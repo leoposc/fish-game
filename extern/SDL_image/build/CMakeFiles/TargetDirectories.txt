@@ -1,0 +1,9 @@
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/SDL2_image.dir
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/showanim.dir
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/showimage.dir
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/edit_cache.dir
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/rebuild_cache.dir
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/list_install_components.dir
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/install.dir
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/install/local.dir
+/Users/leopoldschmid/Uni/AdvancedC++/Project/extern/SDL_image/build/CMakeFiles/install/strip.dir
