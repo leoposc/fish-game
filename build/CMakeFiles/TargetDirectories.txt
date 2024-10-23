@@ -1,3 +1,0 @@
-/Users/leopoldschmid/Uni/AdvancedC++/fish_game/build/CMakeFiles/fish_game.dir
-/Users/leopoldschmid/Uni/AdvancedC++/fish_game/build/CMakeFiles/edit_cache.dir
-/Users/leopoldschmid/Uni/AdvancedC++/fish_game/build/CMakeFiles/rebuild_cache.dir

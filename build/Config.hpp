@@ -1,2 +1,0 @@
-#define Fish_game_VERSION_MAJOR @Fish_game_VERSION_MAJOR
-#define Fish_game_VERSION_MINOR @Fish_game_VERSION_MINOR
