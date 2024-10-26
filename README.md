@@ -6,18 +6,40 @@
 
 #### Dependencies
 
-We recommend to have the libraries installed inside your `/usr/local` directory. This directory is also default directory where cmake usually installs libaries and header files. The source code of all libaries can be found inside the `extern` directory. Installation of the SDL libaries was tested using the `configure` script. 
+We use conan to install the Dependencies.
+So first install conan then the buildilng commands should work successfully
 
-- SDL2
-- SDL_image
+The Dependencies are specified in the conanfile.txt file
+
+#### Installing Conan
+
+First install conan by using pip:
+
+```
+pip install conan
+```
+
+Then create a conan profile
+
+```
+conan profile new default --detect
+```
+
+Now you can install all Dependencies using conan:
+
+```
+conan install .
+```
 
 
 #### Building fish_game
 
+
 ```sh
 mkdir build
 cd build
+
 cmake -DCMAKE_PREFIX_PATH=/usr/local/ ..
-make
+cmake --build .
 ```
 
