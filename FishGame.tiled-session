@@ -18,6 +18,13 @@
                 "y": 484
             }
         },
+        "maps/tileset/plattformer.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "maps/tileset/waterfall.tsx": {
+            "scaleInDock": 1
+        },
         "tileset/River Tileset.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1,
@@ -36,9 +43,11 @@
             "scaleInEditor": 1
         }
     },
-    "last.externalTilesetPath": "/Users/leopoldschmid/Uni/AdvancedC++/Project/tileset",
+    "last.exportedFilePath": "/Users/leopoldschmid/Uni/AdvancedC++/fish_game/maps",
+    "last.externalTilesetPath": "/Users/leopoldschmid/Uni/AdvancedC++/fish_game/tileset",
     "last.imagePath": "/Users/leopoldschmid/Downloads",
     "map.height": 32,
+    "map.lastUsedExportFilter": "JSON-Kartendateien (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "map.layerDataFormat": "1",
     "map.width": 60,

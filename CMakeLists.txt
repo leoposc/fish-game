@@ -18,7 +18,11 @@ configure_file(include/fish_game/Config.hpp.in Config.hpp)
 # "${CMAKE_CURRENT_SOURCE_DIR}/SDL2-2.0.14/include"                          
 # )
 
-include_directories(include)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/fish_game)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/fish_game/ECS)
+# include_directories(include/fish_game)
 add_executable(fish_game ${SOURCE_FILES})
 
 # find SDL" package
@@ -28,6 +32,7 @@ find_package(SDL2_image REQUIRED)
 include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories("/usr/local/include/SDL2")
+# include_directories(%{CMAKE_CURRENT_SOURCE_DIR}/include/fish_game)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/include/SDL2")
 # target_link_libraries(fish_game ${SDL2_LIBRARIES})
 # target_link_libraries(fish_game ${SDL2_IMAGE_LIBRARIES})

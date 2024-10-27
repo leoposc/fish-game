@@ -3,23 +3,28 @@
 
 #include <SDL2/SDL.h>
 
-class Object
+namespace FishEngine
 {
 
-public:
-    Object(const char *texturePath, SDL_Renderer *renderer, int x, int y);
-    ~Object();
+    class Object
+    {
 
-    void update();
-    void render();
+    public:
+        Object(const char *texturePath, int x, int y);
+        ~Object() = default;
 
-private:
-    int xpos;
-    int ypos;
+        void update();
+        void render();
 
-    SDL_Texture *texture;
-    SDL_Rect srcRect, dstRect;
-    SDL_Renderer *renderer;
-};
+    private:
+        int xpos;
+        int ypos;
+
+        SDL_Texture *texture;
+        SDL_Rect srcRect, dstRect;
+        SDL_Renderer *renderer;
+    };
+
+}
 
 #endif // OBJECT_HPP

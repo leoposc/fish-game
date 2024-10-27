@@ -1,5 +1,9 @@
 # extern folders
 extern/
+tileset/
+FishGame.tiled-project
+FishGame.tiled-session
+map01.tmx
 
 # Prerequisites
 *.d

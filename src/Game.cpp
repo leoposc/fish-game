@@ -1,20 +1,32 @@
 #include "../include/fish_game/Game.hpp"
 #include "../include/fish_game/TextureManager.hpp"
-#include "../include/fish_game/Object.hpp"
-#include "../include/fish_game/ECS.hpp"
-#include "../include/fish_game/Components.hpp"
+#include "../include/fish_game/ECS/Components.hpp"
+#include "../include/fish_game/Vector2D.hpp"
+#include "../include/fish_game/Map.hpp"
+#include "../include/fish_game/Collision.hpp"
 
 #include <SDL2/SDL.h>
 #include <iostream>
 
 namespace FishEngine
 {
-    Object *player;
+
+    SDL_Renderer *Game::renderer = nullptr;
+    SDL_Event Game::game_event;
 
     Manager manager;
-    // manager.addEntity();
-    // manager.addEntity();
-    // auto &newPlayer(manager.addEntity());
+    Map *map;
+
+    auto &player(manager.addEntity());
+    auto &wall(manager.addEntity());
+
+    enum groupLabels : std::size_t
+    {
+        groupMap,
+        groupPlayers,
+        groupEnemies,
+        groupColliders,
+    };
 
     Game::Game() : cnt(0), isRunning(false)
     {
@@ -53,20 +65,29 @@ namespace FishEngine
         {
             isRunning = false;
         }
+
+        // etc implementation - temporary test code below
+        map = new Map();
+        map->loadMap("../maps/map01.json");
+
+        float xy;
+        // player.addComponent<SpriteComponent>("assets/RedFish.png");
+        // player.addComponent<KeyboardController>();
+
+        // wall.addComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
+        // wall.addComponent<SpriteComponent>("assets/dirt.png");
     }
 
     void Game::initCombat()
     {
         // init players
         // TODO: load every player from a file and change color
-        player = new Object("assets/player.png", renderer, 0, 0);
     }
 
     void Game::handleEvents()
     {
-        SDL_Event event;
-        SDL_PollEvent(&event);
-        switch (event.type)
+        SDL_PollEvent(&game_event);
+        switch (game_event.type)
         {
         case SDL_QUIT:
             isRunning = false;
@@ -78,6 +99,7 @@ namespace FishEngine
 
     void Game::update()
     {
+        manager.refresh();
         manager.update();
     }
 
@@ -85,8 +107,16 @@ namespace FishEngine
     {
         SDL_RenderClear(renderer);
         // put stuff to render
+        map->drawMap();
+        manager.draw();
         // player->render();
         SDL_RenderPresent(renderer);
+    }
+
+    void Game::addTile(int id, int x, int y)
+    {
+        // auto &tile(manager.addEntity());
+        // tile.addComponent<TileComponent>(x, y, 32, 32, id);
     }
 
     void Game::clean()
