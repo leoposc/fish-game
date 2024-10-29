@@ -38,12 +38,12 @@ conan install . --build=missing -s build_type=Debug
 
 ```
 cmake --preset conan-debug
-cmake --build --preset conan-debug
+cmake -B build/Debug --preset conan-debug
 ./build/Debug/fish_game
 
 
 cmake --preset conan-release
-cmake --build --preset conan-release
+cmake -B build/Release --preset conan-release
 ./build/Release/fish_game
 ```
 
