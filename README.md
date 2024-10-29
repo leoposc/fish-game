@@ -11,35 +11,39 @@ So first install conan then the buildilng commands should work successfully
 
 The Dependencies are specified in the conanfile.txt file
 
-#### Installing Conan
+#### Installing Conan 
 
-First install conan by using pip:
+First install conan by using pipx:
 
 ```
-pip install conan
+pipx install conan
 ```
 
 Then create a conan profile
 
 ```
-conan profile new default --detect
+conan profile detect --force
 ```
 
-Now you can install all Dependencies using conan:
+Now you can install all Dependencies using conan for Release and Debug configurations:
 
 ```
-conan install .
+conan install . --build=missing
+conan install . --build=missing -s build_type=Debug
 ```
 
 
-#### Building fish_game
+#### Building fish_game using presets requirering cmake>=3.23
 
 
-```sh
-mkdir build
-cd build
+```
+cmake --preset conan-debug
+cmake --build --preset conan-debug
+./build/Debug/fish_game
 
-cmake -DCMAKE_PREFIX_PATH=/usr/local/ ..
-cmake --build .
+
+cmake --preset conan-release
+cmake --build --preset conan-release
+./build/Release/fish_game
 ```
 
