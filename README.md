@@ -47,3 +47,16 @@ cmake -B build/Release --preset conan-release
 ./build/Release/fish_game
 ```
 
+## Networking Interface
+
+#### data send to server
+
+Player data:
+- position
+- Health/ alive
+- weapon
+
+
+#### server records
+
+-statistics
