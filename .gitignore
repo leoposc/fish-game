@@ -1,5 +1,6 @@
 # extern folders
 extern/
+build/
 tileset/
 FishGame.tiled-project
 FishGame.tiled-session
