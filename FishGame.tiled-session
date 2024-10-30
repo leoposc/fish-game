@@ -3,8 +3,9 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "map01.tmx",
+    "activeFile": "maps/map01.tmx",
     "expandedProjectPaths": [
+        "maps",
         ".",
         "tileset"
     ],
@@ -16,6 +17,14 @@
             "viewCenter": {
                 "x": 945,
                 "y": 484
+            }
+        },
+        "maps/map01.tmx": {
+            "scale": 0.4771,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 940.0544959128065,
+                "y": 299.7275204359673
             }
         },
         "maps/tileset/plattformer.tsx": {
@@ -52,16 +61,17 @@
     "map.layerDataFormat": "1",
     "map.width": 60,
     "openFiles": [
-        "map01.tmx",
         "tileset/River Tileset.tsx",
         "tileset/plattformer.tsx",
-        "tileset/waterfall.tsx"
+        "tileset/waterfall.tsx",
+        "maps/map01.tmx"
     ],
     "project": "FishGame.tiled-project",
     "recentFiles": [
-        "tileset/waterfall.tsx",
-        "tileset/plattformer.tsx",
         "tileset/River Tileset.tsx",
+        "tileset/plattformer.tsx",
+        "tileset/waterfall.tsx",
+        "maps/map01.tmx",
         "map01.tmx",
         "tileset/WaterFall Tile Middle.tsx"
     ],

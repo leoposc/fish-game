@@ -1,0 +1,14 @@
+{ "columns":24,
+ "image":"fish_game\/tileset\/AdventureTiles\/Tileset\/PNGs\/RiverTileset.png",
+ "imageheight":256,
+ "imagewidth":384,
+ "margin":0,
+ "name":"RiverTileset",
+ "spacing":0,
+ "tilecount":384,
+ "tiledversion":"1.11.0",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

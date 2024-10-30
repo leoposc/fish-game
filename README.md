@@ -21,3 +21,16 @@ cmake -DCMAKE_PREFIX_PATH=/usr/local/ ..
 make
 ```
 
+## Networking Interface
+
+#### data send to server
+
+Player data:
+- position
+- Health/ alive
+- weapon
+
+
+#### server records
+
+-statistics
