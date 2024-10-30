@@ -2,6 +2,7 @@
 #include "../include/fish_game/Game.hpp"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <fstream>
 #include <iostream>
 
@@ -11,6 +12,13 @@ namespace FishEngine {
 // Map::~Map() = default;
 
 void Map::loadMap(fs::path path) {
+
+  std::cout << "Absolute path: " << fs::absolute(path) << std::endl;
+  if (!fs::exists(path)) {
+    std::cout << "Map file does not exist!" << std::endl;
+    return;
+  }
+
   map = tileson.parse(path);
 
   if (map->getStatus() == tson::ParseStatus::OK) {
@@ -20,10 +28,7 @@ void Map::loadMap(fs::path path) {
     return;
   }
 
-  // get plattforms, water and background
-  // plattformsLayer = map->getLayer("plattforms");
-  // waterLayer = map->getLayer("water");
-  // treesLayer = map->getLayer("trees");
+  loadTilesetTextures();
 }
 
 void Map::drawMap() {
@@ -76,14 +81,17 @@ void Map::drawTileLayer(tson::Layer &layer) {
     }
 
     SDL_Texture *texture = nullptr;
-    if (tileset->getType() == tson::TilesetType::ImageCollectionTileset) {
-      tson::Tile *tile = tileObject.getTile();
-      if (tile->getFlipFlags() != tson::TileFlipFlags::None) {
-        tile = tileset->getTile(tile->getId());
-      }
-      fs::path tilesetPath = getImagePath(*tile);
-      texture = getTexture(tilesetPath.generic_string());
-    }
+    // if (tileset->getType() == tson::TilesetType::ImageCollectionTileset) {
+    //   tson::Tile *tile = tileObject.getTile();
+    //   if (tile->getFlipFlags() != tson::TileFlipFlags::None) {
+    //     tile = tileset->getTile(tile->getId());
+    //   }
+    //   fs::path tilesetPath = getImagePath(*tile);
+    //   texture = getTexture(tilesetPath.generic_string());
+    // }
+
+    fs::path tilesetPath = getImagePath(*tileObject.getTile());
+    texture = getTexture(tilesetPath.generic_string());
 
     if (texture != nullptr) {
       src.x = drawingRect.x;
@@ -96,12 +104,43 @@ void Map::drawTileLayer(tson::Layer &layer) {
       dst.w = tileWidth;
       dst.h = tileHeight;
 
+      SDL_Point center = {src.w / 2, src.h / 2};
+      SDL_Rect dstCenter = dst;
+      dstCenter.x += center.x;
+      dstCenter.y += center.y;
+
       SDL_RenderCopy(Game::renderer, texture, &src, &dst);
     }
   }
 }
 
-fs::path Map::getImagePath(tson::Tile &tile) {}
+fs::path Map::getImagePath(tson::Tile &tile) {
+  // expect the exe to be in the build/Release or build/Debug directory
+  fs::path fullPath = fs::path("../../maps") /
+                      tile.getTileset()->getImagePath().relative_path();
+  return fullPath;
+}
 
-SDL_Texture *Map::getTexture(const std::string &image) {}
+SDL_Texture *Map::loadTexture(const std::string &image) {
+  SDL_Texture *tmp = IMG_LoadTexture(Game::renderer, image.c_str());
+  if (tmp == nullptr) {
+    std::cout << "Failed to load texture: " << image << std::endl;
+  }
+  return tmp;
+}
+
+void Map::loadTilesetTextures() {
+  // loop through the tilesets and load the textures
+  for (auto &tileset : map->getTilesets()) {
+    fs::path tilesetPath =
+        fs::path("../../maps") / tileset.getImagePath().relative_path();
+    SDL_Texture *texture = loadTexture(tilesetPath.generic_string());
+    tilesetTextures[tilesetPath] = texture;
+
+    // TODO: free the textures in the destructor
+  }
+}
+
+SDL_Texture *Map::getTexture(fs::path path) { return tilesetTextures[path]; }
+
 } // namespace FishEngine
