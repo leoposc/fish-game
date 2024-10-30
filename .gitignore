@@ -38,3 +38,5 @@ map01.tmx
 *.exe
 *.out
 *.app
+
+.vscode/
