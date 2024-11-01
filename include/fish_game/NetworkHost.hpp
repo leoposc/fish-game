@@ -25,10 +25,10 @@ private:
   void threadFunction();
   std::thread workerThread;
   std::mutex mtx;
+  bool stopThread;
   std::condition_variable cv;
   std::queue<fish_game::InputEvent> elementQueue;
   std::string state;
-  bool stopThread;
 };
 
 #endif // NETWORK_HOST
