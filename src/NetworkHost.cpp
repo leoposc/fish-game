@@ -7,10 +7,7 @@ NetworkHost::NetworkHost() : stopThread(false) {
 
 NetworkHost::~NetworkHost() {
   std::cout << "NetworkHost deconstructed \n";
-  {
-    std::lock_guard<std::mutex> lock(mtx);
-    this->stopThread = true;
-  }
+  this->stopThread = true;
   this->cv.notify_all();
   this->workerThread.join();
   std::cout << "SocketManager deconstructed finished\n";
@@ -32,15 +29,10 @@ void NetworkHost::updateState(const std::string &updatedState) {
 }
 
 void NetworkHost::threadFunction() {
-  SocketManager socketManager(8080, true);
-
-  socketManager.sendMessage("S1 Hallo1\n");
-  socketManager.sendMessage("S1 Hallo2\n");
-
-  std::cout << socketManager.popMessage();
-  std::cout << socketManager.popMessage();
-
+  this->registerSocket = std::make_unique<SocketManager>(8080, true);
+  int counter = 0;
   while (true) {
+    counter++;
     std::cout << "Hello from thread \n";
     {
       std::lock_guard<std::mutex> lock(mtx);

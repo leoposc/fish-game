@@ -6,6 +6,7 @@
 #include "./SocketManager.hpp"
 #include <condition_variable>
 #include <iostream>
+#include <map>
 #include <mutex>
 #include <optional>
 #include <queue>
@@ -29,6 +30,9 @@ private:
   std::condition_variable cv;
   std::queue<fish_game::InputEvent> elementQueue;
   std::string state;
+
+  std::unique_ptr<SocketManager> registerSocket;
+  std::map<std::string, SocketManager> clients;
 };
 
 #endif // NETWORK_HOST

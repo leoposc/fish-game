@@ -21,11 +21,11 @@ class SocketManager {
 public:
   SocketManager(int port, bool host);
   ~SocketManager();
-  void run();
   std::string popMessage();
   void sendMessage(std::string);
 
 private:
+  void run();
   void setupServer(int port);
   void setupClient(int port);
   std::thread workerThread;

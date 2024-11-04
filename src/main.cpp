@@ -31,11 +31,9 @@ int main(int argc, char *argv[]) {
   socketManager2.sendMessage("S2 Hallo1\n");
   socketManager2.sendMessage("S2 Hallo2\n");
 
-  std::cout << socketManager2.popMessage();
-  std::cout << socketManager2.popMessage();
-
   // Reading the server's response
   while (game->running()) {
+    std::cout << socketManager2.popMessage();
     frameStart = SDL_GetTicks();
 
     game->handleEvents();
