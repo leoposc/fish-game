@@ -52,13 +52,13 @@ public:
     // loop through the plattforms layer and set the plattform tiles to 1
     for (auto &[pos, tileObject] :
          currentMap->getLayer("plattforms")->getTileObjects()) {
-      (*mapArray)[get(std::get<1>(pos))][get(std::get<0>(pos))] = 1;
+      (*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 1;
     }
 
-    // loop through the water layer and set the water tiles to 2
+        // loop through the water layer and set the water tiles to 2
     for (auto &[pos, tileObject] :
          currentMap->getLayer("water")->getTileObjects()) {
-      (*mapArray)[get(std::get<1>(pos))][get(std::get<0>(pos))] = 2;
+      (*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 2;
     }
 
     return mapArray;
