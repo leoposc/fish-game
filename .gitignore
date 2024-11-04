@@ -40,3 +40,5 @@ map01.tmx
 *.app
 
 .vscode/
+maps/fish-game.tiled-project
+*.tiled-session

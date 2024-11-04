@@ -56,7 +56,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
 
   // etc implementation - temporary test code below
   map = new Map();
-  map->loadMap("../../maps/TestP.tmj");
+  map->loadMap("../../maps/map03.tmj");
   map->drawMap();
 
   float xy;
@@ -71,15 +71,34 @@ void Game::initCombat() {
   // init players
   // TODO: load every player from a file and change color
 }
-
 void Game::handleEvents() {
-  SDL_PollEvent(&game_event);
-  switch (game_event.type) {
-  case SDL_QUIT:
-    isRunning = false;
-    break;
-  default:
-    break;
+  SDL_Event event;
+  while (SDL_PollEvent(&event)) {
+    switch (event.type) {
+    case SDL_QUIT:
+      isRunning = false;
+      break;
+    case SDLK_w:
+
+      break;
+    case SDLK_s:
+
+      break;
+    case SDLK_a:
+
+      break;
+    case SDLK_d:
+
+      break;
+    case SDLK_SPACE:
+      // pick up item
+      break;
+    case SDLK_RETURN:
+      // attack
+      break;
+    default:
+      break;
+    }
   }
 }
 
