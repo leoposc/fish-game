@@ -1,0 +1,86 @@
+#include "../../include/fish_game/ECS/SpriteComponent.hpp"
+#include "../../include/fish_game/ECS/ECS.hpp"
+#include "../../include/fish_game/ECS/MoveComponent.hpp"
+#include "../../include/fish_game/ECS/TransformComponent.hpp"
+#include "../../include/fish_game/Game.hpp"
+
+// #include "Components.hpp"
+
+// // #include "../AssetManager.hpp"
+// #include "../Game.hpp"
+// // // #include "ECS.hpp"
+
+// #include "../TextureManager.hpp"
+// // // #include "TransformComponent.hpp"
+
+#include <SDL2/SDL.h>
+#include <filesystem>
+#include <map>
+#include <string>
+
+namespace FishEngine {
+
+SpriteComponent::SpriteComponent(std::string id) { setTexture(id) id(id); }
+
+SpriteComponent::SpriteComponent(std::string id, bool isAnimated)
+    : animated(isAnimated), id(id) {
+
+  if (animated) {
+    // Animation idle = Animation(0, 3, 100);
+    // Animation walk = Animation(1, 8, 100);
+
+    // animations.emplace("Idle", idle);
+    // animations.emplace("Walk", walk);
+
+    // play("Idle");
+  }
+
+  setTexture(id);
+  std::cout << "SpriteComponent: " << id << " created!" << std::endl;
+}
+
+SpriteComponent::~SpriteComponent() { SDL_DestroyTexture(texture); }
+
+void SpriteComponent::setTexture(std::string id) {
+  texture = Game::assets->getTexture(id);
+}
+
+void SpriteComponent::init() {
+  if (id == "fish") {
+    if (entity->hasComponent<MoveComponent>()) {
+      transform = &entity->addComponent<MoveComponent>();
+    } else {
+      std::cout << "SpriteComponent: no MoveComponent found." << std::endl;
+    }
+  } else {
+    if (entity->hasComponent<TransformComponent>()) {
+      transform = &entity->getComponent<TransformComponent>();
+    } else {
+      std::cout << "SpriteComponent: no TransformComponent found." << std::endl;
+    }
+  }
+
+  srcRect.x = srcRect.y = 0;
+  srcRect.w = srcRect.h = 16;
+  dstRect.w = dstRect.h = 16;
+}
+
+void SpriteComponent::update() {
+  dstRect.x = (int)transform->getX();
+  dstRect.y = (int)transform->getY();
+  dstRect.w = transform->width * transform->scale;
+  dstRect.h = transform->height * transform->scale;
+}
+
+void SpriteComponent::draw() {
+  TextureManager::draw(texture, srcRect, dstRect, spriteFlip);
+}
+
+// TODO: implement animation with tiled/ tileson
+//   void play(const char *animationName) {
+//     frames = animations[animationName].frames;
+//     speed = animations[animationName].speed;
+//     animated = true;
+//   }
+
+} // namespace FishEngine
