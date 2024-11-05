@@ -1,7 +1,10 @@
-#ifndef VECTOR2D_HPP
-#define VECTOR2D_HPP
+#pragma once
 
 #include <iostream>
+
+// TODO: implemtate template for Vector2D
+
+namespace FishEngine {
 
 class Vector2D {
   float x;
@@ -66,4 +69,4 @@ public:
 // Vector2D operator*(const Vector2D &vec1, const Vector2D &vec2);
 // Vector2D operator/(const Vector2D &vec) const;
 
-#endif // VECTOR2D_HPP
+} // namespace FishEngine
