@@ -1,6 +1,12 @@
+
 #include "../include/fish_game/Game.hpp"
+#include "../include/fish_game/AssetManager.hpp"
 #include "../include/fish_game/Collision.hpp"
-#include "../include/fish_game/ECS/Components.hpp"
+#include "../include/fish_game/ECS/ColliderComponent.hpp"
+#include "../include/fish_game/ECS/KeyboardController.hpp"
+#include "../include/fish_game/ECS/MoveComponent.hpp"
+#include "../include/fish_game/ECS/SpriteComponent.hpp"
+#include "../include/fish_game/ECS/TransformComponent.hpp"
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
@@ -12,19 +18,14 @@ namespace FishEngine {
 
 SDL_Renderer *Game::renderer = nullptr;
 SDL_Event Game::game_event;
+SDL_Rect Game::camera = {0, 0, 800, 640};
 
 Manager manager;
+AssetManager *Game::assets = new AssetManager(&manager);
+
 Map *map;
 
 auto &player(manager.addEntity());
-auto &wall(manager.addEntity());
-
-enum groupLabels : std::size_t {
-  groupMap,
-  groupPlayers,
-  groupEnemies,
-  groupColliders,
-};
 
 Game::Game() : cnt(0), isRunning(false) {}
 
@@ -57,14 +58,17 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
   // etc implementation - temporary test code below
   map = new Map();
   map->loadMap("../../maps/map03.tmj");
-  map->drawMap();
 
-  float xy;
-  // player.addComponent<SpriteComponent>("assets/RedFish.png");
-  // player.addComponent<KeyboardController>();
+  assets->addTexture("fish", "../../assets/fish.png");
 
-  // wall.addComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
-  // wall.addComponent<SpriteComponent>("assets/dirt.png");
+  // init player
+  player.addComponent<MoveComponent>(800, 640, 16, 16, 4);
+  player.addComponent<SpriteComponent>("fish", false);
+  player.addComponent<KeyboardController>();
+  // // player.addComponent<ColliderComponent>("player");
+  // // player.addComponent<TransformComponent>(2);
+  // // player.addGroup(groupLabels::groupPlayers);
+  // player.addGroup(groupPlayers);
 }
 
 void Game::initCombat() {
@@ -72,29 +76,10 @@ void Game::initCombat() {
   // TODO: load every player from a file and change color
 }
 void Game::handleEvents() {
-  SDL_Event event;
-  while (SDL_PollEvent(&event)) {
-    switch (event.type) {
+  while (SDL_PollEvent(&game_event)) {
+    switch (game_event.type) {
     case SDL_QUIT:
       isRunning = false;
-      break;
-    case SDLK_w:
-
-      break;
-    case SDLK_s:
-
-      break;
-    case SDLK_a:
-
-      break;
-    case SDLK_d:
-
-      break;
-    case SDLK_SPACE:
-      // pick up item
-      break;
-    case SDLK_RETURN:
-      // attack
       break;
     default:
       break;
@@ -103,22 +88,66 @@ void Game::handleEvents() {
 }
 
 void Game::update() {
+  // SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
+  // Vector2D playerPos = player.getComponent<MoveComponent>().position;
+
   manager.refresh();
   manager.update();
+
+  // for (auto &c : manager.getGroup(groupColliders)) {
+
+  //   if (Collision::AABB(c->getComponent<ColliderComponent>().collider,
+  //                       playerCol)) {
+  //     player.getComponent<MoveComponent>().position = playerPos;
+  //   }
+  // }
+
+  // for (auto &p : manager.getGroup(groupProjectiles)) {
+  //   if (Collision::AABB(playerCol,
+  //                       p->getComponent<ColliderComponent>().collider)) {
+  //     std::cout << "Hit player" << std::endl;
+  //     p->destroy();
+  //   }
+  // }
+
+  /* todo: move camera:
+    depends on all players positions
+  camera.x = player.getComponent<MoveComponent>().position.x - 400;
+  camera.y = player.getComponent<MoveComponent>().position.y - 320;
+
+  if (camera.x < 0)
+    camera.x = 0;
+  if (camera.y < 0)
+    camera.y = 0;
+  if (camera.x > camera.w)
+    camera.x = camera.w;
+  if (camera.y > camera.h)
+    camera.y = camera.h;
+  */
 }
 
 void Game::render() {
   SDL_RenderClear(renderer);
-  // put stuff to render
-  map->drawMap();
-  manager.draw();
-  // player->render();
-  SDL_RenderPresent(renderer);
-}
 
-void Game::addTile(int id, int x, int y) {
-  // auto &tile(manager.addEntity());
-  // tile.addComponent<TileComponent>(x, y, 32, 32, id);
+  for (auto &t : manager.getGroup(groupLabels::groupMap)) {
+    t->draw();
+  }
+  // TODO: draw map
+  map->drawMap();
+
+  for (auto &t : manager.getGroup(groupLabels::groupColliders)) {
+    t->draw();
+  }
+
+  // for (auto &t : manager.getGroup(groupLabels::groupPlayers)) {
+  //   t->draw();
+  // }
+
+  for (auto &t : manager.getGroup(groupLabels::groupProjectiles)) {
+    t->draw();
+  }
+
+  SDL_RenderPresent(renderer);
 }
 
 void Game::clean() {
@@ -129,5 +158,7 @@ void Game::clean() {
 }
 
 bool Game::running() { return isRunning; }
+
+void Game::stop() { isRunning = false; }
 
 } // namespace FishEngine
