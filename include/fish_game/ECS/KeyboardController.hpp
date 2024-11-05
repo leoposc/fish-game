@@ -1,52 +1,30 @@
-#ifndef KEYBOARDCONTROLLER_HPP
-#define KEYBOARDCONTROLLER_HPP
+#pragma once
 
-#include "Components.hpp"
-// #include "TransformComponent.hpp"
-#include "MoveComponent.hpp"
-// #include "../Game.hpp"
+#include "../Game.hpp"
+#include "ECS.hpp"
+
+// #include "MoveComponent.hpp"
+// #include "SpriteComponent.hpp"
 
 #include <SDL2/SDL.h>
 
-namespace FishEngine
-{
+namespace FishEngine {
 
-    class KeyboardController : public Component
-    {
-        MoveComponent *move;
+class SpriteComponent;
+class MoveComponent;
 
-    public:
-        void init() override
-        {
-            move = &entity->getComponent<MoveComponent>();
-        }
+class KeyboardController : public Component {
 
-        void update() override
-        {
-            {
-                switch (Game::game_event.key.keysym.sym)
-                {
-                // upwards
-                case SDLK_w:
-                    move->up();
-                    break;
-                // downwards
-                case SDLK_s:
-                    move->down();
-                    break;
-                // left
-                case SDLK_a:
-                    move->left();
-                    break;
-                // right
-                case SDLK_d:
-                    move->right();
-                    break;
-                }
-            }
-        }
-    };
+public:
+  MoveComponent *move;
+  SpriteComponent *sprite;
+
+  KeyboardController() = default;
+  ~KeyboardController() = default;
+
+  void init() override;
+
+  void update() override;
+};
 
 } // namespace FishEngine
-
-#endif // KEYBO

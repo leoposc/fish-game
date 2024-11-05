@@ -1,59 +1,61 @@
-#ifndef SPRITECOMPONENT_HPP
-#define SPRITECOMPONENT_HPP
+#pragma once
 
-#include "Components.hpp"
-#include "../TextureManager.hpp"
+#include "ECS.hpp"
+
+// #include "Components.hpp"
+
+// // #include "../AssetManager.hpp"
+// #include "../Game.hpp"
+// // // #include "ECS.hpp"
+
+// #include "../TextureManager.hpp"
+#include "TransformComponent.hpp"
+
 #include <SDL2/SDL.h>
+#include <filesystem>
+#include <map>
+#include <string>
 
-namespace FishEngine
-{
+namespace FishEngine {
 
-    class SpriteComponent : public Component
-    {
-        TransformComponent *transform;
-        SDL_Texture *texture;
-        SDL_Rect srcRect, dstRect;
+class SpriteComponent : public Component {
+  TransformComponent *transform;
+  SDL_Texture *texture;
+  SDL_Rect srcRect, dstRect;
 
-    public:
-        SpriteComponent() = default;
-        SpriteComponent(const char *path)
-        {
-            setTexture(path);
-        }
+  bool animated = false;
+  int frames = 0;
+  int speed = 100; // ms
 
-        ~SpriteComponent()
-        {
-            SDL_DestroyTexture(texture);
-        }
+  str::string id;
 
-        void setTexture(const char *path)
-        {
-            texture = TextureManager::loadTexture(path);
-        }
+public:
+  int animationIndex = 0;
+  // std::map<const char *, Animation> animations;
 
-        void init() override
-        {
-            transform = &entity->getComponent<TransformComponent>();
+  SDL_RendererFlip spriteFlip = SDL_FLIP_NONE;
 
-            srcRect.x = srcRect.y = 0;
-            srcRect.w = srcRect.h = 32;
-            dstRect.w = dstRect.h = 32;
-        }
+  SpriteComponent() = default;
 
-        void update() override
-        {
-            dstRect.x = (int)transform->getX();
-            dstRect.y = (int)transform->getY();
-            dstRect.w = transform->width * transform->scale;
-            dstRect.h = transform->height * transform->scale;
-        }
+  SpriteComponent(std::string id);
 
-        void draw() override
-        {
-            // Texture::Manager::draw(texture, srcRect, dstRect);
-        }
-    };
+  SpriteComponent(std::string id, bool isAnimated);
+
+  ~SpriteComponent();
+
+  void setTexture(std::string id);
+
+  void init() override;
+
+  void update() override;
+
+  void draw() override;
+  // TODO: implement animation with tiled/ tileson
+  //   void play(const char *animationName) {
+  //     frames = animations[animationName].frames;
+  //     speed = animations[animationName].speed;
+  //     animated = true;
+  //   }
+};
 
 } // namespace FishEngine
-
-#endif // SPRITECOMPONENT_HPP
