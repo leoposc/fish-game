@@ -27,7 +27,7 @@ class SpriteComponent : public Component {
   int frames = 0;
   int speed = 100; // ms
 
-  str::string id;
+  std::string id;
 
 public:
   int animationIndex = 0;

@@ -59,7 +59,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
   map = new Map();
   map->loadMap("../../maps/map03.tmj");
 
-  assets->addTexture("fish", "../../assets/fish.png");
+  assets->addTexture("fish", "../../assets/RedFish.png");
 
   // init player
   player.addComponent<MoveComponent>(800, 640, 16, 16, 4);
@@ -68,7 +68,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
   // // player.addComponent<ColliderComponent>("player");
   // // player.addComponent<TransformComponent>(2);
   // // player.addGroup(groupLabels::groupPlayers);
-  // player.addGroup(groupPlayers);
+  player.addGroup(groupPlayers);
 }
 
 void Game::initCombat() {
@@ -133,19 +133,19 @@ void Game::render() {
     t->draw();
   }
   // TODO: draw map
-  map->drawMap();
+  // map->drawMap();
 
   for (auto &t : manager.getGroup(groupLabels::groupColliders)) {
     t->draw();
   }
 
-  // for (auto &t : manager.getGroup(groupLabels::groupPlayers)) {
-  //   t->draw();
-  // }
-
-  for (auto &t : manager.getGroup(groupLabels::groupProjectiles)) {
+  for (auto &t : manager.getGroup(groupLabels::groupPlayers)) {
     t->draw();
   }
+
+  // for (auto &t : manager.getGroup(groupLabels::groupProjectiles)) {
+  //   t->draw();
+  // }
 
   SDL_RenderPresent(renderer);
 }

@@ -38,7 +38,17 @@ public:
   Entity *entity;
 
   virtual void init() {}
+  /**
+   * @brief: update the component
+   * @details: If the virtual base class is not overridden, the default implementation
+   * will be called. Meaning that nothing will happen.
+   */
   virtual void update() {}
+  /**
+   * @brief: draw the component
+   * @details: If the virtual base class is not overridden, the default implementation
+   * will be called. Meaning that nothing will happen.
+   */
   virtual void draw() {}
 
   virtual ~Component() {}
@@ -59,11 +69,23 @@ public:
 
   void addGroup(Group group);
 
+  /** 
+     * @brief: update all components which belong to a instance of an entity
+     * @details: The order of updating components is important. It is defined by the order
+     * of adding components to an entity. The very first component added is updated first.
+     * The ComponentID is NOT used to determine the order of updating components.
+     */
   void update() {
     for (auto &c : components)
       c->update();
   }
 
+  /** 
+     * @brief: draw all components which belong to a instance of an entity
+     * @details: The order of drawing components is important. It is defined by the order
+     * of adding components to an entity. The very first component added is updated first.
+     * The ComponentID is NOT used to determine the order of drawing components.
+     */
   void draw() {
     for (auto &c : components)
       c->draw();

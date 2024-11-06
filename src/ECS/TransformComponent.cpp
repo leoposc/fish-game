@@ -12,9 +12,9 @@ void TransformComponent::init() {
 }
 
 void TransformComponent::update() {
-  if (!blocked) {
-    position += velocity * speed;
-  }
+  position += velocity * speed;
+  std::cout << "TransformComponent - new pos: " << position.getX() << " "
+            << position.getY() << std::endl;
 }
 
 } // namespace FishEngine

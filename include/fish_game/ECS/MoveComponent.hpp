@@ -22,9 +22,12 @@ public:
   MoveComponent(int x, int y, int h, int w, int sc);
 
   // void init() override;
-  using TransformComponent::init;
+  // using TransformComponent::init;
+  void init() override { TransformComponent::init(); }
 
-  using TransformComponent::update;
+  void update() override { TransformComponent::update(); }
+
+  // using TransformComponent::update;
 
   void up();
 

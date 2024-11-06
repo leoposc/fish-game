@@ -25,8 +25,8 @@ void AssetManager::createProjectile(Vector2D pos, Vector2D vel, int range,
 }
 
 void AssetManager::addTexture(std::string id, fs::path path) {
+  std::cout << "Loading texture from: " << path << std::endl;
   textures[id] = TextureManager::loadTexture(path);
-  std::cout << "Texture loaded: " << path << std::endl;
 }
 
 void AssetManager::addFont(std::string id, fs::path path, int fontSize) {
