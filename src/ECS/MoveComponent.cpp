@@ -13,10 +13,10 @@ MoveComponent::MoveComponent(int x, int y) : TransformComponent(x, y) {}
 
 MoveComponent::MoveComponent(int sc) : TransformComponent(sc) {}
 
-MoveComponent::MoveComponent(int x, int y, int h, int w, int sc)
+MoveComponent::MoveComponent(int x, int y, int h, int w, float sc)
     : TransformComponent(x, y, h, w, sc) {
-  std::cout << "MoveComponent created! Position at: " << x << " " << y
-            << std::endl;
+  // std::cout << "MoveComponent created! Position at: " << x << " " << y
+            // << std::endl;
 }
 
 void MoveComponent::up() { velocity.setY(-1); }

@@ -1,7 +1,7 @@
 #pragma once
 
 // #include "Components.hpp"
-
+#include <iostream>
 #include <algorithm>
 #include <array>
 #include <bitset>
@@ -76,15 +76,16 @@ public:
      * The ComponentID is NOT used to determine the order of updating components.
      */
   void update() {
-    for (auto &c : components)
+    for (auto &c : components) {
       c->update();
+    }
   }
 
   /** 
      * @brief: draw all components which belong to a instance of an entity
      * @details: The order of drawing components is important. It is defined by the order
      * of adding components to an entity. The very first component added is updated first.
-     * The ComponentID is NOT used to determine the order of drawing components.
+     * The ComponentID is NOT used to determine the order of updating components.
      */
   void draw() {
     for (auto &c : components)

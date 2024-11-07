@@ -7,14 +7,15 @@
 namespace FishEngine {
 
 void TransformComponent::init() {
+  std::cout << "TRANSFORM COMPONENT INITIALIZED" << std::endl;
   velocity.setX(0);
   velocity.setY(0);
 }
 
 void TransformComponent::update() {
   position += velocity * speed;
-  std::cout << "TransformComponent - new pos: " << position.getX() << " "
-            << position.getY() << std::endl;
+  // std::cout << "TransformComponent - new pos: " << position.getX() << " "
+            // << position.getY() << std::endl;
 }
 
 } // namespace FishEngine

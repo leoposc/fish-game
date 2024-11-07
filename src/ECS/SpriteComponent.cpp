@@ -48,7 +48,8 @@ void SpriteComponent::setTexture(std::string id) {
 void SpriteComponent::init() {
   if (id == "fish") {
     if (entity->hasComponent<MoveComponent>()) {
-      transform = &entity->addComponent<MoveComponent>();
+      transform = &entity->getComponent<MoveComponent>();
+      std::cout << "SpriteComponent: MoveComponent found." << std::endl;
     } else {
       std::cout << "SpriteComponent: no MoveComponent found." << std::endl;
     }
@@ -61,8 +62,8 @@ void SpriteComponent::init() {
   }
 
   srcRect.x = srcRect.y = 0;
-  srcRect.w = transform->width;
-  srcRect.h = transform->height;
+  srcRect.w = static_cast<int>(transform->width * transform->scale);
+  srcRect.h = static_cast<int>(transform->height * transform->scale);
 }
 
 void SpriteComponent::update() {
@@ -73,8 +74,8 @@ void SpriteComponent::update() {
   //           << std::endl;
   dstRect.x = (int)transform->getX();
   dstRect.y = (int)transform->getY();
-  dstRect.w = transform->width * transform->scale;
-  dstRect.h = transform->height * transform->scale;
+  dstRect.w = transform->width;
+  dstRect.h = transform->height;
 }
 
 void SpriteComponent::draw() {

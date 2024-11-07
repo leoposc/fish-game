@@ -19,13 +19,19 @@ public:
 
   MoveComponent(int sc);
 
-  MoveComponent(int x, int y, int h, int w, int sc);
+  MoveComponent(int x, int y, int h, int w, float sc);
 
   // void init() override;
   // using TransformComponent::init;
   void init() override { TransformComponent::init(); }
 
-  void update() override { TransformComponent::update(); }
+  void update() override { 
+    // std::cout << "Before MoveComponent - new pos: " << position.getX() << " "
+    //           << position.getY() << std::endl;
+    TransformComponent::update(); 
+    // std::cout << "After MoveComponent - new pos: " << position.getX() << " "
+    //           << position.getY() << std::endl;
+    }
 
   // using TransformComponent::update;
 

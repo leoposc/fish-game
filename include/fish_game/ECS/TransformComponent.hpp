@@ -18,7 +18,7 @@ public:
   int height = 16;
   int width = 16;
 
-  int scale = 1;
+  float scale = 1;
 
   bool blocked = false;
 
@@ -28,7 +28,7 @@ public:
 
   TransformComponent(int sc) : scale(sc), position(0, 0) {}
 
-  TransformComponent(int x, int y, int h, int w, int sc)
+  TransformComponent(int x, int y, int h, int w, float sc)
       : position(x, y), height(h), width(w), scale(sc) {}
 
   int getX() { return position.getX(); }
