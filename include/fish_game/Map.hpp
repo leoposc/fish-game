@@ -56,7 +56,7 @@ public:
       (*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 1;
     }
 
-    // loop through the water layer and set the water tiles to 2
+        // loop through the water layer and set the water tiles to 2
     for (auto &[pos, tileObject] :
          currentMap->getLayer("water")->getTileObjects()) {
       (*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 2;
