@@ -5,58 +5,77 @@
 namespace FishEngine {
 
 void KeyboardController::init() {
-  move = &entity->getComponent<MoveComponent>();
-  sprite = &entity->getComponent<SpriteComponent>();
+	std::cout << "KEYBOARDCONTROLLER INITIALIZED" << std::endl;
+	move = &entity->getComponent<MoveComponent>();
+	sprite = &entity->getComponent<SpriteComponent>();
 }
 
-void KeyboardController::update() {
+void KeyboardController::update()
 
-  // move the player
-  if (Game::game_event.type == SDL_KEYDOWN) {
-    switch (Game::game_event.key.keysym.sym) {
-    // upwards
-    case SDLK_w:
-      move->up();
-      // sprite->play("swim");
-      break;
-    // downwards
-    case SDLK_s:
-      move->down();
-      // sprite->play("swim");
-      break;
-    // left
-    case SDLK_a:
-      move->left();
-      // sprite->play("swim");
-      sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
-      break;
-    // right
-    case SDLK_d:
-      move->right();
-      // sprite->play("swim");
-      break;
-    }
-  }
+{
+	// std::cout << "KEYBOARDCONTROLLER UPDATED" << std::endl;
+	// move the player
+	// while (SDL_PollEvent(&Game::game_event)) {
 
-  // stop the player
-  if (Game::game_event.type == SDL_KEYUP) {
-    switch (Game::game_event.key.keysym.sym) {
-    // upwards
-    case SDLK_w || SDLK_s || SDLK_d:
-      move->stop();
-      // sprite->play("idle");
-      break;
-    case SDLK_a:
-      move->stop();
-      // sprite->play("idle");
-      sprite->spriteFlip = SDL_FLIP_NONE;
-      break;
-    case SDLK_ESCAPE:
-      // TODO: add a pause menu
-      // Game::stop();
-      break;
-    }
-  }
+	if (Game::game_event.type == SDL_KEYDOWN) {
+		switch (Game::game_event.key.keysym.sym) {
+		// upwards
+		case SDLK_w:
+			move->up();
+			// sprite->play("swim");
+			break;
+		// downwards
+		case SDLK_s:
+			move->down();
+			// sprite->play("swim");
+			break;
+		// left
+		case SDLK_a:
+			move->left();
+			// sprite->play("swim");
+			break;
+		// right
+		case SDLK_d:
+			move->right();
+			sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+			// sprite->play("swim");
+			break;
+		}
+	}
+
+	// stop the player
+	if (Game::game_event.type == SDL_KEYUP) {
+		switch (Game::game_event.key.keysym.sym) {
+		case SDLK_ESCAPE:
+			// TODO: add a pause menu
+			// Game::stop();
+			break;
+			// upwards
+		case SDLK_w:
+			move->stop();
+			// sprite->play("idle");
+			break;
+		// downwards
+		case SDLK_s:
+			move->stop();
+			// sprite->play("idle");
+			break;
+		// left
+		case SDLK_a:
+			move->stop();
+			// sprite->play("idle");
+			// sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+			break;
+		// right
+		case SDLK_d:
+			move->stop();
+			sprite->spriteFlip = SDL_FLIP_NONE;
+
+			// sprite->play("idle");
+			break;
+		}
+	}
+	// }
 }
 
 } // namespace FishEngine

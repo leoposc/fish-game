@@ -7,46 +7,44 @@
 
 namespace FishEngine {
 
-#include "../include/fish_game/Game.hpp"
+// #include "../include/fish_game/Game.hpp"
 
-ColliderComponent::ColliderComponent(std::string t, int xpos, int ypos,
-                                     int size)
-    : tag(t) {
-  collider.x = xpos;
-  collider.y = ypos;
-  collider.w = collider.h = size;
+ColliderComponent::ColliderComponent(std::string t, int xpos, int ypos, int size) : tag(t) {
+	collider.x = xpos;
+	collider.y = ypos;
+	collider.w = collider.h = size;
 }
 
 void ColliderComponent::init() {
-  if (!entity->hasComponent<TransformComponent>()) {
-    entity->addComponent<TransformComponent>();
-  }
-  transform = &entity->getComponent<TransformComponent>();
+	if (!entity->hasComponent<TransformComponent>()) {
+		entity->addComponent<TransformComponent>();
+	}
+	transform = &entity->getComponent<TransformComponent>();
 
-  // TODO: create a collider texture
-  // tex = TextureManager::loadTexture("assets/coltex.png");
+	// TODO: create a collider texture
+	// tex = TextureManager::loadTexture("assets/coltex.png");
 
-  // TODO: read the size of the collider from the texture
-  srcRect = {0, 0, 16, 16};
-  dstRect = {collider.x, collider.y, collider.w, collider.h};
+	// TODO: read the size of the collider from the texture
+	srcRect = {0, 0, 16, 16};
+	dstRect = {collider.x, collider.y, collider.w, collider.h};
 }
 
 // TODO: adapt code to use tileson and different layers
 void ColliderComponent::update() {
-  if (tag != "terrain") {
-    collider.x = static_cast<int>(transform->position.getX());
-    collider.y = static_cast<int>(transform->position.getY());
-    collider.w = transform->width * transform->scale;
-    collider.h = transform->height * transform->scale;
-  }
+	if (tag != "terrain") {
+		collider.x = static_cast<int>(transform->position.getX());
+		collider.y = static_cast<int>(transform->position.getY());
+		collider.w = transform->width * transform->scale;
+		collider.h = transform->height * transform->scale;
+	}
 
-  dstRect.x = collider.x - Game::camera.x;
-  dstRect.y = collider.y - Game::camera.y;
+	dstRect.x = collider.x - Game::camera.x;
+	dstRect.y = collider.y - Game::camera.y;
 }
 
 void ColliderComponent::draw() {
-  // todo: create a collider texture
-  // TextureManager::draw(tex, srcRect, dstRect, SDL_FLIP_NONE);
+	// todo: create a collider texture
+	// TextureManager::draw(tex, srcRect, dstRect, SDL_FLIP_NONE);
 }
 
 } // namespace FishEngine
