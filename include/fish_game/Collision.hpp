@@ -1,18 +1,17 @@
-#ifndef COLLISION_HPP
-#define COLLISION_HPP
+#pragma once
 
-#include "Game.hpp"
+// #include "ECS/Components.hpp"
+// #include "Game.hpp"
+#include "ECS/ColliderComponent.hpp"
 
 #include <SDL2/SDL.h>
 
-namespace FishEngine
-{
+namespace FishEngine {
 
-    class Collision
-    {
-    public:
-        static bool AABB(const SDL_Rect &recA, const SDL_Rect &recB);
-    };
-}
-
-#endif // COLLISION_HPP
+class Collision {
+public:
+  static bool AABB(const SDL_Rect &recA, const SDL_Rect &recB);
+  static bool AABB(const ColliderComponent &colA,
+                   const ColliderComponent &colB);
+};
+} // namespace FishEngine

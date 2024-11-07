@@ -1,42 +1,49 @@
-#ifndef MOVECOMPONENT_HPP
-#define MOVECOMPONENT_HPP
+#pragma once
 
-#include "Components.hpp"
-#include "../Vector2D.hpp"
+// #include "Components.hpp"
+#include "ECS.hpp"
 
-namespace FishEngine
-{
+// #include "../Vector2D.hpp"
+#include "TransformComponent.hpp"
 
-    class MoveComponent : public Component
-    {
-        TransformComponent *transform;
+// class TransformComponent;
 
-    public:
-        void init() override
-        {
-            transform = &entity->getComponent<TransformComponent>();
-        }
+namespace FishEngine {
 
-        void up()
-        {
-            transform->velocity.setY(-1);
-        }
+class MoveComponent : public TransformComponent {
 
-        void down()
-        {
-            transform->velocity.setY(1);
-        }
+public:
+  using TransformComponent::TransformComponent;
 
-        void left()
-        {
-            transform->velocity.setX(-1);
-        }
+  MoveComponent(int x, int y);
 
-        void right()
-        {
-            transform->velocity.setX(1);
-        }
-    };
-}
+  MoveComponent(int sc);
 
-#endif // MOVECOMPONENT_HPP
+  MoveComponent(int x, int y, int h, int w, float sc);
+
+  // void init() override;
+  // using TransformComponent::init;
+  void init() override { TransformComponent::init(); }
+
+  void update() override { 
+    // std::cout << "Before MoveComponent - new pos: " << position.getX() << " "
+    //           << position.getY() << std::endl;
+    TransformComponent::update(); 
+    // std::cout << "After MoveComponent - new pos: " << position.getX() << " "
+    //           << position.getY() << std::endl;
+    }
+
+  // using TransformComponent::update;
+
+  void up();
+
+  void down();
+
+  void left();
+
+  void right();
+
+  void stop();
+};
+
+} // namespace FishEngine

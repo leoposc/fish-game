@@ -1,38 +1,36 @@
-#ifndef COLLIDERCOMPONENT_HPP
-#define COLLIDERCOMPONENT_HPP
+#pragma once
 
-#include "Components.hpp"
+// #include "Components.hpp"
+#include "../Game.hpp"
 #include "ECS.hpp"
 
 #include <SDL2/SDL.h>
 #include <string>
 
-namespace FishEngine
-{
-    class ColliderComponent : public Component
-    {
-    public:
-        SDL_Rect collider;
-        std::string tag;
+namespace FishEngine {
 
-        TransformComponent *transform;
+class TransformComponent;
 
-        void init() override
-        {
-            if (!entity->hasComponent<TransformComponent>())
-            {
-                entity->addComponent<TransformComponent>();
-            }
-            transform = &entity->getComponent<TransformComponent>();
-        }
+class ColliderComponent : public Component {
+public:
+  std::string tag;
 
-        void update() override
-        {
-            collider.x = transform->getX();
-            collider.y = transform->getY();
-            collider.w = transform->width * transform->scale;
-            collider.h = transform->height * transform->scale;
-        } 
-    };
-}
-#endif // COLLIDERCOMPONENT_HPP
+  SDL_Rect collider;
+  SDL_Texture *tex;
+  SDL_Rect srcRect, dstRect;
+
+  TransformComponent *transform;
+
+  ColliderComponent(std::string t) : tag(t) {}
+
+  ColliderComponent(std::string t, int xpos, int ypos, int size);
+
+  void init() override;
+
+  // TODO: adapt code to use tileson and different layers
+  void update() override;
+
+  void draw() override;
+};
+
+} // namespace FishEngine

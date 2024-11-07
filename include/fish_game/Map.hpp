@@ -1,13 +1,14 @@
-#ifndef MAP_HPP
-#define MAP_HPP
+#pragma once
 
-#include "../include/tileson.hpp"
+
+#include "../tileson.hpp"
 
 #include <SDL2/SDL.h>
 #include <array>
 #include <string>
 
 namespace FishEngine {
+
 class Map {
 public:
   Map() = default;
@@ -92,6 +93,5 @@ private:
 
   std::map<uint32_t, tson::Animation *> animationUpdateQueue;
 };
-} // namespace FishEngine
 
-#endif // MAP_HPP
+} // namespace FishEngine

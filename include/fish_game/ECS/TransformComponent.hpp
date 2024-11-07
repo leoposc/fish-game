@@ -1,47 +1,49 @@
-#ifndef TRANSFORMCOMPONENT_HPP
-#define TRANSFORMCOMPONENT_HPP
+#pragma once
 
-#include "Components.hpp"
 #include "../Vector2D.hpp"
+// #include "Components.hpp"
+#include "ECS.hpp"
 
-namespace FishEngine
-{
-    class TransformComponent : public Component
-    {
-        Vector2D position;
+namespace FishEngine {
 
-        int speed = 3;
+class TransformComponent : public Component {
 
-    public:
-        Vector2D velocity;
+public:
+  Vector2D velocity;
+  Vector2D position;
 
-        int height = 32;
-        int width = 32;
-        int scale = 1;
+  int speed = 3;
 
-        TransformComponent() : position(0, 0) {}
-        TransformComponent(int x, int y) : position(x, y) {}
+  // TODO: read from file/ tileson
+  int height = 16;
+  int width = 16;
 
-        int getX() { return position.getX(); }
-        int getY() { return position.getY(); }
-        void setX(int x) { position.setX(x); }
-        void setY(int y) { position.setY(y); }
+  float scale = 1;
 
-        void setPos(int x, int y)
-        {
-            position.setX(x);
-            position.setY(y);
+  bool blocked = false;
 
-            // position += (velocity * speed);
-        }
+  TransformComponent() : position(0, 0) {}
 
-        void init() override
-        {
-            velocity.setX(0);
-            velocity.setY(0);
-        }
-    };
+  TransformComponent(int x, int y) : position(x, y) {}
+
+  TransformComponent(int sc) : scale(sc), position(0, 0) {}
+
+  TransformComponent(int x, int y, int h, int w, float sc)
+      : position(x, y), height(h), width(w), scale(sc) {}
+
+  int getX() { return position.getX(); }
+  int getY() { return position.getY(); }
+  void setX(int x) { position.setX(x); }
+  void setY(int y) { position.setY(y); }
+
+  void setPos(int x, int y) {
+    position.setX(x);
+    position.setY(y);
+  }
+
+  void init() override;
+
+  void update() override;
+};
 
 } // namespace FishEngine
-
-#endif // TRANSFORMCOMPONENT_HPP

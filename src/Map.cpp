@@ -7,13 +7,13 @@
 #include <iostream>
 
 namespace FishEngine {
+
 // Map::Map() = default;
 
 // Map::~Map() = default;
 
 void Map::loadMap(fs::path path) {
 
-  std::cout << "Absolute path: " << fs::absolute(path) << std::endl;
   if (!fs::exists(path)) {
     std::cout << "Map file does not exist!" << std::endl;
     return;

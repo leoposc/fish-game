@@ -1,52 +1,64 @@
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
-// #include "ECS/ECS.hpp"
 // #include "ECS/Components.hpp"
-// #include "ECS/ColliderComponent.hpp"
+#include "AssetManager.hpp"
+
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <vector>
 
-namespace FishEngine
-{
+// class AssetManager;
+class ColliderComponent;
 
-    class ColliderComponent;
+namespace FishEngine {
 
-    class Game
-    {
+// class AssetManager;
+// class ColliderComponent;
 
-    public:
-        static SDL_Event game_event;
-        static SDL_Renderer *renderer;
-        // static std::vector<ColliderComponent *> colliders;
+class Game {
 
-        Game();
-        ~Game();
+public:
+  // static std::vector<ColliderComponent *> colliders;
 
-        SDL_Event getEvent() { return game_event; }
+  Game();
+  ~Game();
 
-        void init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen);
+  SDL_Event getEvent() { return game_event; }
 
-        void initCombat();
+  void init(const char *title, int xpos, int ypos, int width, int height,
+            bool fullscreen);
 
-        void handleEvents();
+  void initCombat();
 
-        void update();
+  void handleEvents();
 
-        void render();
+  void update();
 
-        void clean();
+  void render();
 
-        bool running();
+  void clean();
 
-        static void addTile(int id, int x, int y);
+  bool running();
 
-    private:
-        int cnt;
-        bool isRunning;
-        SDL_Window *window;
-    };
+  void stop();
+
+  static SDL_Renderer *renderer;
+  static SDL_Event game_event;
+  static SDL_Rect camera;
+  static AssetManager *assets;
+
+  enum groupLabels : std::size_t {
+    groupMap,
+    groupPlayers,
+    groupEnemies,
+    groupColliders,
+    groupProjectiles
+  };
+
+private:
+  int cnt;
+  bool isRunning;
+  SDL_Window *window;
+};
+
 } // namespace FishEngine
-
-#endif // GAME_HPP
