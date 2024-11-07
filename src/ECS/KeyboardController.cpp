@@ -13,10 +13,6 @@ void KeyboardController::init() {
 void KeyboardController::update()
 
 {
-	// std::cout << "KEYBOARDCONTROLLER UPDATED" << std::endl;
-	// move the player
-	// while (SDL_PollEvent(&Game::game_event)) {
-
 	if (Game::game_event.type == SDL_KEYDOWN) {
 		switch (Game::game_event.key.keysym.sym) {
 		// upwards
@@ -75,7 +71,6 @@ void KeyboardController::update()
 			break;
 		}
 	}
-	// }
 }
 
 } // namespace FishEngine

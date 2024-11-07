@@ -12,38 +12,34 @@ namespace FishEngine {
 
 class MoveComponent : public TransformComponent {
 
-public:
-  using TransformComponent::TransformComponent;
+	bool inWater = false;
 
-  MoveComponent(int x, int y);
+  public:
+	using TransformComponent::TransformComponent;
 
-  MoveComponent(int sc);
+	MoveComponent(int x, int y);
 
-  MoveComponent(int x, int y, int h, int w, float sc);
+	MoveComponent(int sc);
 
-  // void init() override;
-  // using TransformComponent::init;
-  void init() override { TransformComponent::init(); }
+	MoveComponent(int x, int y, int h, int w, float sc);
 
-  void update() override { 
-    // std::cout << "Before MoveComponent - new pos: " << position.getX() << " "
-    //           << position.getY() << std::endl;
-    TransformComponent::update(); 
-    // std::cout << "After MoveComponent - new pos: " << position.getX() << " "
-    //           << position.getY() << std::endl;
-    }
+	// void init() override;
+	// using TransformComponent::init;
+	void init() override { TransformComponent::init(); }
 
-  // using TransformComponent::update;
+	void update() override;
 
-  void up();
+	// using TransformComponent::update;
 
-  void down();
+	void up();
 
-  void left();
+	void down();
 
-  void right();
+	void left();
 
-  void stop();
+	void right();
+
+	void stop();
 };
 
 } // namespace FishEngine
