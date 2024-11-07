@@ -62,6 +62,7 @@
 #include <map>
 #include <memory>
 #include <initializer_list>
+#include <algorithm>
 
 #define JSON11_IS_DEFINED
 
