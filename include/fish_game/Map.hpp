@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "../tileson.hpp"
 
 #include <SDL2/SDL.h>
@@ -9,89 +8,104 @@
 
 namespace FishEngine {
 
+/**
+ * @brief: class to load and draw a map
+ * @details: the map is loaded using the tileson library
+ * the map is drawn using the SDL2 library
+ */
+
 class Map {
-public:
-  Map() = default;
-  ~Map() = default;
+  public:
+	Map() = default;
+	~Map() = default;
 
-  void loadMap(fs::path path);
+	void loadMap(fs::path path);
 
-  void drawMap();
+	void drawMap();
 
-  void drawLayer(tson::Layer &layer);
+	void drawLayer(tson::Layer &layer);
 
-  void drawTileLayer(tson::Layer &layer);
+	void drawTileLayer(tson::Layer &layer);
 
-  // fetch the path to the tileset
-  fs::path getTilePath(int id);
+	// fetch the path to the tileset
+	fs::path getTilePath(int id);
 
-  fs::path getImagePath(tson::Tile &tile);
+	fs::path getImagePath(tson::Tile &tile);
 
-  SDL_Texture *loadTexture(const std::string &image);
+	SDL_Texture *loadTexture(const std::string &image);
 
-  /*
-   * @brief: create a two dimensional array of the size of the map
-   * @param: void
-   * @details: the array is used to store type of the tile at the position (e.g.
-   * water=2, plattform=1, tree)
-   */
-  template <typename T, size_t Row, size_t Col>
-  std::array<std::array<uint8_t, Col>, Row> *initMapArray() {
+	/**
+	 * @brief: idea: pass colllider components to the map and check for collision
+	 */
+	bool checkPlattformCollisions(SDL_Rect *collider);
 
-    tson::Vector2i mapSize = currentMap->getSize();
-    size_t rows = mapSize.y;
-    size_t cols = mapSize.x;
-    // TODO: dynamic allocation, delete in destructor? or use std::unique_pt?
-    std::array<std::array<uint8_t, Col>, Row> *mapArray =
-        new std::array<std::array<uint8_t, mapSize.x>, mapSize.y>();
-    for (size_t i = 0; i < rows; ++i) {
-      for (size_t j = 0; j < cols; ++j) {
-        (*mapArray)[i][j] = 0;
-      }
-    }
+	/**
+	 * @brief: check if the player is in water
+	 * @param: SDL_Rect *collider   the collider of the player
+	 */
+	bool isInWater(SDL_Rect *collider);
 
-    // loop through the plattforms layer and set the plattform tiles to 1
-    for (auto &[pos, tileObject] :
-         currentMap->getLayer("plattforms")->getTileObjects()) {
-      (*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 1;
-    }
+	/*
+	 * @brief: create a two dimensional array of the size of the map
+	 * @param: void
+	 * @details: the array is used to store type of the tile at the position (e.g.
+	 * water=2, plattform=1, tree)
+	 */
+	template <typename T, size_t Row, size_t Col>
+	std::array<std::array<uint8_t, Col>, Row> *initMapArray() {
 
-        // loop through the water layer and set the water tiles to 2
-    for (auto &[pos, tileObject] :
-         currentMap->getLayer("water")->getTileObjects()) {
-      (*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 2;
-    }
+		tson::Vector2i mapSize = currentMap->getSize();
+		size_t rows = mapSize.y;
+		size_t cols = mapSize.x;
+		// TODO: dynamic allocation, delete in destructor? or use std::unique_pt?
+		std::array<std::array<uint8_t, Col>, Row> *mapArray =
+		    new std::array<std::array<uint8_t, mapSize.x>, mapSize.y>();
+		for (size_t i = 0; i < rows; ++i) {
+			for (size_t j = 0; j < cols; ++j) {
+				(*mapArray)[i][j] = 0;
+			}
+		}
 
-    return mapArray;
-  }
+		// loop through the plattforms layer and set the plattform tiles to 1
+		for (auto &[pos, tileObject] : currentMap->getLayer("plattforms")->getTileObjects()) {
+			(*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 1;
+		}
 
-  void loadTilesetTextures();
+		// loop through the water layer and set the water tiles to 2
+		for (auto &[pos, tileObject] : currentMap->getLayer("water")->getTileObjects()) {
+			(*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 2;
+		}
 
-  SDL_Texture *getTexture(fs::path path);
+		return mapArray;
+	}
 
-private:
-  SDL_Rect src, dst;
+	void loadTilesetTextures();
 
-  std::map<fs::path, SDL_Texture *> tilesetTextures;
+	SDL_Texture *getTexture(fs::path path);
 
-  SDL_Texture *plattforms;
-  SDL_Texture *water;
-  SDL_Texture *trees;
+  private:
+	SDL_Rect src, dst;
 
-  tson::Layer *plattformsLayer;
-  tson::Layer *waterLayer;
-  tson::Layer *treesLayer;
+	std::map<fs::path, SDL_Texture *> tilesetTextures;
 
-  tson::Tileson tileson;
-  std::unique_ptr<tson::Map> map = nullptr;
-  tson::Map *currentMap = nullptr;
+	SDL_Texture *plattforms;
+	SDL_Texture *water;
+	SDL_Texture *trees;
 
-  tson::Vector2i tileSize;
-  tson::Vector2i mapSize;
-  tson::Vector2i mapScale;
-  tson::Vector2i positionOffset{0, 0};
+	tson::Layer *plattformsLayer;
+	tson::Layer *waterLayer;
+	tson::Layer *treesLayer;
 
-  std::map<uint32_t, tson::Animation *> animationUpdateQueue;
+	tson::Tileson tileson;
+	std::unique_ptr<tson::Map> map = nullptr;
+	tson::Map *currentMap = nullptr;
+
+	tson::Vector2i tileSize;
+	tson::Vector2i mapSize;
+	tson::Vector2i mapScale;
+	tson::Vector2i positionOffset{0, 0};
+
+	std::map<uint32_t, tson::Animation *> animationUpdateQueue;
 };
 
 } // namespace FishEngine

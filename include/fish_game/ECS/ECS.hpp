@@ -1,10 +1,11 @@
 #pragma once
 
 // #include "Components.hpp"
-#include <iostream>
 #include <algorithm>
 #include <array>
 #include <bitset>
+#include <cassert>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -18,13 +19,14 @@ using ComponentID = std::size_t;
 using Group = std::size_t;
 
 inline ComponentID generateComponentID() {
-  static ComponentID lastID = 0u;
-  return lastID++;
+	static ComponentID lastID = 0u;
+	return lastID++;
 }
 
-template <typename T> inline ComponentID getComponentTypeID() noexcept {
-  static ComponentID typeID = generateComponentID();
-  return typeID;
+template <typename T>
+inline ComponentID getComponentTypeID() noexcept {
+	static ComponentID typeID = generateComponentID();
+	return typeID;
 }
 
 constexpr std::size_t maxGroups = 32;
@@ -34,141 +36,139 @@ using GroupBitSet = std::bitset<maxGroups>;
 using ComponentArray = std::array<Component *, maxComponents>;
 
 class Component {
-public:
-  Entity *entity;
+  public:
+	Entity *entity;
 
-  virtual void init() {}
-  /**
-   * @brief: update the component
-   * @details: If the virtual base class is not overridden, the default implementation
-   * will be called. Meaning that nothing will happen.
-   */
-  virtual void update() {}
-  /**
-   * @brief: draw the component
-   * @details: If the virtual base class is not overridden, the default implementation
-   * will be called. Meaning that nothing will happen.
-   */
-  virtual void draw() {}
+	virtual void init() {}
+	/**
+	 * @brief: update the component
+	 * @details: If the virtual base class is not overridden, the default implementation
+	 * will be called. Meaning that nothing will happen.
+	 */
+	virtual void update() {}
+	/**
+	 * @brief: draw the component
+	 * @details: If the virtual base class is not overridden, the default implementation
+	 * will be called. Meaning that nothing will happen.
+	 */
+	virtual void draw() {}
 
-  virtual ~Component() {}
+	virtual ~Component() {}
 };
 
 class Entity {
-  Manager &manager;
+	Manager &manager;
 
-  bool active = true;
-  std::vector<std::unique_ptr<Component>> components;
+	bool active = true;
+	std::vector<std::unique_ptr<Component>> components;
 
-  ComponentArray componentArray;
-  ComponentBitSet componentBitSet;
-  GroupBitSet groupBitSet;
+	ComponentArray componentArray;
+	ComponentBitSet componentBitSet;
+	GroupBitSet groupBitSet;
 
-public:
-  Entity(Manager &man) : manager(man) {}
+  public:
+	Entity(Manager &man) : manager(man) {}
 
-  void addGroup(Group group);
+	void addGroup(Group group);
 
-  /** 
-     * @brief: update all components which belong to a instance of an entity
-     * @details: The order of updating components is important. It is defined by the order
-     * of adding components to an entity. The very first component added is updated first.
-     * The ComponentID is NOT used to determine the order of updating components.
-     */
-  void update() {
-    for (auto &c : components) {
-      c->update();
-    }
-  }
+	/**
+	 * @brief: update all components which belong to a instance of an entity
+	 * @details: The order of updating components is important. It is defined by the order
+	 * of adding components to an entity. The very first component added is updated first.
+	 * The ComponentID is NOT used to determine the order of updating components.
+	 */
+	void update() {
+		for (auto &c : components) {
+			c->update();
+		}
+	}
 
-  /** 
-     * @brief: draw all components which belong to a instance of an entity
-     * @details: The order of drawing components is important. It is defined by the order
-     * of adding components to an entity. The very first component added is updated first.
-     * The ComponentID is NOT used to determine the order of updating components.
-     */
-  void draw() {
-    for (auto &c : components)
-      c->draw();
-  }
+	/**
+	 * @brief: draw all components which belong to a instance of an entity
+	 * @details: The order of drawing components is important. It is defined by the order
+	 * of adding components to an entity. The very first component added is updated first.
+	 * The ComponentID is NOT used to determine the order of updating components.
+	 */
+	void draw() {
+		for (auto &c : components)
+			c->draw();
+	}
 
-  bool isActive() const { return active; }
-  void destroy() { active = false; }
+	bool isActive() const { return active; }
+	void destroy() { active = false; }
 
-  template <typename T> bool hasComponent() const {
-    return componentBitSet[getComponentTypeID<T>()];
-  }
+	template <typename T>
+	bool hasComponent() const {
+		return componentBitSet[getComponentTypeID<T>()];
+	}
 
-  bool hasGroup(Group group) const { return groupBitSet[group]; }
+	bool hasGroup(Group group) const { return groupBitSet[group]; }
 
-  void delGroup(Group group) { groupBitSet[group] = false; }
+	void delGroup(Group group) { groupBitSet[group] = false; }
 
-  template <typename T, typename... TArgs> T &addComponent(TArgs &&...mArgs) {
-    T *c(new T(std::forward<TArgs>(mArgs)...));
-    c->entity = this;
-    std::unique_ptr<Component> uPtr{c};
-    components.emplace_back(std::move(uPtr));
+	template <typename T, typename... TArgs>
+	T &addComponent(TArgs &&...mArgs) {
+		// check if the component already exists
+		assert(!hasComponent<T>());
 
-    componentArray[getComponentTypeID<T>()] = c;
-    componentBitSet[getComponentTypeID<T>()] = true;
+		T *c(new T(std::forward<TArgs>(mArgs)...));
+		c->entity = this;
+		std::unique_ptr<Component> uPtr{c};
+		components.emplace_back(std::move(uPtr));
 
-    c->init();
-    return *c;
-  }
+		componentArray[getComponentTypeID<T>()] = c;
+		componentBitSet[getComponentTypeID<T>()] = true;
 
-  template <typename T> T &getComponent() const {
-    auto ptr(componentArray[getComponentTypeID<T>()]);
-    return *static_cast<T *>(ptr);
-  }
+		c->init();
+		return *c;
+	}
+
+	template <typename T>
+	T &getComponent() const {
+		assert(hasComponent<T>());
+		auto ptr(componentArray[getComponentTypeID<T>()]);
+		return *static_cast<T *>(ptr);
+	}
 };
 
 class Manager {
-  std::vector<std::unique_ptr<Entity>> entities;
-  std::array<std::vector<Entity *>, maxGroups> groupedEntities;
+	std::vector<std::unique_ptr<Entity>> entities;
+	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
 
-public:
-  void update() {
-    for (auto &e : entities)
-      e->update();
-  }
+  public:
+	void update() {
+		for (auto &e : entities)
+			e->update();
+	}
 
-  void draw() {
-    for (auto &e : entities)
-      e->draw();
-  }
+	void draw() {
+		for (auto &e : entities)
+			e->draw();
+	}
 
-  void refresh() {
-    for (auto i(0u); i < maxGroups; i++) {
-      auto &v(groupedEntities[i]);
-      v.erase(std::remove_if(std::begin(v), std::end(v),
-                             [i](Entity *entity) {
-                               return !entity->isActive() ||
-                                      !entity->hasGroup(i);
-                             }),
-              std::end(v));
-    }
+	void refresh() {
+		for (auto i(0u); i < maxGroups; i++) {
+			auto &v(groupedEntities[i]);
+			v.erase(std::remove_if(std::begin(v), std::end(v),
+			                       [i](Entity *entity) { return !entity->isActive() || !entity->hasGroup(i); }),
+			        std::end(v));
+		}
 
-    entities.erase(std::remove_if(std::begin(entities), std::end(entities),
-                                  [](const std::unique_ptr<Entity> &mEntity) {
-                                    return !mEntity->isActive();
-                                  }),
-                   std::end(entities));
-  }
+		entities.erase(std::remove_if(std::begin(entities), std::end(entities),
+		                              [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive(); }),
+		               std::end(entities));
+	}
 
-  void addToGroup(Entity *entity, Group group) {
-    groupedEntities[group].emplace_back(entity);
-  }
+	void addToGroup(Entity *entity, Group group) { groupedEntities[group].emplace_back(entity); }
 
-  std::vector<Entity *> &getGroup(Group group) {
-    return groupedEntities[group];
-  }
+	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 
-  Entity &addEntity() {
-    Entity *e = new Entity(*this);
-    std::unique_ptr<Entity> uPtr(e);
-    entities.emplace_back(std::move(uPtr));
-    return *e;
-  }
+	Entity &addEntity() {
+		Entity *e = new Entity(*this);
+		std::unique_ptr<Entity> uPtr(e);
+		entities.emplace_back(std::move(uPtr));
+		return *e;
+	}
 };
 
 } // namespace FishEngine

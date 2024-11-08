@@ -18,20 +18,40 @@ MoveComponent::MoveComponent(int x, int y, int h, int w, float sc) : TransformCo
 	// << std::endl;
 }
 
+void MoveComponent::update() {
+	// add gravity
+	// if (!inWater) {
+	// 	velocity.setY(1);
+	// }
+	TransformComponent::update();
+}
+
 void MoveComponent::up() {
+	// if (inWater) {
 	velocity.setY(-1);
+	// }
 }
 
 void MoveComponent::down() {
+	// if (inWater) {
 	velocity.setY(1);
+	// }
 }
 
 void MoveComponent::left() {
-	velocity.setX(-1);
+	if (inWater) {
+		velocity.setX(-2);
+	} else {
+		velocity.setX(-1);
+	}
 }
 
 void MoveComponent::right() {
-	velocity.setX(1);
+	if (inWater) {
+		velocity.setX(2);
+	} else {
+		velocity.setX(1);
+	}
 }
 
 void MoveComponent::stop() {

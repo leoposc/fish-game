@@ -54,18 +54,17 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 		isRunning = false;
 	}
 
-	// etc implementation - temporary test code below
+	// ================== init map and assets ==================
 	map = new Map();
 	map->loadMap("../../maps/map03.tmj");
-
 	assets->addTexture("fish", "../../assets/RedFishSmall.png");
 
-	// init player
+	// =================== init player===========================
 	// scaling not working correctly, RedFish.png also very high resolution
 	player.addComponent<MoveComponent>(400, 240, 45, 60, 1.0);
 	player.addComponent<SpriteComponent>("fish", false);
 	player.addComponent<KeyboardController>();
-	// // // player.addComponent<ColliderComponent>("player");
+	player.addComponent<ColliderComponent>("player", 400, 240, 45, 60);
 	// // player.addComponent<TransformComponent>(2);
 	// // player.addGroup(groupLabels::groupPlayers);
 	player.addGroup(groupPlayers);
@@ -75,6 +74,7 @@ void Game::initCombat() {
 	// init players
 	// TODO: load every player from a file and change color
 }
+
 void Game::handleEvents() {
 	// TODO: look for a better way to handle events since movement seems to be pretty slow
 	SDL_PollEvent(&game_event);
@@ -95,6 +95,53 @@ void Game::update() {
 	manager.refresh();
 	manager.update();
 
+	// ================ GET CLIENT COMMANDS ==========================
+	// => keyboard controller
+
+	/*$
+   | $$
+/$$$$$$$  /$$$$$$         /$$$$$$$  /$$$$$$  /$$$$$$/$$$$   /$$$$$$
+/$$__  $$ /$$__  $$       /$$_____/ /$$__  $$| $$_  $$_  $$ /$$__  $$
+| $$  | $$| $$  \ $$      |  $$$$$$ | $$  \ $$| $$ \ $$ \ $$| $$$$$$$$
+| $$  | $$| $$  | $$       \____  $$| $$  | $$| $$ | $$ | $$| $$_____/
+|  $$$$$$$|  $$$$$$/       /$$$$$$$/|  $$$$$$/| $$ | $$ | $$|  $$$$$$$
+\_______/ \______/       |_______/  \______/ |__/ |__/ |__/ \_______/
+
+	            /$$                                       /$$       /$$
+	           | $$                                      | $$      |__/
+/$$$$$$$   /$$$$$$  /$$$$$$   /$$  /$$  /$$  /$$$$$$   /$$$$$$ | $$   /$$ /$$ /$$$$$$$   /$$$$$$
+| $$__  $$ /$$__  $$|_  $$_/  | $$ | $$ | $$ /$$__  $$ /$$__  $$| $$  /$$/| $$| $$__  $$ /$$__  $$
+| $$  \ $$| $$$$$$$$  | $$    | $$ | $$ | $$| $$  \ $$| $$  \__/| $$$$$$/ | $$| $$  \ $$| $$  \ $$
+| $$  | $$| $$_____/  | $$ /$$| $$ | $$ | $$| $$  | $$| $$      | $$_  $$ | $$| $$  | $$| $$  | $$
+| $$  | $$|  $$$$$$$  |  $$$$/|  $$$$$/$$$$/|  $$$$$$/| $$      | $$ \  $$| $$| $$  | $$|  $$$$$$$
+|__/  |__/ \_______/   \___/   \_____/\___/  \______/ |__/      |__/  \__/|__/|__/  |__/ \____  $$
+	                                                                                       /$$  \ $$
+	                                                                                    . |  $$$$$$/
+	                                                                                       \______/
+.	         /$$                /$$$$$$   /$$$$$$
+.  	      | $$                /$$__  $$ /$$__  $$
+/$$$$$$$ /$$$$$$   /$$   /$$| $$  \__/| $$  \__/
+/$$_____/|_  $$_/  | $$  | $$| $$$$    | $$$$
+|  $$$$$$  | $$    | $$  | $$| $$_/    | $$_/
+\____  $$  | $$ /$$| $$  | $$| $$      | $$
+/$$$$$$$/  |  $$$$/|  $$$$$$/| $$      | $$
+|_______/    \___/   \______/ |__/      |__*/
+
+	// ================ UPDATE CLIENT POSITIONS AND SPRITES ==============
+
+	// print collider data
+	// std::cout << "Player collider: " << player.getComponent<ColliderComponent>().collider.x << " "
+	//           << player.getComponent<ColliderComponent>().collider.y << " "
+	//           << player.getComponent<ColliderComponent>().collider.w << " "
+	//           << player.getComponent<ColliderComponent>().collider.h << std::endl;
+
+	// if (map->isInWater(&player.getComponent<ColliderComponent>().collider)) {
+	// 	player.getComponent<MoveComponent>().inWater = true;
+	// } else {
+	// 	player.getComponent<MoveComponent>().inWater = false;
+	// }
+
+	// ===================== outdated code ==========================
 	// for (auto &c : manager.getGroup(groupColliders)) {
 
 	//   if (Collision::AABB(c->getComponent<ColliderComponent>().collider,
@@ -130,9 +177,16 @@ void Game::update() {
 void Game::render() {
 	SDL_RenderClear(renderer);
 
+	map->drawMap();
+
 	manager.draw();
 
-	map->drawMap();
+	// ===================== test if adaptive movement works ==========================
+	bool swimming = map->isInWater(&player.getComponent<ColliderComponent>().collider);
+	player.getComponent<MoveComponent>().inWater = swimming;
+
+	bool collision = map->checkPlattformCollisions(&player.getComponent<ColliderComponent>().collider);
+	// do something with the collision - don't know how to handle movements in x - y axis yet
 
 	// for (auto &t : manager.getGroup(groupLabels::groupMap)) {
 	//   t->draw();
