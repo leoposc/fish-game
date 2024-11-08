@@ -125,6 +125,7 @@ class Entity {
 
 	template <typename T>
 	T &getComponent() const {
+		assert(hasComponent<T>());
 		auto ptr(componentArray[getComponentTypeID<T>()]);
 		return *static_cast<T *>(ptr);
 	}

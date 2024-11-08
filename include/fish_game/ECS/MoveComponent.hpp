@@ -12,9 +12,8 @@ namespace FishEngine {
 
 class MoveComponent : public TransformComponent {
 
-	bool inWater = false;
-
   public:
+	bool inWater = false;
 	using TransformComponent::TransformComponent;
 
 	MoveComponent(int x, int y);

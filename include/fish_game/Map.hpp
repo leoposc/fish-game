@@ -34,6 +34,17 @@ class Map {
 
 	SDL_Texture *loadTexture(const std::string &image);
 
+	/**
+	 * @brief: idea: pass colllider components to the map and check for collision
+	 */
+	bool checkPlattformCollisions(SDL_Rect *collider);
+
+	/**
+	 * @brief: check if the player is in water
+	 * @param: SDL_Rect *collider   the collider of the player
+	 */
+	bool isInWater(SDL_Rect *collider);
+
 	/*
 	 * @brief: create a two dimensional array of the size of the map
 	 * @param: void

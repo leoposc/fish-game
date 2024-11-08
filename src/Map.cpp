@@ -143,6 +143,57 @@ SDL_Texture *Map::getTexture(fs::path path) {
 	return tilesetTextures[path];
 }
 
-void testCollision() {}
+bool Map::checkPlattformCollisions(SDL_Rect *collider) {
+	tson::Layer *plattforms = currentMap->getLayer("plattforms");
+
+	for (auto &[pos, tileObject] : plattforms->getTileObjects()) {
+		tson::Rect rect = tileObject.getDrawingRect();
+		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
+		                  rect.width, rect.height};
+
+		if (SDL_HasIntersection(collider, &block)) {
+			return true;
+		}
+
+		SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
+		SDL_RenderDrawRect(Game::renderer, &block);
+		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+	}
+	return false;
+}
+
+bool Map::isInWater(SDL_Rect *collider) {
+	tson::Layer *water = currentMap->getLayer("water");
+	tson::Layer *waterfall = currentMap->getLayer("waterfalls");
+
+	for (auto &[pos, tileObject] : water->getTileObjects()) {
+		tson::Rect rect = tileObject.getDrawingRect();
+		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
+		                  rect.width, rect.height};
+
+		if (SDL_HasIntersection(collider, &block)) {
+			return true;
+		}
+
+		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
+		SDL_RenderDrawRect(Game::renderer, &block);
+		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+	}
+
+	for (auto &[pos, tileObject] : waterfall->getTileObjects()) {
+		tson::Rect rect = tileObject.getDrawingRect();
+		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
+		                  rect.width, rect.height};
+
+		if (SDL_HasIntersection(collider, &block)) {
+			return true;
+		}
+
+		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
+		SDL_RenderDrawRect(Game::renderer, &block);
+		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+	}
+	return false;
+}
 
 } // namespace FishEngine

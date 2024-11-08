@@ -3,9 +3,9 @@
 
 namespace FishEngine {
 
-WearableComponent::WearableComponent(/* args */) {}
+// WearableComponent::WearableComponent(/* args */) {}
 
-WearableComponent::~WearableComponent() {}
+// WearableComponent::~WearableComponent() {}
 
 void WearableComponent::init() {
 	if (!entity->hasComponent<TransformComponent>()) {
