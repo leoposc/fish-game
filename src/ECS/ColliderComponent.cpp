@@ -38,8 +38,8 @@ void ColliderComponent::update() {
 		collider.h = transform->height * transform->scale;
 	}
 
-	dstRect.x = collider.x - Game::camera.x;
-	dstRect.y = collider.y - Game::camera.y;
+	// dstRect.x = collider.x - Game::camera.x;
+	// dstRect.y = collider.y - Game::camera.y;
 }
 
 void ColliderComponent::draw() {
