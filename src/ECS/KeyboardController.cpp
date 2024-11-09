@@ -14,8 +14,9 @@ void KeyboardController::update()
 
 {
 	if (Game::game_event.type == SDL_KEYDOWN) {
+		std::cout << Game::game_event.key.keysym.sym << std::endl;
 		switch (Game::game_event.key.keysym.sym) {
-		// upwards
+		// upwardsw
 		case SDLK_w:
 			move->up();
 			// sprite->play("swim");
@@ -42,6 +43,7 @@ void KeyboardController::update()
 	// stop the player
 	if (Game::game_event.type == SDL_KEYUP) {
 		switch (Game::game_event.key.keysym.sym) {
+
 		case SDLK_ESCAPE:
 			// TODO: add a pause menu
 			// Game::stop();

@@ -10,6 +10,8 @@
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
+#include "../include/fish_game/ECS/ComponentsGenerator.hpp"
+
 
 #include <SDL2/SDL.h>
 #include <iostream>
@@ -25,13 +27,11 @@ AssetManager *Game::assets = new AssetManager(&manager);
 
 Map *map;
 
-auto &player(manager.addEntity());
-
 Game::Game() : cnt(0), isRunning(false) {}
 
 Game::~Game() {}
 
-void Game::init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen) {
+void Game::init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen, int numPlayers) {
 	int flags = 0;
 	if (fullscreen) {
 		flags = SDL_WINDOW_FULLSCREEN;
@@ -61,13 +61,12 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 
 	// =================== init player===========================
 	// scaling not working correctly, RedFish.png also very high resolution
-	player.addComponent<MoveComponent>(400, 240, 45, 60, 1.0);
-	player.addComponent<SpriteComponent>("fish", false);
-	player.addComponent<KeyboardController>();
-	player.addComponent<ColliderComponent>("player", 400, 240, 45, 60);
-	// // player.addComponent<TransformComponent>(2);
-	// // player.addGroup(groupLabels::groupPlayers);
-	player.addGroup(groupPlayers);
+
+	for (int i = 0; i < numPlayers; ++i) {
+		auto &player(manager.addEntity());
+		manager.addToGroup(&player, groupLabels::groupPlayers);
+		ComponentsGenerator::forPlayer(player);
+	}
 }
 
 void Game::initCombat() {
@@ -182,10 +181,11 @@ void Game::render() {
 	manager.draw();
 
 	// ===================== test if adaptive movement works ==========================
-	bool swimming = map->isInWater(&player.getComponent<ColliderComponent>().collider);
-	player.getComponent<MoveComponent>().inWater = swimming;
+	Entity* player = manager.getGroup(groupLabels::groupPlayers).back();
+	bool swimming = map->isInWater(&player->getComponent<ColliderComponent>().collider);
+	player->getComponent<MoveComponent>().inWater = swimming;
 
-	bool collision = map->checkPlattformCollisions(&player.getComponent<ColliderComponent>().collider);
+	bool collision = map->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider);
 	// do something with the collision - don't know how to handle movements in x - y axis yet
 
 	// for (auto &t : manager.getGroup(groupLabels::groupMap)) {

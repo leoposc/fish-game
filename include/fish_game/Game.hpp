@@ -26,7 +26,7 @@ public:
   SDL_Event getEvent() { return game_event; }
 
   void init(const char *title, int xpos, int ypos, int width, int height,
-            bool fullscreen);
+            bool fullscreen, int numPlayers);
 
   void initCombat();
 
