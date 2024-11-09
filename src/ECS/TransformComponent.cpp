@@ -14,6 +14,9 @@ void TransformComponent::init() {
 
 void TransformComponent::update() {
 	// std::cout << "TransformComponent - velocity: " << velocity.getX() << " " << velocity.getY() << std::endl;
+
+	//If in Client, calculation is NOT performed, but fetched from Server
+	//Only calculated in Server
 	position += velocity * speed;
 }
 

@@ -10,12 +10,16 @@
 namespace FishEngine {
 class ComponentsGenerator {
     public:
-        static void forPlayer(Entity &player) {
-    	    player.addComponent<MoveComponent>(400, 240, 45, 60, 1.0);
+        static void forPlayer(Entity &player, std::uint16_t x, std::uint16_t y) {
+    	    player.addComponent<MoveComponent>(x, y, 45, 60, 1.0);
 	        player.addComponent<SpriteComponent>("fish", false);
-	        player.addComponent<ColliderComponent>("player", 400, 240, 45, 60);
+	        player.addComponent<ColliderComponent>("player", x, y, 45, 60);
             player.addComponent<KeyboardController>();
 		    player.addGroup(Game::groupLabels::groupPlayers);
         }
+
+        static void forProjectile(Entity &projectile, std::uint16_t x, std::uint16_t) {}
     };
+
+    
 }

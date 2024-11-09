@@ -65,7 +65,8 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 	for (int i = 0; i < numPlayers; ++i) {
 		auto &player(manager.addEntity());
 		manager.addToGroup(&player, groupLabels::groupPlayers);
-		ComponentsGenerator::forPlayer(player);
+		auto initPos = map->getInitialPos().at(i); 
+		ComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
 	}
 }
 

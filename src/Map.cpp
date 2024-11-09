@@ -29,6 +29,11 @@ void Map::loadMap(fs::path path) {
 	}
 
 	loadTilesetTextures();
+
+	//TODO load from config
+	initialPos.push_back(std::pair(400,240));
+	initialPos.push_back(std::pair(800,240));
+
 }
 
 void Map::drawMap() {

@@ -83,6 +83,8 @@ class Map {
 
 	SDL_Texture *getTexture(fs::path path);
 
+	std::vector<std::pair<std::uint16_t, std::uint16_t>> getInitialPos() {return initialPos; }
+
   private:
 	SDL_Rect src, dst;
 
@@ -106,6 +108,8 @@ class Map {
 	tson::Vector2i positionOffset{0, 0};
 
 	std::map<uint32_t, tson::Animation *> animationUpdateQueue;
+
+	std::vector<std::pair<std::uint16_t, std::uint16_t>> initialPos;
 };
 
 } // namespace FishEngine

@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 
   game = new FishEngine::Game();
   game->init("Fish Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280,
-             720, false, 1);
+             720, false, 2);
 
   while (game->running()) {
     frameStart = SDL_GetTicks();
