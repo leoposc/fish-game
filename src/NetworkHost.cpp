@@ -1,47 +1,64 @@
 #include "../include/fish_game/NetworkHost.hpp"
+#include <iostream>
+#include <tuple>
 
-NetworkHost::NetworkHost() : stopThread(false) {
-  this->workerThread = std::thread(&NetworkHost::threadFunction, this);
-  std::cout << "Thread created \n";
+NetworkHost::NetworkHost() : stopThread(false), socket(SocketManager(8080, true))
+{
+	this->workerThread = std::thread(&NetworkHost::threadFunction, this);
+	std::cout << "Thread created \n";
 }
 
-NetworkHost::~NetworkHost() {
-  std::cout << "NetworkHost deconstructed \n";
-  this->stopThread = true;
-  this->cv.notify_all();
-  this->workerThread.join();
-  std::cout << "SocketManager deconstructed finished\n";
+NetworkHost::~NetworkHost()
+{
+	std::cout << "NetworkHost deconstructed \n";
+	this->stopThread = true;
+	this->cv.notify_all();
+	this->workerThread.join();
+	std::cout << "NetworkHost deconstructed finished\n";
 }
 
-std::optional<fish_game::InputEvent> NetworkHost::getActionQueue() {
-  std::lock_guard<std::mutex> lock(mtx);
-  if (this->elementQueue.empty()) {
-    return std::nullopt;
-  }
-  fish_game::InputEvent element = this->elementQueue.front();
-  this->elementQueue.pop();
-  return element;
+std::optional<InputEvent::Event> NetworkHost::getAction()
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	if (this->elementQueue.empty()) {
+		return std::nullopt;
+	}
+	auto element = this->elementQueue.front();
+	this->elementQueue.pop();
+	return std::get<1>(element);
 }
 
-void NetworkHost::updateState(const std::string &updatedState) {
-  std::lock_guard<std::mutex> lock(mtx);
-  this->state = updatedState;
+void NetworkHost::updateState(const std::string &updatedState)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	this->state = updatedState;
+	this->socket.sendMessage(updatedState);
 }
 
-void NetworkHost::threadFunction() {
-  this->registerSocket = std::make_unique<SocketManager>(8080, true);
-  int counter = 0;
-  while (true) {
-    counter++;
-    std::cout << "Hello from thread \n";
-    {
-      std::lock_guard<std::mutex> lock(mtx);
-      if (stopThread) {
-        return;
-      }
-      // Simulate adding elements to the queue
-      elementQueue.push(fish_game::InputEvent()); // Example element
-    }
-    std::this_thread::sleep_for(std::chrono::seconds(1)); // Simulate work
-  }
+void NetworkHost::threadFunction()
+{
+	int counter = 0;
+	while (true) {
+		counter++;
+		{
+			std::lock_guard<std::mutex> lock(mtx);
+			if (stopThread) {
+				return;
+			}
+
+			auto message = this->socket.popMessage();
+			if (message.message == "") {
+				continue;
+			}
+			if (clients.find(message.client_id) == clients.end()) {
+				// first time -> register user
+				std::cout << "in register branch\n";
+				clients.insert(std::make_pair(message.client_id, message.message));
+			} else {
+				std::cout << "received";
+				this->elementQueue.push(
+				    std::make_tuple(clients[message.client_id], InputEvent::deserialize(message.message)));
+			}
+		}
+	}
 }

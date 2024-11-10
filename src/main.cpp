@@ -1,6 +1,7 @@
 #include "../include/fish_game/Game.hpp"
+#include "../include/fish_game/GameInputEvents.hpp"
+#include "../include/fish_game/NetworkClient.hpp"
 #include "../include/fish_game/NetworkHost.hpp"
-#include "../include/fish_game/SocketManager.hpp"
 
 #include <SDL2/SDL.h>
 #include <arpa/inet.h>
@@ -16,38 +17,44 @@
 
 FishEngine::Game *game = nullptr;
 
-int main(int argc, char *argv[]) {
-  const int FPS = 60;
-  const int frameDelay = 1000 / FPS;
+int main(int argc, char *argv[])
+{
+	const int FPS = 60;
+	const int frameDelay = 1000 / FPS;
 
-  u_int32_t frameStart;
-  int frameTime;
+	u_int32_t frameStart;
+	int frameTime;
 
-  game = new FishEngine::Game();
-  game->init("Fish Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800,
-             640, false);
-  NetworkHost networkHost;
-  SocketManager socketManager2(8080, false);
-  socketManager2.sendMessage("S2 Hallo1\n");
-  socketManager2.sendMessage("S2 Hallo2\n");
+	game = new FishEngine::Game();
+	game->init("Fish Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 640, false);
+	NetworkHost networkHost;
 
-  // Reading the server's response
-  while (game->running()) {
-    std::cout << socketManager2.popMessage();
-    frameStart = SDL_GetTicks();
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	NetworkClient client("172.0.0.1", "test user");
+	client.setEvent(InputEvent::Event::MOVE_DOWN);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    game->handleEvents();
-    game->update();
-    game->render();
+	auto action = networkHost.getAction();
+	if (action.has_value()) {
+		std::cout << InputEvent::serialize(action.value());
+	}
 
-    frameTime = SDL_GetTicks() - frameStart;
+	// Reading the server's response
+	while (game->running()) {
+		frameStart = SDL_GetTicks();
 
-    if (frameDelay > frameTime) {
-      SDL_Delay(frameDelay - frameTime);
-    }
-  }
+		game->handleEvents();
+		game->update();
+		game->render();
 
-  game->clean();
+		frameTime = SDL_GetTicks() - frameStart;
 
-  return 0;
+		if (frameDelay > frameTime) {
+			SDL_Delay(frameDelay - frameTime);
+		}
+	}
+
+	game->clean();
+
+	return 0;
 }

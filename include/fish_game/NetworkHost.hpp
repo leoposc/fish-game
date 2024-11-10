@@ -12,27 +12,33 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 class NetworkHost {
-public:
-  NetworkHost();
-  ~NetworkHost();
+  public:
+	NetworkHost();
+	~NetworkHost();
 
-  std::optional<fish_game::InputEvent> getActionQueue();
-  void updateState(const std::string &updatedState);
+	std::optional<InputEvent::Event> getAction();
+	void updateState(const std::string &updatedState);
 
-private:
-  void threadFunction();
-  std::thread workerThread;
-  std::mutex mtx;
-  bool stopThread;
-  std::condition_variable cv;
-  std::queue<fish_game::InputEvent> elementQueue;
-  std::string state;
+	std::vector<std::string> getClients();
 
-  std::unique_ptr<SocketManager> registerSocket;
-  std::map<std::string, SocketManager> clients;
+  private:
+	void threadFunction();
+
+	// data variables
+	std::string state;
+	std::queue<std::tuple<std::string, InputEvent::Event>> elementQueue;
+	std::map<int, std::string> clients;
+
+	// functionality variables
+	std::condition_variable cv;
+	std::thread workerThread;
+	std::mutex mtx;
+	bool stopThread;
+	SocketManager socket;
 };
 
 #endif // NETWORK_HOST

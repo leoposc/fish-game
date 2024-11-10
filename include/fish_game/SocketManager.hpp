@@ -3,41 +3,45 @@
 
 #include <arpa/inet.h>
 #include <condition_variable>
-#include <cstring> // Add this include at the top of your file
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <mutex>
-#include <netinet/in.h>
 #include <string>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <thread>
 #include <unistd.h>
 #include <vector>
 
 #define BUFFER_SIZE 1024
 
-class SocketManager {
-public:
-  SocketManager(int port, bool host);
-  ~SocketManager();
-  std::string popMessage();
-  void sendMessage(std::string);
+struct IncomingMessage {
+	int client_id;
+	std::string message;
+};
 
-private:
-  void run();
-  void setupServer(int port);
-  void setupClient(int port);
-  std::thread workerThread;
-  std::mutex mtx;
-  bool stopThread;
-  std::condition_variable cv;
-  int server_fd;
-  int socket_id;
-  struct sockaddr_in address;
-  std::vector<std::string> messages;
-  int port;
-  int addrlen;
+class SocketManager {
+  public:
+	SocketManager(int port, bool host);
+	~SocketManager();
+	void sendMessage(std::string message);
+	IncomingMessage popMessage();
+
+  private:
+	void setupServer(int port);
+	void setupClient(int port);
+	void run(int client_socket);
+
+	int server_fd, socket_id;
+	struct sockaddr_in address;
+	int addrlen;
+	std::vector<int> client_sockets;
+	std::vector<std::thread> client_threads;
+	std::mutex mtx;
+	std::condition_variable cv;
+	bool stopThread = false;
+	std::thread server_thread;
+	std::vector<IncomingMessage> messages;
 };
 
 #endif // SOCKET_MANAGER
