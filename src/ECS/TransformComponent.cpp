@@ -7,7 +7,7 @@
 namespace FishEngine {
 
 void TransformComponent::init() {
-	std::cout << "TRANSFORM COMPONENT INITIALIZED" << std::endl;
+	// std::cout << "TRANSFORM COMPONENT INITIALIZED with the addr: " << this << std::endl;
 	velocity.setX(0);
 	velocity.setY(0);
 }

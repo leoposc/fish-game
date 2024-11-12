@@ -10,27 +10,26 @@
 
 namespace FishEngine {
 
-ProjectileComponent::ProjectileComponent(int rng, int sp, Vector2D vel)
-    : range(rng), speed(sp), velocity(vel) {}
+ProjectileComponent::ProjectileComponent(int rng, int sp, Vector2D vel) : range(rng), speed(sp), velocity(vel) {}
 
 void ProjectileComponent::init() {
-  transform = &entity->getComponent<TransformComponent>();
-  transform->velocity = velocity;
+	transform = &entity->getComponent<TransformComponent>();
+	transform->velocity = velocity;
 }
 
 void ProjectileComponent::update() {
-  distance += speed;
+	distance += speed;
 
-  if (distance > range) {
-    std::cout << "Projectile out of range" << std::endl;
-    entity->destroy();
-  } else if (transform->position.getX() > Game::camera.x + Game::camera.w ||
-             transform->position.getX() < Game::camera.x ||
-             transform->position.getY() > Game::camera.y + Game::camera.h ||
-             transform->position.getY() < Game::camera.y) {
-    std::cout << "Projectile out of bounds" << std::endl;
-    entity->destroy();
-  }
+	if (distance > range) {
+		std::cout << "Projectile out of range" << std::endl;
+		entity->destroy();
+	} else if (transform->position.getX() > Game::camera.x + Game::camera.w
+	           || transform->position.getX() < Game::camera.x
+	           || transform->position.getY() > Game::camera.y + Game::camera.h
+	           || transform->position.getY() < Game::camera.y) {
+		std::cout << "Projectile out of bounds" << std::endl;
+		entity->destroy();
+	}
 }
 
 } // namespace FishEngine

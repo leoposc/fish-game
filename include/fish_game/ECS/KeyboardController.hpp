@@ -2,6 +2,7 @@
 
 #include "../Game.hpp"
 #include "ECS.hpp"
+#include "EquipmentComponent.hpp"
 
 // #include "MoveComponent.hpp"
 // #include "SpriteComponent.hpp"
@@ -12,19 +13,20 @@ namespace FishEngine {
 
 class SpriteComponent;
 class MoveComponent;
+class EquipmentComponent;
 
 class KeyboardController : public Component {
+	MoveComponent *move = nullptr;
+	SpriteComponent *sprite = nullptr;
+	EquipmentComponent *equip = nullptr;
 
-public:
-  MoveComponent *move;
-  SpriteComponent *sprite;
+  public:
+	KeyboardController() = default;
+	~KeyboardController() = default;
 
-  KeyboardController() = default;
-  ~KeyboardController() = default;
+	void init() override;
 
-  void init() override;
-
-  void update() override;
+	void update() override;
 };
 
 } // namespace FishEngine

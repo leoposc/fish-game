@@ -1,4 +1,5 @@
 #include "../../include/fish_game/ECS/KeyboardController.hpp"
+#include "../../include/fish_game/ECS/EquipmentComponent.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/SpriteComponent.hpp"
 
@@ -8,6 +9,7 @@ void KeyboardController::init() {
 	std::cout << "KEYBOARDCONTROLLER INITIALIZED" << std::endl;
 	move = &entity->getComponent<MoveComponent>();
 	sprite = &entity->getComponent<SpriteComponent>();
+	equip = &entity->getComponent<EquipmentComponent>();
 }
 
 void KeyboardController::update()
@@ -35,6 +37,13 @@ void KeyboardController::update()
 			move->right();
 			sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
 			// sprite->play("swim");
+			break;
+		// equip/ unequip
+		case SDLK_j:
+			equip->processCommand();
+			break;
+		case SDLK_k:
+			equip->shoot();
 			break;
 		}
 	}
@@ -66,11 +75,11 @@ void KeyboardController::update()
 		case SDLK_d:
 			move->stop();
 			sprite->spriteFlip = SDL_FLIP_NONE;
-
 			// sprite->play("idle");
 			break;
 		}
 	}
+	std::cout << "KEYBOARDC CONTROLLER UPDATED" << std::endl;
 }
 
 } // namespace FishEngine

@@ -157,7 +157,7 @@ bool Map::checkPlattformCollisions(SDL_Rect *collider) {
 
 		SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
 		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(Game::renderer, 255, 255, 255, 255);
 	}
 	return false;
 }
@@ -177,7 +177,7 @@ bool Map::isInWater(SDL_Rect *collider) {
 
 		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
 		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(Game::renderer, 255, 255, 255, 255);
 	}
 
 	for (auto &[pos, tileObject] : waterfall->getTileObjects()) {
@@ -191,7 +191,7 @@ bool Map::isInWater(SDL_Rect *collider) {
 
 		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
 		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(Game::renderer, 255, 255, 255, 255);
 	}
 	return false;
 }

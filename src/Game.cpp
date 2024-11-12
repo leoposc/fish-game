@@ -7,6 +7,7 @@
 #include "../include/fish_game/ECS/MoveComponent.hpp"
 #include "../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../include/fish_game/ECS/TransformComponent.hpp"
+#include "../include/fish_game/ECS/WearableComponent.hpp"
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
@@ -26,6 +27,8 @@ AssetManager *Game::assets = new AssetManager(&manager);
 Map *map;
 
 auto &player(manager.addEntity());
+auto &weapon(manager.addEntity());
+auto &projectile(manager.addEntity());
 
 Game::Game() : cnt(0), isRunning(false) {}
 
@@ -58,21 +61,58 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 	map = new Map();
 	map->loadMap("../../maps/map03.tmj");
 	assets->addTexture("fish", "../../assets/RedFishSmall.png");
+	assets->addTexture("pistol", "../../assets/PistolSmall.png");
+	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
 
 	// =================== init player===========================
 	// scaling not working correctly, RedFish.png also very high resolution
 	player.addComponent<MoveComponent>(400, 240, 45, 60, 1.0);
 	player.addComponent<SpriteComponent>("fish", false);
-	player.addComponent<KeyboardController>();
 	player.addComponent<ColliderComponent>("player", 400, 240, 45, 60);
-	// // player.addComponent<TransformComponent>(2);
-	// // player.addGroup(groupLabels::groupPlayers);
-	player.addGroup(groupPlayers);
+	player.addComponent<EquipmentComponent>();
+	player.addComponent<KeyboardController>();
+	player.addGroup(groupLabels::groupPlayers);
+	// player.addGroup(groupPlayers);
+
+	// =================== init weapon ===========================
+	weapon.addComponent<TransformComponent>(410, 250, 13, 18, 1.0);
+	weapon.addComponent<SpriteComponent>("pistol", false);
+	weapon.addComponent<ColliderComponent>("weapon", 410, 250, 13, 18);
+	weapon.addComponent<WearableComponent>();
+	weapon.addGroup(groupLabels::groupWeapons);
+
+	// =================== init projectile =======================
+	projectile.addComponent<TransformComponent>(0, 0, 16, 16, 1.0);
 }
 
 void Game::initCombat() {
 	// init players
 	// TODO: load every player from a file and change color
+}
+
+void toggleWindowMode(SDL_Window *win, bool *windowed) {
+	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
+	// changes.
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	std::cout << "first: " << *windowed << std::endl;
+	*windowed = !*windowed;
+	std::cout << "second: " << *windowed << std::endl;
+	if (*windowed) {
+		int i = SDL_GetWindowDisplayIndex(win);
+		// screenWidth = 1280;
+		// screenHeight = 720;
+		SDL_SetWindowFullscreen(win, 0);
+		std::cout << "Windowed" << std::endl;
+	} else {
+		int i = SDL_GetWindowDisplayIndex(win);
+		SDL_Rect j;
+		SDL_GetDisplayBounds(i, &j);
+		// screenWidth = j.w;
+		// screenHeight = j.h;
+		SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		std::cout << "Fullscreen" << std::endl;
+	}
+	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
 void Game::handleEvents() {
@@ -82,6 +122,13 @@ void Game::handleEvents() {
 	case SDL_QUIT:
 		isRunning = false;
 		break;
+		// case F11 is pressed
+	case SDL_KEYDOWN:
+		if (game_event.key.keysym.sym == SDLK_F11) {
+			std::cout << windowed << std::endl;
+			toggleWindowMode(window, &windowed);
+		}
+
 	default:
 		break;
 	}
@@ -94,6 +141,7 @@ void Game::update() {
 
 	manager.refresh();
 	manager.update();
+	std::cout << "finished updating!" << std::endl;
 
 	// ================ GET CLIENT COMMANDS ==========================
 	// => keyboard controller
@@ -179,7 +227,7 @@ void Game::render() {
 
 	map->drawMap();
 
-	manager.draw();
+	// manager.draw();
 
 	// ===================== test if adaptive movement works ==========================
 	bool swimming = map->isInWater(&player.getComponent<ColliderComponent>().collider);
@@ -196,13 +244,17 @@ void Game::render() {
 	//   t->draw();
 	// }
 
-	// for (auto &t : manager.getGroup(groupLabels::groupPlayers)) {
-	//   t->draw();
-	// }
+	for (auto &t : manager.getGroup(groupLabels::groupPlayers)) {
+		t->draw();
+	}
 
-	// for (auto &t : manager.getGroup(groupLabels::groupProjectiles)) {
-	//   t->draw();
-	// }
+	for (auto &t : manager.getGroup(groupLabels::groupWeapons)) {
+		t->draw();
+	}
+
+	for (auto &t : manager.getGroup(groupLabels::groupProjectiles)) {
+		t->draw();
+	}
 
 	SDL_RenderPresent(renderer);
 }

@@ -69,6 +69,8 @@ class Entity {
   public:
 	Entity(Manager &man) : manager(man) {}
 
+	Manager *getManager() { return &manager; }
+
 	void addGroup(Group group);
 
 	/**
@@ -79,6 +81,7 @@ class Entity {
 	 */
 	void update() {
 		for (auto &c : components) {
+			std::cout << "ECS - Updating component" << std::endl;
 			c->update();
 		}
 	}
@@ -137,8 +140,10 @@ class Manager {
 
   public:
 	void update() {
-		for (auto &e : entities)
+		for (auto &e : entities) {
+			std::cout << "ECS - Updating entity" << std::endl;
 			e->update();
+		}
 	}
 
 	void draw() {
@@ -164,9 +169,13 @@ class Manager {
 	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 
 	Entity &addEntity() {
+		std::cout << "Adding entity" << std::endl;
 		Entity *e = new Entity(*this);
+		std::cout << "Entity created" << std::endl;
 		std::unique_ptr<Entity> uPtr(e);
+		std::cout << "Unique pointer created" << std::endl;
 		entities.emplace_back(std::move(uPtr));
+		std::cout << "Entity moved" << std::endl;
 		return *e;
 	}
 };
