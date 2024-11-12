@@ -1,4 +1,4 @@
-#include "../include/fish_game/Game.hpp"
+#include "../include/fish_game/ClientGame.hpp"
 #include "../include/fish_game/Object.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 
@@ -30,7 +30,7 @@ namespace FishEngine
 
     void Object::render()
     {
-        SDL_RenderCopy(Game::renderer, texture, &srcRect, &dstRect);
+        SDL_RenderCopy(ClientGame::renderer, texture, &srcRect, &dstRect);
     }
 
 } // namespace FishEgine

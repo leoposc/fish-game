@@ -1,6 +1,6 @@
 #include "../../include/fish_game/ECS/ProjectileComponent.hpp"
 
-#include "../../include/fish_game/Game.hpp"
+#include "../../include/fish_game/ClientGame.hpp"
 // // #include "ECS.hpp"
 // #include "Components.hpp"
 // // #include "TransformComponent.hpp"
@@ -24,10 +24,10 @@ void ProjectileComponent::update() {
   if (distance > range) {
     std::cout << "Projectile out of range" << std::endl;
     entity->destroy();
-  } else if (transform->position.getX() > Game::camera.x + Game::camera.w ||
-             transform->position.getX() < Game::camera.x ||
-             transform->position.getY() > Game::camera.y + Game::camera.h ||
-             transform->position.getY() < Game::camera.y) {
+  } else if (transform->position.getX() > ClientGame::camera.x + ClientGame::camera.w ||
+             transform->position.getX() < ClientGame::camera.x ||
+             transform->position.getY() > ClientGame::camera.y + ClientGame::camera.h ||
+             transform->position.getY() < ClientGame::camera.y) {
     std::cout << "Projectile out of bounds" << std::endl;
     entity->destroy();
   }

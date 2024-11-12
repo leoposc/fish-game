@@ -9,11 +9,11 @@ namespace FishEngine {
 //   TransformComponent::init();
 // }
 
-MoveComponent::MoveComponent(int x, int y) : TransformComponent(x, y) {}
+MoveComponent::MoveComponent(int x, int y) : ServerTransformComponent(x, y) {}
 
-MoveComponent::MoveComponent(int sc) : TransformComponent(sc) {}
+MoveComponent::MoveComponent(int sc) : ServerTransformComponent(sc) {}
 
-MoveComponent::MoveComponent(int x, int y, int h, int w, float sc) : TransformComponent(x, y, h, w, sc) {
+MoveComponent::MoveComponent(int x, int y, int h, int w, float sc) : ServerTransformComponent(x, y, h, w, sc) {
 	// std::cout << "MoveComponent created! Position at: " << x << " " << y
 	// << std::endl;
 }
@@ -23,7 +23,7 @@ void MoveComponent::update() {
 	// if (!inWater) {
 	// 	velocity.setY(1);
 	// }
-	TransformComponent::update();
+	ServerTransformComponent::update();
 }
 
 void MoveComponent::up() {

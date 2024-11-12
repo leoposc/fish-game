@@ -1,5 +1,5 @@
 #include "../include/fish_game/Map.hpp"
-#include "../include/fish_game/Game.hpp"
+#include "../include/fish_game/ClientGame.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -114,7 +114,7 @@ void Map::drawTileLayer(tson::Layer &layer) {
 			dstCenter.x += center.x;
 			dstCenter.y += center.y;
 
-			SDL_RenderCopy(Game::renderer, texture, &src, &dst);
+			SDL_RenderCopy(ClientGame::renderer, texture, &src, &dst);
 		}
 	}
 }
@@ -126,7 +126,7 @@ fs::path Map::getImagePath(tson::Tile &tile) {
 }
 
 SDL_Texture *Map::loadTexture(const std::string &image) {
-	SDL_Texture *tmp = IMG_LoadTexture(Game::renderer, image.c_str());
+	SDL_Texture *tmp = IMG_LoadTexture(ClientGame::renderer, image.c_str());
 	if (tmp == nullptr) {
 		std::cout << "Failed to load texture: " << image << std::endl;
 	}
@@ -160,9 +160,9 @@ bool Map::checkPlattformCollisions(SDL_Rect *collider) {
 			return true;
 		}
 
-		SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
-		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 255, 0, 0, 255);
+		SDL_RenderDrawRect(ClientGame::renderer, &block);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 	return false;
 }
@@ -180,9 +180,9 @@ bool Map::isInWater(SDL_Rect *collider) {
 			return true;
 		}
 
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
-		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 255, 255);
+		SDL_RenderDrawRect(ClientGame::renderer, &block);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 
 	for (auto &[pos, tileObject] : waterfall->getTileObjects()) {
@@ -194,9 +194,9 @@ bool Map::isInWater(SDL_Rect *collider) {
 			return true;
 		}
 
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
-		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 255, 255);
+		SDL_RenderDrawRect(ClientGame::renderer, &block);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 	return false;
 }

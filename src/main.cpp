@@ -1,36 +1,43 @@
-#include "../include/fish_game/Game.hpp"
+#include "../include/fish_game/ClientGame.hpp"
+#include "../include/fish_game/ServerGame.hpp"
 
 #include <SDL2/SDL.h>
 
-FishEngine::Game *game = nullptr;
+FishEngine::ClientGame *clientGame = nullptr;
+FishEngine::ServerGame *serverGame = nullptr;
 
 int main(int argc, char *argv[]) {
-  const int FPS = 60;
-  const int frameDelay = 1000 / FPS;
+	const int FPS = 60;
+	const int frameDelay = 1000 / FPS;
 
-  u_int32_t frameStart;
-  int frameTime;
+	u_int32_t frameStart;
+	int frameTime;
 
-  game = new FishEngine::Game();
-  game->init("Fish Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280,
-             720, false, 2);
+	clientGame = new FishEngine::ClientGame();
+	serverGame = new FishEngine::ServerGame();
 
-  while (game->running()) {
-    frameStart = SDL_GetTicks();
+	clientGame->init("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false, 2);
+	serverGame->init("Fish Game Server", 2);
 
-    game->handleEvents();
-    // game->networking();
-    game->update();
-    game->render();
+	while (clientGame->running()) {
+		frameStart = SDL_GetTicks();
 
-    frameTime = SDL_GetTicks() - frameStart;
+		clientGame->handleEvents();
+		serverGame->handleEvents();
 
-    if (frameDelay > frameTime) {
-      SDL_Delay(frameDelay - frameTime);
-    }
-  }
+		serverGame->update();
+		clientGame->update();
 
-  game->clean();
+		clientGame->render();
 
-  return 0;
+		frameTime = SDL_GetTicks() - frameStart;
+
+		if (frameDelay > frameTime) {
+			SDL_Delay(frameDelay - frameTime);
+		}
+	}
+
+	clientGame->clean();
+
+	return 0;
 }

@@ -1,37 +1,35 @@
-
-#include "../include/fish_game/Game.hpp"
+#include "../include/fish_game/ClientGame.hpp"
 #include "../include/fish_game/AssetManager.hpp"
 #include "../include/fish_game/Collision.hpp"
 #include "../include/fish_game/ECS/ColliderComponent.hpp"
-#include "../include/fish_game/ECS/KeyboardController.hpp"
+#include "../include/fish_game/ECS/ComponentsGenerator.hpp"
 #include "../include/fish_game/ECS/MoveComponent.hpp"
 #include "../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../include/fish_game/ECS/TransformComponent.hpp"
 #include "../include/fish_game/Map.hpp"
+#include "../include/fish_game/MockServer.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
-#include "../include/fish_game/ECS/ComponentsGenerator.hpp"
-
 
 #include <SDL2/SDL.h>
 #include <iostream>
 
 namespace FishEngine {
 
-SDL_Renderer *Game::renderer = nullptr;
-SDL_Event Game::game_event;
-SDL_Rect Game::camera = {0, 0, 800, 640};
+SDL_Renderer *ClientGame::renderer = nullptr;
+SDL_Event ClientGame::game_event;
+SDL_Rect ClientGame::camera = {0, 0, 800, 640};
 
-Manager manager;
-AssetManager *Game::assets = new AssetManager(&manager);
+Manager clientManager;
+AssetManager *ClientGame::assets = new AssetManager(&clientManager);
 
-Map *map;
+Map *clientMap;
 
-Game::Game() : cnt(0), isRunning(false) {}
+ClientGame::ClientGame() : cnt(0), isRunning(false) {}
 
-Game::~Game() {}
+ClientGame::~ClientGame() {}
 
-void Game::init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen, int numPlayers) {
+void ClientGame::init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen, int numPlayers) {
 	int flags = 0;
 	if (fullscreen) {
 		flags = SDL_WINDOW_FULLSCREEN;
@@ -54,46 +52,39 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 		isRunning = false;
 	}
 
-	// ================== init map and assets ==================
-	map = new Map();
-	map->loadMap("../../maps/map03.tmj");
+	// ================== init clientMap and assets ==================
+	clientMap = new Map();
+	clientMap->loadMap("../../maps/map03.tmj");
 	assets->addTexture("fish", "../../assets/RedFishSmall.png");
 
 	// =================== init player===========================
 	// scaling not working correctly, RedFish.png also very high resolution
 
 	for (int i = 0; i < numPlayers; ++i) {
-		auto &player(manager.addEntity());
-		manager.addToGroup(&player, groupLabels::groupPlayers);
-		auto initPos = map->getInitialPos().at(i); 
-		ComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
+		auto &player(clientManager.addEntity());
+		clientManager.addToGroup(&player, groupLabels::groupPlayers);
+		auto initPos = clientMap->getInitialPos().at(i);
+		ClientComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
 	}
 }
 
-void Game::initCombat() {
-	// init players
-	// TODO: load every player from a file and change color
-}
-
-void Game::handleEvents() {
+void ClientGame::handleEvents() {
 	// TODO: look for a better way to handle events since movement seems to be pretty slow
 	SDL_PollEvent(&game_event);
-	switch (game_event.type) {
-	case SDL_QUIT:
+
+	if (game_event.type == SDL_QUIT) {
 		isRunning = false;
-		break;
-	default:
-		break;
 	}
-	// }
+
+	MockServer::getInstance().enqueueEvent(game_event);
 }
 
-void Game::update() {
+void ClientGame::update() {
 	// SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
 	// Vector2D playerPos = player.getComponent<MoveComponent>().position;
 
-	manager.refresh();
-	manager.update();
+	clientManager.refresh();
+	clientManager.update();
 
 	// ================ GET CLIENT COMMANDS ==========================
 	// => keyboard controller
@@ -135,14 +126,14 @@ void Game::update() {
 	//           << player.getComponent<ColliderComponent>().collider.w << " "
 	//           << player.getComponent<ColliderComponent>().collider.h << std::endl;
 
-	// if (map->isInWater(&player.getComponent<ColliderComponent>().collider)) {
+	// if (clientMap->isInWater(&player.getComponent<ColliderComponent>().collider)) {
 	// 	player.getComponent<MoveComponent>().inWater = true;
 	// } else {
 	// 	player.getComponent<MoveComponent>().inWater = false;
 	// }
 
 	// ===================== outdated code ==========================
-	// for (auto &c : manager.getGroup(groupColliders)) {
+	// for (auto &c : clientManager.getGroup(groupColliders)) {
 
 	//   if (Collision::AABB(c->getComponent<ColliderComponent>().collider,
 	//                       playerCol)) {
@@ -150,7 +141,7 @@ void Game::update() {
 	//   }
 	// }
 
-	// for (auto &p : manager.getGroup(groupProjectiles)) {
+	// for (auto &p : clientManager.getGroup(groupProjectiles)) {
 	//   if (Collision::AABB(playerCol,
 	//                       p->getComponent<ColliderComponent>().collider)) {
 	//     std::cout << "Hit player" << std::endl;
@@ -174,52 +165,52 @@ void Game::update() {
 	*/
 }
 
-void Game::render() {
+void ClientGame::render() {
 	SDL_RenderClear(renderer);
 
-	map->drawMap();
+	clientMap->drawMap();
 
-	manager.draw();
+	clientManager.draw();
 
 	// ===================== test if adaptive movement works ==========================
-	Entity* player = manager.getGroup(groupLabels::groupPlayers).back();
-	bool swimming = map->isInWater(&player->getComponent<ColliderComponent>().collider);
-	player->getComponent<MoveComponent>().inWater = swimming;
+	// Entity *player = clientManager.getGroup(groupLabels::groupPlayers).back();
+	// bool swimming = clientMap->isInWater(&player->getComponent<ColliderComponent>().collider);
+	// player->getComponent<MoveComponent>().inWater = swimming;
 
-	bool collision = map->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider);
-	// do something with the collision - don't know how to handle movements in x - y axis yet
+	// bool collision = clientMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider);
+	//  do something with the collision - don't know how to handle movements in x - y axis yet
 
-	// for (auto &t : manager.getGroup(groupLabels::groupMap)) {
+	// for (auto &t : clientManager.getGroup(groupLabels::groupMap)) {
 	//   t->draw();
 	// }
 
-	// for (auto &t : manager.getGroup(groupLabels::groupColliders)) {
+	// for (auto &t : clientManager.getGroup(groupLabels::groupColliders)) {
 	//   t->draw();
 	// }
 
-	// for (auto &t : manager.getGroup(groupLabels::groupPlayers)) {
+	// for (auto &t : clientManager.getGroup(groupLabels::groupPlayers)) {
 	//   t->draw();
 	// }
 
-	// for (auto &t : manager.getGroup(groupLabels::groupProjectiles)) {
+	// for (auto &t : clientManager.getGroup(groupLabels::groupProjectiles)) {
 	//   t->draw();
 	// }
 
 	SDL_RenderPresent(renderer);
 }
 
-void Game::clean() {
+void ClientGame::clean() {
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
 	// log clean
 }
 
-bool Game::running() {
+bool ClientGame::running() {
 	return isRunning;
 }
 
-void Game::stop() {
+void ClientGame::stop() {
 	isRunning = false;
 }
 

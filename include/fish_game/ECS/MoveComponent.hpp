@@ -10,11 +10,11 @@
 
 namespace FishEngine {
 
-class MoveComponent : public TransformComponent {
+class MoveComponent : public ServerTransformComponent {
 
   public:
 	bool inWater = false;
-	using TransformComponent::TransformComponent;
+	using ServerTransformComponent::ServerTransformComponent;
 
 	MoveComponent(int x, int y);
 
@@ -24,7 +24,7 @@ class MoveComponent : public TransformComponent {
 
 	// void init() override;
 	// using TransformComponent::init;
-	void init() override { TransformComponent::init(); }
+	void init() override { ServerTransformComponent::init(); }
 
 	void update() override;
 

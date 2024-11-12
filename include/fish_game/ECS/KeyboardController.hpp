@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Game.hpp"
+#include "../ClientGame.hpp"
 #include "ECS.hpp"
 
 // #include "MoveComponent.hpp"
@@ -10,21 +10,15 @@
 
 namespace FishEngine {
 
-class SpriteComponent;
-class MoveComponent;
-
 class KeyboardController : public Component {
 
-public:
-  MoveComponent *move;
-  SpriteComponent *sprite;
+  public:
+	KeyboardController() = default;
+	~KeyboardController() = default;
 
-  KeyboardController() = default;
-  ~KeyboardController() = default;
+	void init() override;
 
-  void init() override;
-
-  void update() override;
+	void update() override;
 };
 
 } // namespace FishEngine

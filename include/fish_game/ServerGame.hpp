@@ -15,20 +15,17 @@ namespace FishEngine {
 // class AssetManager;
 // class ColliderComponent;
 
-class Game {
+class ServerGame {
 
 public:
   // static std::vector<ColliderComponent *> colliders;
 
-  Game();
-  ~Game();
+  ServerGame();
+  ~ServerGame();
 
   SDL_Event getEvent() { return game_event; }
 
-  void init(const char *title, int xpos, int ypos, int width, int height,
-            bool fullscreen, int numPlayers);
-
-  void initCombat();
+  void init(const char *title, int numPlayer);
 
   void handleEvents();
 
