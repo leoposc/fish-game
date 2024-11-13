@@ -4,7 +4,7 @@
 #include "../include/fish_game/ECS/ProjectileComponent.hpp"
 #include "../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../include/fish_game/ECS/TransformComponent.hpp"
-#include "../include/fish_game/Game.hpp"
+#include "../include/fish_game/ClientGame.hpp"
 
 // #include "../include/fish_game/ECS/ProjectileComponent.hpp"
 
@@ -21,7 +21,7 @@ void AssetManager::createProjectile(Vector2D pos, Vector2D vel, int range,
                                               1);
   projectile.addComponent<SpriteComponent>(path);
   projectile.addComponent<ProjectileComponent>(range, speed, vel);
-  projectile.addGroup(Game::groupProjectiles);
+  projectile.addGroup(ClientGame::groupProjectiles);
 }
 
 void AssetManager::addTexture(std::string id, fs::path path) {

@@ -1,6 +1,5 @@
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
-
-#include "../../include/fish_game/Vector2D.hpp"
+#include "../../include/fish_game/MockServer.hpp"
 // #include "Components.hpp"
 // #include "ECS.hpp"
 
@@ -12,9 +11,17 @@ void TransformComponent::init() {
 	velocity.setY(0);
 }
 
-void TransformComponent::update() {
-	// std::cout << "TransformComponent - velocity: " << velocity.getX() << " " << velocity.getY() << std::endl;
+void ServerTransformComponent::update() {
 	position += velocity * speed;
+	MockServer::getInstance().enqueuePosition(position);
+}
+
+void ClientTransformComponent::update() {
+	FishEngine::Vector2D newPos;
+
+	if (MockServer::getInstance().pollPosition(newPos)) {
+		position = newPos;
+	}
 }
 
 } // namespace FishEngine

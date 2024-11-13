@@ -1,22 +1,22 @@
-#include "../../include/fish_game/ECS/KeyboardController.hpp"
+#include "../../include/fish_game/ECS/EventHandlerComponent.hpp"
+#include "../../include/fish_game/ClientGame.hpp"
 #include "../../include/fish_game/ECS/EquipmentComponent.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
-#include "../../include/fish_game/ECS/SpriteComponent.hpp"
 
 namespace FishEngine {
 
-void KeyboardController::init() {
-	std::cout << "KEYBOARDCONTROLLER INITIALIZED" << std::endl;
+void EventHandlerComponent::init()
+{
+	std::cout << "EVENT HANDLER COMPONENT INITIALIZED" << std::endl;
 	move = &entity->getComponent<MoveComponent>();
-	sprite = &entity->getComponent<SpriteComponent>();
 	equip = &entity->getComponent<EquipmentComponent>();
 }
 
-void KeyboardController::update()
+void EventHandlerComponent::update()
 
 {
-	if (Game::game_event.type == SDL_KEYDOWN) {
-		switch (Game::game_event.key.keysym.sym) {
+	if (ClientGame::game_event.type == SDL_KEYDOWN) {
+		switch (ClientGame::game_event.key.keysym.sym) {
 		// upwards
 		case SDLK_w:
 			move->up();
@@ -35,7 +35,6 @@ void KeyboardController::update()
 		// right
 		case SDLK_d:
 			move->right();
-			sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
 			// sprite->play("swim");
 			break;
 		// equip/ unequip
@@ -49,11 +48,11 @@ void KeyboardController::update()
 	}
 
 	// stop the player
-	if (Game::game_event.type == SDL_KEYUP) {
-		switch (Game::game_event.key.keysym.sym) {
+	if (ClientGame::game_event.type == SDL_KEYUP) {
+		switch (ClientGame::game_event.key.keysym.sym) {
 		case SDLK_ESCAPE:
 			// TODO: add a pause menu
-			// Game::stop();
+			// ClientGame::stop();
 			break;
 			// upwards
 		case SDLK_w:
@@ -74,12 +73,11 @@ void KeyboardController::update()
 		// right
 		case SDLK_d:
 			move->stop();
-			sprite->spriteFlip = SDL_FLIP_NONE;
 			// sprite->play("idle");
 			break;
 		}
 	}
-	std::cout << "KEYBOARDC CONTROLLER UPDATED" << std::endl;
+	std::cout << "EVENTHANDLER COMPONENT UPDATED" << std::endl;
 }
 
 } // namespace FishEngine

@@ -1,13 +1,13 @@
 #include "../../include/fish_game/ECS/SpriteComponent.hpp"
+#include "../../include/fish_game/ClientGame.hpp"
 #include "../../include/fish_game/ECS/ECS.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
-#include "../../include/fish_game/Game.hpp"
 
 // #include "Components.hpp"
 
 // // #include "../AssetManager.hpp"
-// #include "../Game.hpp"
+// #include "../ClientGame.hpp"
 // // // #include "ECS.hpp"
 
 // #include "../TextureManager.hpp"
@@ -20,11 +20,13 @@
 
 namespace FishEngine {
 
-SpriteComponent::SpriteComponent(std::string id) : id(id) {
+SpriteComponent::SpriteComponent(std::string id) : id(id)
+{
 	setTexture(id);
 }
 
-SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isAnimated), id(id) {
+SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isAnimated), id(id)
+{
 
 	if (animated) {
 		// Animation idle = Animation(0, 3, 100);
@@ -40,28 +42,22 @@ SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isA
 	std::cout << "SpriteComponent: " << id << " created!" << std::endl;
 }
 
-SpriteComponent::~SpriteComponent() {
+SpriteComponent::~SpriteComponent()
+{
 	SDL_DestroyTexture(texture);
 }
 
-void SpriteComponent::setTexture(std::string id) {
-	texture = Game::assets->getTexture(id);
+void SpriteComponent::setTexture(std::string id)
+{
+	texture = ClientGame::assets->getTexture(id);
 }
 
-void SpriteComponent::init() {
-	if (id == "fish") {
-		if (entity->hasComponent<MoveComponent>()) {
-			transform = &entity->getComponent<MoveComponent>();
-			std::cout << "SpriteComponent: MoveComponent found." << std::endl;
-		} else {
-			std::cout << "SpriteComponent: no MoveComponent found." << std::endl;
-		}
+void SpriteComponent::init()
+{
+	if (entity->hasComponent<ClientTransformComponent>()) {
+		transform = &entity->getComponent<ClientTransformComponent>();
 	} else {
-		if (entity->hasComponent<TransformComponent>()) {
-			transform = &entity->getComponent<TransformComponent>();
-		} else {
-			std::cout << "SpriteComponent: no TransformComponent found." << std::endl;
-		}
+		std::cout << "SpriteComponent: no ClientTransformComponent found." << std::endl;
 	}
 
 	srcRect.x = srcRect.y = 0;
@@ -69,7 +65,8 @@ void SpriteComponent::init() {
 	srcRect.h = static_cast<int>(transform->height * transform->scale);
 }
 
-void SpriteComponent::update() {
+void SpriteComponent::update()
+{
 	if (id == "pistol") {
 		std::cout << "SpriteComponent: updating " << id << std::endl;
 	}
@@ -80,10 +77,12 @@ void SpriteComponent::update() {
 	dstRect.h = transform->height;
 }
 
-void SpriteComponent::draw() {
-	// std::cout << "SpriteComponent: drawing " << id << "\n at " << dstRect.x
-	//           << ", " << dstRect.y << "\n"
+void SpriteComponent::draw()
+{
+	// std::cout << "SpriteComponent: drawing " << id << "\n at " << dstRect.x << ", " << dstRect.y << "\n"
 	//           << " with scale " << transform->scale << std::endl;
+	//
+
 	TextureManager::draw(texture, srcRect, dstRect, spriteFlip);
 }
 

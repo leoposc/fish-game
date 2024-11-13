@@ -45,9 +45,9 @@ class Map {
 	 */
 	bool isInWater(SDL_Rect *collider);
 
-	std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints(size_t numPlayers);
+	std::vector<std::pair<uint16_t, uint16_t>> getPlayerSpawnpoints(size_t numPlayers);
 
-	std::vector<std::pair<uint16_t, uint16_t>> *Map::getWeaponSpawnpoints();
+	std::vector<std::pair<uint16_t, uint16_t>> *getWeaponSpawnpoints();
 	/*
 	 * @brief: create a two dimensional array of the size of the map
 	 * @param: void
@@ -55,7 +55,8 @@ class Map {
 	 * water=2, plattform=1, tree)
 	 */
 	template <typename T, size_t Row, size_t Col>
-	std::array<std::array<uint8_t, Col>, Row> *initMapArray() {
+	std::array<std::array<uint8_t, Col>, Row> *initMapArray()
+	{
 
 		tson::Vector2i mapSize = currentMap->getSize();
 		size_t rows = mapSize.y;
@@ -86,6 +87,8 @@ class Map {
 
 	SDL_Texture *getTexture(fs::path path);
 
+	std::vector<std::pair<std::uint16_t, std::uint16_t>> getInitialPos() { return initialPos; }
+
   private:
 	SDL_Rect src, dst;
 
@@ -109,6 +112,8 @@ class Map {
 	tson::Vector2i positionOffset{0, 0};
 
 	std::map<uint32_t, tson::Animation *> animationUpdateQueue;
+
+	std::vector<std::pair<std::uint16_t, std::uint16_t>> initialPos;
 };
 
 } // namespace FishEngine

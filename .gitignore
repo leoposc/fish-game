@@ -42,3 +42,5 @@ map01.tmx
 .vscode/
 maps/fish-game.tiled-project
 *.tiled-session
+.clang-format 
+

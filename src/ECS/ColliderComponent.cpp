@@ -2,13 +2,13 @@
 // #include "../../include/fish_game/ECS/ECS.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
-#include "../../include/fish_game/Game.hpp"
+#include "../../include/fish_game/ClientGame.hpp"
 #include <SDL2/SDL.h>
 #include <string>
 
 namespace FishEngine {
 
-// #include "../include/fish_game/Game.hpp"
+// #include "../include/fish_game/ClientGame.hpp"
 
 ColliderComponent::ColliderComponent(std::string t, int xpos, int ypos, int xsize, int ysize) : tag(t) {
 	collider.x = xpos;
@@ -40,8 +40,8 @@ void ColliderComponent::update() {
 
 	// std::cout << "ColliderComponent - new pos: " << collider.x << " " << collider.y << std::endl;
 
-	// dstRect.x = collider.x - Game::camera.x;
-	// dstRect.y = collider.y - Game::camera.y;
+	// dstRect.x = collider.x - ClientGame::camera.x;
+	// dstRect.y = collider.y - ClientGame::camera.y;
 }
 
 void ColliderComponent::draw() {

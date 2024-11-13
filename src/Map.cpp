@@ -1,5 +1,5 @@
 #include "../include/fish_game/Map.hpp"
-#include "../include/fish_game/Game.hpp"
+#include "../include/fish_game/ClientGame.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -12,7 +12,8 @@ namespace FishEngine {
 
 // Map::~Map() = default;
 
-void Map::loadMap(fs::path path) {
+void Map::loadMap(fs::path path)
+{
 
 	if (!fs::exists(path)) {
 		std::cout << "Map file does not exist!" << std::endl;
@@ -29,9 +30,14 @@ void Map::loadMap(fs::path path) {
 	}
 
 	loadTilesetTextures();
+
+	// TODO load from config
+	initialPos.push_back(std::pair(400, 240));
+	initialPos.push_back(std::pair(800, 240));
 }
 
-void Map::drawMap() {
+void Map::drawMap()
+{
 	positionOffset = {0, 0};
 	currentMap = map.get();
 
@@ -40,7 +46,8 @@ void Map::drawMap() {
 	}
 }
 
-fs::path Map::getTilePath(int id) {
+fs::path Map::getTilePath(int id)
+{
 	// fetch the path to the tileset
 	// use the id to get the right tileset
 
@@ -48,7 +55,8 @@ fs::path Map::getTilePath(int id) {
 	return path;
 }
 
-void Map::drawLayer(tson::Layer &layer) {
+void Map::drawLayer(tson::Layer &layer)
+{
 	switch (layer.getType()) {
 	case tson::LayerType::TileLayer: {
 		drawTileLayer(layer);
@@ -59,7 +67,8 @@ void Map::drawLayer(tson::Layer &layer) {
 	}
 }
 
-void Map::drawTileLayer(tson::Layer &layer) {
+void Map::drawTileLayer(tson::Layer &layer)
+{
 	float tileHeight = layer.getMap()->getTileSize().y;
 	float tileWidth = layer.getMap()->getTileSize().x;
 
@@ -109,26 +118,29 @@ void Map::drawTileLayer(tson::Layer &layer) {
 			dstCenter.x += center.x;
 			dstCenter.y += center.y;
 
-			SDL_RenderCopy(Game::renderer, texture, &src, &dst);
+			SDL_RenderCopy(ClientGame::renderer, texture, &src, &dst);
 		}
 	}
 }
 
-fs::path Map::getImagePath(tson::Tile &tile) {
+fs::path Map::getImagePath(tson::Tile &tile)
+{
 	// expect the exe to be in the build/Release or build/Debug directory
 	fs::path fullPath = fs::path("../../maps") / tile.getTileset()->getImagePath().relative_path();
 	return fullPath;
 }
 
-SDL_Texture *Map::loadTexture(const std::string &image) {
-	SDL_Texture *tmp = IMG_LoadTexture(Game::renderer, image.c_str());
+SDL_Texture *Map::loadTexture(const std::string &image)
+{
+	SDL_Texture *tmp = IMG_LoadTexture(ClientGame::renderer, image.c_str());
 	if (tmp == nullptr) {
 		std::cout << "Failed to load texture: " << image << std::endl;
 	}
 	return tmp;
 }
 
-void Map::loadTilesetTextures() {
+void Map::loadTilesetTextures()
+{
 	// loop through the tilesets and load the textures
 	for (auto &tileset : map->getTilesets()) {
 		fs::path tilesetPath = fs::path("../../maps") / tileset.getImagePath().relative_path();
@@ -139,11 +151,13 @@ void Map::loadTilesetTextures() {
 	}
 }
 
-SDL_Texture *Map::getTexture(fs::path path) {
+SDL_Texture *Map::getTexture(fs::path path)
+{
 	return tilesetTextures[path];
 }
 
-bool Map::checkPlattformCollisions(SDL_Rect *collider) {
+bool Map::checkPlattformCollisions(SDL_Rect *collider)
+{
 	tson::Layer *plattforms = currentMap->getLayer("plattforms");
 
 	for (auto &[pos, tileObject] : plattforms->getTileObjects()) {
@@ -155,14 +169,15 @@ bool Map::checkPlattformCollisions(SDL_Rect *collider) {
 			return true;
 		}
 
-		SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
-		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 255, 255, 255, 255);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 255, 0, 0, 255);
+		SDL_RenderDrawRect(ClientGame::renderer, &block);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 	return false;
 }
 
-bool Map::isInWater(SDL_Rect *collider) {
+bool Map::isInWater(SDL_Rect *collider)
+{
 	tson::Layer *water = currentMap->getLayer("water");
 	tson::Layer *waterfall = currentMap->getLayer("waterfalls");
 
@@ -175,9 +190,9 @@ bool Map::isInWater(SDL_Rect *collider) {
 			return true;
 		}
 
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
-		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 255, 255, 255, 255);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 255, 255);
+		SDL_RenderDrawRect(ClientGame::renderer, &block);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 
 	for (auto &[pos, tileObject] : waterfall->getTileObjects()) {
@@ -189,14 +204,15 @@ bool Map::isInWater(SDL_Rect *collider) {
 			return true;
 		}
 
-		SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
-		SDL_RenderDrawRect(Game::renderer, &block);
-		SDL_SetRenderDrawColor(Game::renderer, 255, 255, 255, 255);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 255, 255);
+		SDL_RenderDrawRect(ClientGame::renderer, &block);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 	return false;
 }
 
-std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints(size_t numPlayers) {
+std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints(size_t numPlayers)
+{
 	tson::Layer *spawnpoints = currentMap->getLayer("playerSpawnpoints");
 
 	std::vector<std::pair<std::uint16_t, std::uint16_t>> spawnpointsVec;
@@ -212,14 +228,17 @@ std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints(size_t numP
 	return spawnpointsVec;
 }
 
-std::vector<std::pair<uint16_t, uint16_t>> *Map::getWeaponSpawnpoints() {
-	tson::Layer *spawnpoints = currentMap->getLayer("weaponSpawnpoints");
+/*
+std::vector<std::pair<uint16_t, uint16_t>> *Map::getWeaponSpawnpoints()
+{
+    tson::Layer *spawnpoints = currentMap->getLayer("weaponSpawnpoints");
 
-	for (auto &[pos, tileObject] : spawnpoints->getTileObjects()) {
-		tson::Vector2f position = tileObject.getPosition();
-		weaponSpawnpoints.emplace_back(static_cast<uint16_t>(position.x), static_cast<uint16_t>(position.y));
-	}
-	return &weaponSpawnpoints;
+    for (auto &[pos, tileObject] : spawnpoints->getTileObjects()) {
+        tson::Vector2f position = tileObject.getPosition();
+        weaponSpawnpoints.emplace_back(static_cast<uint16_t>(position.x), static_cast<uint16_t>(position.y));
+    }
+    return &weaponSpawnpoints;
 }
+*/
 
 } // namespace FishEngine

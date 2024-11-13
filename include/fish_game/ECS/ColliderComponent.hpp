@@ -1,7 +1,7 @@
 #pragma once
 
 // #include "Components.hpp"
-#include "../Game.hpp"
+#include "../ClientGame.hpp"
 #include "ECS.hpp"
 
 #include <SDL2/SDL.h>

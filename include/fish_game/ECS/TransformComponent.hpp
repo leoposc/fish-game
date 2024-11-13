@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Vector2D.hpp"
-// #include "Components.hpp"
 #include "ECS.hpp"
 
 namespace FishEngine {
@@ -42,8 +41,21 @@ public:
   }
 
   void init() override;
-
-  void update() override;
 };
+
+class ClientTransformComponent : public TransformComponent {
+  public:
+    using TransformComponent::TransformComponent;
+
+    void update() override;
+};
+
+class ServerTransformComponent : public TransformComponent {
+  public:
+    using TransformComponent::TransformComponent;
+    
+    void update() override;
+};
+
 
 } // namespace FishEngine

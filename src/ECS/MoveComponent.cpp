@@ -9,35 +9,41 @@ namespace FishEngine {
 //   TransformComponent::init();
 // }
 
-MoveComponent::MoveComponent(int x, int y) : TransformComponent(x, y) {}
+MoveComponent::MoveComponent(int x, int y) : ServerTransformComponent(x, y) {}
 
-MoveComponent::MoveComponent(int sc) : TransformComponent(sc) {}
+MoveComponent::MoveComponent(int sc) : ServerTransformComponent(sc) {}
 
-MoveComponent::MoveComponent(int x, int y, int h, int w, float sc) : TransformComponent(x, y, h, w, sc) {
-	std::cout << "NOVECOMPONENT INITIALIZED with the addr: " << this << std::endl;
+MoveComponent::MoveComponent(int x, int y, int h, int w, float sc) : ServerTransformComponent(x, y, h, w, sc)
+{
+	// std::cout << "MoveComponent created! Position at: " << x << " " << y
+	// << std::endl;
 }
 
-void MoveComponent::update() {
+void MoveComponent::update()
+{
 	// add gravity
 	// if (!inWater) {
 	// 	velocity.setY(1);
 	// }
-	TransformComponent::update();
+	ServerTransformComponent::update();
 }
 
-void MoveComponent::up() {
+void MoveComponent::up()
+{
 	// if (inWater) {
 	velocity.setY(-1);
 	// }
 }
 
-void MoveComponent::down() {
+void MoveComponent::down()
+{
 	// if (inWater) {
 	velocity.setY(1);
 	// }
 }
 
-void MoveComponent::left() {
+void MoveComponent::left()
+{
 	if (inWater) {
 		velocity.setX(-2);
 	} else {
@@ -45,7 +51,8 @@ void MoveComponent::left() {
 	}
 }
 
-void MoveComponent::right() {
+void MoveComponent::right()
+{
 	if (inWater) {
 		velocity.setX(2);
 	} else {
@@ -53,7 +60,8 @@ void MoveComponent::right() {
 	}
 }
 
-void MoveComponent::stop() {
+void MoveComponent::stop()
+{
 	velocity.setX(0);
 	velocity.setY(0);
 }
