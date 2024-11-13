@@ -196,4 +196,30 @@ bool Map::isInWater(SDL_Rect *collider) {
 	return false;
 }
 
+std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints(size_t numPlayers) {
+	tson::Layer *spawnpoints = currentMap->getLayer("playerSpawnpoints");
+
+	std::vector<std::pair<std::uint16_t, std::uint16_t>> spawnpointsVec;
+	spawnpointsVec.reserve(numPlayers);
+
+	auto it = spawnpoints->getTileObjects().begin();
+	for (int i = 0; i < numPlayers; ++i) {
+		auto &[pos, tileObject] = *it;
+		tson::Vector2f position = tileObject.getPosition();
+		spawnpointsVec.emplace_back(static_cast<uint16_t>(position.x), static_cast<uint16_t>(position.y));
+		++it;
+	}
+	return spawnpointsVec;
+}
+
+std::vector<std::pair<uint16_t, uint16_t>> *Map::getWeaponSpawnpoints() {
+	tson::Layer *spawnpoints = currentMap->getLayer("weaponSpawnpoints");
+
+	for (auto &[pos, tileObject] : spawnpoints->getTileObjects()) {
+		tson::Vector2f position = tileObject.getPosition();
+		weaponSpawnpoints.emplace_back(static_cast<uint16_t>(position.x), static_cast<uint16_t>(position.y));
+	}
+	return &weaponSpawnpoints;
+}
+
 } // namespace FishEngine

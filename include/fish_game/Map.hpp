@@ -45,6 +45,9 @@ class Map {
 	 */
 	bool isInWater(SDL_Rect *collider);
 
+	std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints(size_t numPlayers);
+
+	std::vector<std::pair<uint16_t, uint16_t>> *Map::getWeaponSpawnpoints();
 	/*
 	 * @brief: create a two dimensional array of the size of the map
 	 * @param: void
