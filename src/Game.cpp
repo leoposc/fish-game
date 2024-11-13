@@ -72,7 +72,6 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 	player.addComponent<EquipmentComponent>();
 	player.addComponent<KeyboardController>();
 	player.addGroup(groupLabels::groupPlayers);
-	// player.addGroup(groupPlayers);
 
 	// =================== init weapon ===========================
 	weapon.addComponent<TransformComponent>(410, 250, 13, 18, 1.0);
