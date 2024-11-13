@@ -26,7 +26,7 @@ void EquipmentComponent::equip(Entity *entity) {
 	isEquipped = true;
 	wearable = &entity->getComponent<WearableComponent>();
 	assert(wearable != nullptr);
-	wearable->attach(entity);
+	wearable->attach(this->entity);
 }
 
 void EquipmentComponent::unequip() {
