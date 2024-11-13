@@ -1,6 +1,10 @@
 # extern folders
 extern/
-build
+build/
+tileset/
+FishGame.tiled-project
+FishGame.tiled-session
+map01.tmx
 
 # Prerequisites
 *.d
@@ -36,3 +40,5 @@ build
 *.app
 
 .vscode/
+maps/fish-game.tiled-project
+*.tiled-session

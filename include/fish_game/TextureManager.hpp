@@ -1,19 +1,17 @@
-#ifndef TEXTUREMANAGER_HPP
-#define TEXTUREMANAGER_HPP
+#pragma once
 
-#include "Game.hpp"
+// #include "Game.hpp"
 
 #include <SDL2/SDL.h>
+#include <filesystem>
 
-namespace Texture
-{
+namespace fs = std::filesystem;
+namespace FishEngine {
+class TextureManager {
 
-    class TextureManager
-    {
-
-    public:
-        static SDL_Texture *LoadTexture(const char *fileName, SDL_Renderer *renderer);
-    };
-} // namespace Texture
-
-#endif // TEXTUREMANAGER_HPP
+public:
+  static SDL_Texture *loadTexture(fs::path path);
+  static void draw(SDL_Texture *tex, SDL_Rect src, SDL_Rect dst,
+                   SDL_RendererFlip flip);
+};
+} // namespace FishEngine
