@@ -45,21 +45,6 @@ class Map {
 	 */
 	bool isInWater(SDL_Rect *collider);
 
-	/**
-	 * @brief: get the spawn positions of the players
-	 * @details: the spawn positions are stored in the map file and are returned in pixel points
-	 * @param: size_t numPlayers   the number of players
-	 * @return copy of the vector of pairs of uint16_t (since playerSpawnpoints is only need once
-	 * per initialization there is no need to make it a class attribute)
-	 */
-	std::vector<std::pair<uint16_t, uint16_t>> getPlayerSpawnpoints(size_t numPlayers);
-
-	/**
-	 * @brief: get the spawn positions of the weapons
-	 * @details: the spawn positions are stored in the map file and are returned in pixel points
-	 * @return pointer to a vector of pairs of uint16_t, points towards class attribute weaponSpawnpoints
-	 */
-	std::vector<std::pair<uint16_t, uint16_t>> *getWeaponSpawnpoints();
 	/*
 	 * @brief: create a two dimensional array of the size of the map
 	 * @param: void
@@ -98,7 +83,7 @@ class Map {
 
 	SDL_Texture *getTexture(fs::path path);
 
-	std::vector<std::pair<std::uint16_t, std::uint16_t>> getInitialPos() { return initialPos; }
+	std::vector<std::pair<std::uint16_t, std::uint16_t>> getInitialPos() {return initialPos; }
 
   private:
 	SDL_Rect src, dst;
@@ -125,8 +110,6 @@ class Map {
 	std::map<uint32_t, tson::Animation *> animationUpdateQueue;
 
 	std::vector<std::pair<std::uint16_t, std::uint16_t>> initialPos;
-
-	std::vector<std::pair<uint16_t, uint16_t>> weaponSpawnpoints;
 };
 
 } // namespace FishEngine

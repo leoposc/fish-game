@@ -29,25 +29,19 @@ ServerGame::ServerGame() : cnt(0), isRunning(false) {}
 
 ServerGame::~ServerGame() {}
 
-void ServerGame::init(const char *title, int nP) {
+void ServerGame::init(const char *title, int numPlayers) {
 	// ================== init serverMap and assets ==================
-	numPlayers = numPlayers;
 	serverMap = new Map();
 	serverMap->loadMap("../../maps/map03.tmj");
-	assets->addTexture("fish", "../../assets/RedFishSmall.png");
+	assets->addTexture("fish", "../../assets/RedFishSmall.pname");
 
 	// =================== init player===========================
 	// scaling not working correctly, RedFish.png also very high resolution
 
-	// map does no have a playerSpawnpoints layer yet, in future use
-	std::vector<std::pair<std::uint16_t, std::uint16_t>> playerSpawnpoints =
-	    serverMap->getPlayerSpawnpoints(numPlayers);
-
 	for (int i = 0; i < numPlayers; ++i) {
 		auto &player(ServerManager.addEntity());
 		ServerManager.addToGroup(&player, groupLabels::groupPlayers);
-		// std::pair<uint16_t, uint16_t> initPos = playerSpawnpoints.at(i);
-		// auto initPos = serverMap->getInitialPos().at(i);
+		auto initPos = serverMap->getInitialPos().at(i);
 		ServerComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
 	}
 }
