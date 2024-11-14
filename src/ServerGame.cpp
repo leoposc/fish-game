@@ -25,7 +25,7 @@ AssetManager *ServerGame::assets = new AssetManager(&ServerManager);
 
 Map *serverMap;
 
-ServerGame::ServerGame() : cnt(0), isRunning(false) {}
+ServerGame::ServerGame() : isRunning(false) {}
 
 ServerGame::~ServerGame() {}
 
@@ -123,21 +123,6 @@ void ServerGame::update() {
 	//     p->destroy();
 	//   }
 	// }
-
-	/* TODO: move camera:
-	  depends on all players positions
-	camera.x = player.getComponent<MoveComponent>().position.x - 400;
-	camera.y = player.getComponent<MoveComponent>().position.y - 320;
-
-	if (camera.x < 0)
-	  camera.x = 0;
-	if (camera.y < 0)
-	  camera.y = 0;
-	if (camera.x > camera.w)
-	  camera.x = camera.w;
-	if (camera.y > camera.h)
-	  camera.y = camera.h;
-	*/
 }
 
 bool ServerGame::running() {

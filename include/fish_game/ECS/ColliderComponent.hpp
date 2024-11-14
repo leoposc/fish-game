@@ -17,7 +17,6 @@ class ColliderComponent : public Component {
 
 	SDL_Rect collider;
 	SDL_Texture *tex;
-	SDL_Rect srcRect, dstRect;
 
 	TransformComponent *transform;
 
@@ -27,7 +26,6 @@ class ColliderComponent : public Component {
 
 	void init() override;
 
-	// TODO: adapt code to use tileson and different layers
 	void update() override;
 
 	void draw() override;

@@ -19,8 +19,7 @@
 FishEngine::ClientGame *clientGame = nullptr;
 FishEngine::ServerGame *serverGame = nullptr;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 
@@ -31,6 +30,7 @@ int main(int argc, char *argv[])
 	serverGame = new FishEngine::ServerGame();
 
 	clientGame->init("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false, 2);
+	std::cout << "\nClient Game Initialized\n" << std::endl;
 	serverGame->init("Fish Game Server", 2);
 
 	while (clientGame->running()) {

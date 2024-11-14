@@ -7,10 +7,9 @@
 
 namespace FishEngine {
 
-void EquipmentComponent::init()
-{
+void EquipmentComponent::init() {
+	std::cout << "EQUIPMENT COMPONENT INIT" << std::endl;
 	collider = &entity->getComponent<ColliderComponent>();
-	std::cout << "EQUIPMENT COMPONENT INITIALIZED" << std::endl;
 }
 
 // void EquipmentComponent::update() {
@@ -21,8 +20,7 @@ void EquipmentComponent::init()
 // 	}
 // }
 
-void EquipmentComponent::processCommand()
-{
+void EquipmentComponent::processCommand() {
 	if (isEquipped) {
 		unequip();
 	} else {
@@ -38,17 +36,15 @@ void EquipmentComponent::processCommand()
 	}
 }
 
-void EquipmentComponent::equip(Entity *entity)
-{
+void EquipmentComponent::equip(Entity *entity) {
 	isEquipped = true;
 	wearable = &entity->getComponent<WearableComponent>();
 	assert(wearable != nullptr);
 	wearable->attach(this->entity);
-	std::cout << this->entity->hasComponent<MoveComponent>() << std::endl;
+	// std::cout << this->entity->hasComponent<MoveComponent>() << std::endl;
 }
 
-void EquipmentComponent::unequip()
-{
+void EquipmentComponent::unequip() {
 	isEquipped = false;
 	if (wearable != nullptr) {
 		wearable->detach();
@@ -57,8 +53,7 @@ void EquipmentComponent::unequip()
 	}
 }
 
-void EquipmentComponent::shoot()
-{
+void EquipmentComponent::shoot() {
 	if (isEquipped) {
 		wearable->shoot();
 	} else {

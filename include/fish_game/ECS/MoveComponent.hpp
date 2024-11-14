@@ -1,34 +1,22 @@
 #pragma once
 
-// #include "Components.hpp"
 #include "ECS.hpp"
-
-// #include "../Vector2D.hpp"
 #include "TransformComponent.hpp"
-
-// class TransformComponent;
 
 namespace FishEngine {
 
-class MoveComponent : public ServerTransformComponent {
+class MoveComponent : public Component {
+
+	TransformComponent *transform = nullptr;
 
   public:
 	bool inWater = false;
-	using ServerTransformComponent::ServerTransformComponent;
 
-	MoveComponent(int x, int y);
+	MoveComponent() {}
 
-	MoveComponent(int sc);
-
-	MoveComponent(int x, int y, int h, int w, float sc);
-
-	// void init() override;
-	// using TransformComponent::init;
-	void init() override { ServerTransformComponent::init(); }
+	void init() override;
 
 	void update() override;
-
-	// using TransformComponent::update;
 
 	void up();
 

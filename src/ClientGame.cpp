@@ -28,12 +28,11 @@ Map *clientMap;
 
 auto &weapon(clientManager.addEntity());
 auto &projectile(clientManager.addEntity());
-ClientGame::ClientGame() : cnt(0), isRunning(false) {}
+ClientGame::ClientGame() : isRunning(false) {}
 
 ClientGame::~ClientGame() {}
 
-void ClientGame::init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen, int numPlayers)
-{
+void ClientGame::init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen, int numPlayers) {
 	int flags = 0;
 	if (fullscreen) {
 		flags = SDL_WINDOW_FULLSCREEN;
@@ -71,18 +70,17 @@ void ClientGame::init(const char *title, int xpos, int ypos, int width, int heig
 	}
 
 	// =================== init weapon ===========================
-	weapon.addComponent<ClientTransformComponent>(410, 250, 13, 18, 1.0);
-	weapon.addComponent<SpriteComponent>("pistol", false);
-	weapon.addComponent<ColliderComponent>("weapon", 410, 250, 13, 18);
-	weapon.addComponent<WearableComponent>();
-	weapon.addGroup(groupLabels::groupWeapons);
+	// weapon.addComponent<ClientTransformComponent>(410, 250, 13, 18, 1.0);
+	// weapon.addComponent<SpriteComponent>("pistol", false);
+	// weapon.addComponent<ColliderComponent>("weapon", 410, 250, 13, 18);
+	// weapon.addComponent<WearableComponent>();
+	// weapon.addGroup(groupLabels::groupWeapons);
 
 	// =================== init projectile =======================
-	projectile.addComponent<ClientTransformComponent>(0, 0, 16, 16, 1.0);
+	// projectile.addComponent<ClientTransformComponent>(0, 0, 16, 16, 1.0);
 }
 
-void toggleWindowMode(SDL_Window *win, bool *windowed)
-{
+void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
 	// changes.
 	SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -107,8 +105,7 @@ void toggleWindowMode(SDL_Window *win, bool *windowed)
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
-void ClientGame::handleEvents()
-{
+void ClientGame::handleEvents() {
 	// TODO: look for a better way to handle events since movement seems to be pretty slow
 	SDL_PollEvent(&game_event);
 
@@ -129,8 +126,7 @@ void ClientGame::handleEvents()
 	MockServer::getInstance().enqueueEvent(game_event);
 }
 
-void ClientGame::update()
-{
+void ClientGame::update() {
 	// SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
 	// Vector2D playerPos = player.getComponent<MoveComponent>().position;
 
@@ -200,25 +196,9 @@ void ClientGame::update()
 	//     p->destroy();
 	//   }
 	// }
-
-	/* TODO: move camera:
-	  depends on all players positions
-	camera.x = player.getComponent<MoveComponent>().position.x - 400;
-	camera.y = player.getComponent<MoveComponent>().position.y - 320;
-
-	if (camera.x < 0)
-	  camera.x = 0;
-	if (camera.y < 0)
-	  camera.y = 0;
-	if (camera.x > camera.w)
-	  camera.x = camera.w;
-	if (camera.y > camera.h)
-	  camera.y = camera.h;
-	*/
 }
 
-void ClientGame::render()
-{
+void ClientGame::render() {
 	SDL_RenderClear(renderer);
 
 	clientMap->drawMap();
@@ -256,21 +236,18 @@ void ClientGame::render()
 	SDL_RenderPresent(renderer);
 }
 
-void ClientGame::clean()
-{
+void ClientGame::clean() {
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
 	// log clean
 }
 
-bool ClientGame::running()
-{
+bool ClientGame::running() {
 	return isRunning;
 }
 
-void ClientGame::stop()
-{
+void ClientGame::stop() {
 	isRunning = false;
 }
 

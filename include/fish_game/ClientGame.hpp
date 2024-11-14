@@ -1,25 +1,16 @@
 #pragma once
 
-// #include "ECS/Components.hpp"
 #include "AssetManager.hpp"
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <vector>
 
-// class AssetManager;
-class ColliderComponent;
-
 namespace FishEngine {
-
-// class AssetManager;
-// class ColliderComponent;
 
 class ClientGame {
 
   public:
-	// static std::vector<ColliderComponent *> colliders;
-
 	ClientGame();
 	~ClientGame();
 
@@ -54,7 +45,6 @@ class ClientGame {
 	};
 
   private:
-	int cnt;
 	bool isRunning;
 	SDL_Window *window;
 	bool windowed = true;

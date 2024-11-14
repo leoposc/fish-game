@@ -1,25 +1,19 @@
 #include "../../include/fish_game/ECS/ProjectileComponent.hpp"
 
 #include "../../include/fish_game/ClientGame.hpp"
-// // #include "ECS.hpp"
-// #include "Components.hpp"
-// // #include "TransformComponent.hpp"
-
 #include "../../include/fish_game/Vector2D.hpp"
-// #include "Components.hpp"
 
 namespace FishEngine {
 
 ProjectileComponent::ProjectileComponent(int rng, int sp, Vector2D vel) : range(rng), speed(sp), velocity(vel) {}
 
-void ProjectileComponent::init()
-{
+void ProjectileComponent::init() {
+	std::cout << "PROJECTILE COMPONENT INIT" << std::endl;
 	transform = &entity->getComponent<TransformComponent>();
 	transform->velocity = velocity;
 }
 
-void ProjectileComponent::update()
-{
+void ProjectileComponent::update() {
 	distance += speed;
 
 	if (distance > range) {

@@ -17,45 +17,36 @@ namespace FishEngine {
 
 class ServerGame {
 
-public:
-  // static std::vector<ColliderComponent *> colliders;
+  public:
+	ServerGame();
+	~ServerGame();
 
-  ServerGame();
-  ~ServerGame();
+	SDL_Event getEvent() { return game_event; }
 
-  SDL_Event getEvent() { return game_event; }
+	void init(const char *title, int numPlayer);
 
-  void init(const char *title, int numPlayer);
+	void handleEvents();
 
-  void handleEvents();
+	void update();
 
-  void update();
+	void render();
 
-  void render();
+	void clean();
 
-  void clean();
+	bool running();
 
-  bool running();
+	void stop();
 
-  void stop();
+	static SDL_Renderer *renderer;
+	static SDL_Event game_event;
+	static SDL_Rect camera;
+	static AssetManager *assets;
 
-  static SDL_Renderer *renderer;
-  static SDL_Event game_event;
-  static SDL_Rect camera;
-  static AssetManager *assets;
+	enum groupLabels : std::size_t { groupMap, groupPlayers, groupEnemies, groupColliders, groupProjectiles };
 
-  enum groupLabels : std::size_t {
-    groupMap,
-    groupPlayers,
-    groupEnemies,
-    groupColliders,
-    groupProjectiles
-  };
-
-private:
-  int cnt;
-  bool isRunning;
-  SDL_Window *window;
+  private:
+	bool isRunning;
+	SDL_Window *window;
 };
 
 } // namespace FishEngine
