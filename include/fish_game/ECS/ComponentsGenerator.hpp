@@ -4,6 +4,7 @@
 #include "ColliderComponent.hpp"
 #include "ECS.hpp"
 #include "EventHandlerComponent.hpp"
+#include "GravityComponent.hpp"
 #include "MoveComponent.hpp"
 #include "ServerComponent.hpp"
 #include "SpriteComponent.hpp"
@@ -28,6 +29,7 @@ class ServerComponentsGenerator {
 		player.addComponent<TransformComponent>(x, y, 45, 60, 1.0);
 		player.addComponent<ColliderComponent>("player", x, y, 45, 60);
 		player.addComponent<MoveComponent>();
+		player.addComponent<GravityComponent>();
 		player.addComponent<EquipmentComponent>();
 		player.addComponent<EventHandlerComponent>();
 		player.addComponent<ServerComponent>();

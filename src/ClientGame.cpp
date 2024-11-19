@@ -17,9 +17,12 @@
 
 namespace FishEngine {
 
+constexpr int SCREEN_WIDTH = 1280;
+constexpr int SCREEN_HEIGHT = 720;
+
 SDL_Renderer *ClientGame::renderer = nullptr;
 SDL_Event ClientGame::game_event;
-SDL_Rect ClientGame::camera = {0, 0, 800, 640};
+SDL_Rect ClientGame::camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
 Manager clientManager;
 AssetManager *ClientGame::assets = new AssetManager(&clientManager);
@@ -28,6 +31,7 @@ Map *clientMap;
 
 auto &weapon(clientManager.addEntity());
 auto &projectile(clientManager.addEntity());
+
 ClientGame::ClientGame() : isRunning(false) {}
 
 ClientGame::~ClientGame() {}
@@ -64,7 +68,7 @@ void ClientGame::init(const char *title, int xpos, int ypos, int width, int heig
 
 	for (int i = 0; i < numPlayers; ++i) {
 		auto &player(clientManager.addEntity());
-		clientManager.addToGroup(&player, groupLabels::groupPlayers);
+		// clientManager.addToGroup(&player, groupLabels::groupPlayers);
 		auto initPos = clientMap->getInitialPos().at(i);
 		ClientComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
 	}
@@ -127,58 +131,9 @@ void ClientGame::handleEvents() {
 }
 
 void ClientGame::update() {
-	// SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
-	// Vector2D playerPos = player.getComponent<MoveComponent>().position;
 
 	clientManager.refresh();
 	clientManager.update();
-	std::cout << "finished updating!" << std::endl;
-
-	// ================ GET CLIENT COMMANDS ==========================
-	// => keyboard controller
-
-	/*$
-   | $$
-/$$$$$$$  /$$$$$$         /$$$$$$$  /$$$$$$  /$$$$$$/$$$$   /$$$$$$
-/$$__  $$ /$$__  $$       /$$_____/ /$$__  $$| $$_  $$_  $$ /$$__  $$
-| $$  | $$| $$  \ $$      |  $$$$$$ | $$  \ $$| $$ \ $$ \ $$| $$$$$$$$
-| $$  | $$| $$  | $$       \____  $$| $$  | $$| $$ | $$ | $$| $$_____/
-|  $$$$$$$|  $$$$$$/       /$$$$$$$/|  $$$$$$/| $$ | $$ | $$|  $$$$$$$
-\_______/ \______/       |_______/  \______/ |__/ |__/ |__/ \_______/
-
-	            /$$                                       /$$       /$$
-	           | $$                                      | $$      |__/
-/$$$$$$$   /$$$$$$  /$$$$$$   /$$  /$$  /$$  /$$$$$$   /$$$$$$ | $$   /$$ /$$ /$$$$$$$   /$$$$$$
-| $$__  $$ /$$__  $$|_  $$_/  | $$ | $$ | $$ /$$__  $$ /$$__  $$| $$  /$$/| $$| $$__  $$ /$$__  $$
-| $$  \ $$| $$$$$$$$  | $$    | $$ | $$ | $$| $$  \ $$| $$  \__/| $$$$$$/ | $$| $$  \ $$| $$  \ $$
-| $$  | $$| $$_____/  | $$ /$$| $$ | $$ | $$| $$  | $$| $$      | $$_  $$ | $$| $$  | $$| $$  | $$
-| $$  | $$|  $$$$$$$  |  $$$$/|  $$$$$/$$$$/|  $$$$$$/| $$      | $$ \  $$| $$| $$  | $$|  $$$$$$$
-|__/  |__/ \_______/   \___/   \_____/\___/  \______/ |__/      |__/  \__/|__/|__/  |__/ \____  $$
-	                                                                                       /$$  \ $$
-	                                                                                    . |  $$$$$$/
-	                                                                                       \______/
-.	         /$$                /$$$$$$   /$$$$$$
-.  	      | $$                /$$__  $$ /$$__  $$
-/$$$$$$$ /$$$$$$   /$$   /$$| $$  \__/| $$  \__/
-/$$_____/|_  $$_/  | $$  | $$| $$$$    | $$$$
-|  $$$$$$  | $$    | $$  | $$| $$_/    | $$_/
-\____  $$  | $$ /$$| $$  | $$| $$      | $$
-/$$$$$$$/  |  $$$$/|  $$$$$$/| $$      | $$
-|_______/    \___/   \______/ |__/      |__*/
-
-	// ================ UPDATE CLIENT POSITIONS AND SPRITES ==============
-
-	// print collider data
-	// std::cout << "Player collider: " << player.getComponent<ColliderComponent>().collider.x << " "
-	//           << player.getComponent<ColliderComponent>().collider.y << " "
-	//           << player.getComponent<ColliderComponent>().collider.w << " "
-	//           << player.getComponent<ColliderComponent>().collider.h << std::endl;
-
-	// if (clientMap->isInWater(&player.getComponent<ColliderComponent>().collider)) {
-	// 	player.getComponent<MoveComponent>().inWater = true;
-	// } else {
-	// 	player.getComponent<MoveComponent>().inWater = false;
-	// }
 
 	// ===================== outdated code ==========================
 	// for (auto &c : clientManager.getGroup(groupColliders)) {
@@ -188,18 +143,57 @@ void ClientGame::update() {
 	//     player.getComponent<MoveComponent>().position = playerPos;
 	//   }
 	// }
+}
 
-	// for (auto &p : clientManager.getGroup(groupProjectiles)) {
-	//   if (Collision::AABB(playerCol,
-	//                       p->getComponent<ColliderComponent>().collider)) {
-	//     std::cout << "Hit player" << std::endl;
-	//     p->destroy();
-	//   }
-	// }
+// todo: does not work yet - prob pretty wrong
+void ClientGame::zoomIn() {
+	// Get the most outer players
+	std::vector<Entity *> &players = clientManager.getGroup(groupLabels::groupPlayers);
+	if (players.empty())
+		return;
+
+	int minX = players[0]->getComponent<TransformComponent>().position.getX();
+	int minY = players[0]->getComponent<TransformComponent>().position.getY();
+	int maxX = minX, maxY = minY;
+
+	for (auto &player : players) {
+		TransformComponent &transform = player->getComponent<TransformComponent>();
+		int x = transform.position.getX();
+		int y = transform.position.getY();
+		minX = std::min(minX, x);
+		minY = std::min(minY, y);
+		maxX = std::max(maxX, x);
+		maxY = std::max(maxY, y);
+	}
+
+	// int minWidth = std :
+
+	minX = std::max(0, minX - 100);
+	minY = std::max(0, minY - 100);
+	maxX = std::min(SCREEN_WIDTH, maxX + 100);
+	maxY = std::min(SCREEN_HEIGHT, maxY + 100);
+
+	int width = (maxX - minX);
+	int height = (maxY - minY);
+
+	// create a minimum size for the camera
+	width = std::max(width, SCREEN_WIDTH);
+	height = std::max(height, SCREEN_HEIGHT);
+
+	camera = {minX, minY, width, height};
+	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
+
+#define DEBUG
+#ifdef DEBUG
+	std::cout << "Camera: " << camera.x << " " << camera.y << " " << camera.w << " " << camera.h << std::endl;
+#endif
 }
 
 void ClientGame::render() {
 	SDL_RenderClear(renderer);
+
+	// zoomIn();
+	// SDL_RenderSetViewport(renderer, &camera);
 
 	clientMap->drawMap();
 
@@ -212,10 +206,6 @@ void ClientGame::render() {
 
 	// bool collision = clientMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider);
 	//  do something with the collision - don't know how to handle movements in x - y axis yet
-
-	// for (auto &t : clientManager.getGroup(groupLabels::groupMap)) {
-	//   t->draw();
-	// }
 
 	// for (auto &t : clientManager.getGroup(groupLabels::groupColliders)) {
 	//   t->draw();
@@ -232,6 +222,8 @@ void ClientGame::render() {
 	for (auto &t : clientManager.getGroup(groupLabels::groupProjectiles)) {
 		t->draw();
 	}
+
+	// SDL_RenderSetViewport(renderer, nullptr);
 
 	SDL_RenderPresent(renderer);
 }

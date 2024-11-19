@@ -12,6 +12,8 @@ namespace FishEngine {
 class TransformComponent;
 
 class ColliderComponent : public Component {
+	Vector2D lastPosition{0, 0};
+
   public:
 	std::string tag;
 

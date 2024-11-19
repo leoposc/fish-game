@@ -37,6 +37,12 @@ class ServerGame {
 
 	void stop();
 
+	void checkWaterCollisions();
+
+	void checkPlattformCollisions();
+
+	static bool checkCollisions(Entity *player);
+
 	static SDL_Renderer *renderer;
 	static SDL_Event game_event;
 	static SDL_Rect camera;
@@ -47,6 +53,8 @@ class ServerGame {
   private:
 	bool isRunning;
 	SDL_Window *window;
+
+	std::vector<Entity *> players;
 };
 
 } // namespace FishEngine

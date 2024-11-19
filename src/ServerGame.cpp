@@ -21,7 +21,7 @@ namespace FishEngine {
 SDL_Event ServerGame::game_event;
 
 Manager ServerManager;
-AssetManager *ServerGame::assets = new AssetManager(&ServerManager);
+AssetManager *ServerGame::assets = new AssetManager(&ServerManager); // todo: need it?
 
 Map *serverMap;
 
@@ -33,7 +33,7 @@ void ServerGame::init(const char *title, int numPlayers) {
 	// ================== init serverMap and assets ==================
 	serverMap = new Map();
 	serverMap->loadMap("../../maps/map03.tmj");
-	assets->addTexture("fish", "../../assets/RedFishSmall.pname");
+	// assets->addTexture("fish", "../../assets/RedFishSmall.pname"); any reason to load it here as well?
 
 	// =================== init player===========================
 	// scaling not working correctly, RedFish.png also very high resolution
@@ -43,6 +43,7 @@ void ServerGame::init(const char *title, int numPlayers) {
 		ServerManager.addToGroup(&player, groupLabels::groupPlayers);
 		auto initPos = serverMap->getInitialPos().at(i);
 		ServerComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
+		players.push_back(&player);
 	}
 }
 
@@ -55,74 +56,10 @@ void ServerGame::handleEvents() {
 }
 
 void ServerGame::update() {
-	// SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
-	// Vector2D playerPos = player.getComponent<MoveComponent>().position;
-
 	ServerManager.refresh();
 	ServerManager.update();
-
-	// ================ GET CLIENT COMMANDS ==========================
-	// => keyboard controller
-
-	/*$
-   | $$
-/$$$$$$$  /$$$$$$         /$$$$$$$  /$$$$$$  /$$$$$$/$$$$   /$$$$$$
-/$$__  $$ /$$__  $$       /$$_____/ /$$__  $$| $$_  $$_  $$ /$$__  $$
-| $$  | $$| $$  \ $$      |  $$$$$$ | $$  \ $$| $$ \ $$ \ $$| $$$$$$$$
-| $$  | $$| $$  | $$       \____  $$| $$  | $$| $$ | $$ | $$| $$_____/
-|  $$$$$$$|  $$$$$$/       /$$$$$$$/|  $$$$$$/| $$ | $$ | $$|  $$$$$$$
-\_______/ \______/       |_______/  \______/ |__/ |__/ |__/ \_______/
-
-	            /$$                                       /$$       /$$
-	           | $$                                      | $$      |__/
-/$$$$$$$   /$$$$$$  /$$$$$$   /$$  /$$  /$$  /$$$$$$   /$$$$$$ | $$   /$$ /$$ /$$$$$$$   /$$$$$$
-| $$__  $$ /$$__  $$|_  $$_/  | $$ | $$ | $$ /$$__  $$ /$$__  $$| $$  /$$/| $$| $$__  $$ /$$__  $$
-| $$  \ $$| $$$$$$$$  | $$    | $$ | $$ | $$| $$  \ $$| $$  \__/| $$$$$$/ | $$| $$  \ $$| $$  \ $$
-| $$  | $$| $$_____/  | $$ /$$| $$ | $$ | $$| $$  | $$| $$      | $$_  $$ | $$| $$  | $$| $$  | $$
-| $$  | $$|  $$$$$$$  |  $$$$/|  $$$$$/$$$$/|  $$$$$$/| $$      | $$ \  $$| $$| $$  | $$|  $$$$$$$
-|__/  |__/ \_______/   \___/   \_____/\___/  \______/ |__/      |__/  \__/|__/|__/  |__/ \____  $$
-	                                                                                       /$$  \ $$
-	                                                                                    . |  $$$$$$/
-	                                                                                       \______/
-.	         /$$                /$$$$$$   /$$$$$$
-.  	      | $$                /$$__  $$ /$$__  $$
-/$$$$$$$ /$$$$$$   /$$   /$$| $$  \__/| $$  \__/
-/$$_____/|_  $$_/  | $$  | $$| $$$$    | $$$$
-|  $$$$$$  | $$    | $$  | $$| $$_/    | $$_/
-\____  $$  | $$ /$$| $$  | $$| $$      | $$
-/$$$$$$$/  |  $$$$/|  $$$$$$/| $$      | $$
-|_______/    \___/   \______/ |__/      |__*/
-
-	// ================ UPDATE CLIENT POSITIONS AND SPRITES ==============
-
-	// print collider data
-	// std::cout << "Player collider: " << player.getComponent<ColliderComponent>().collider.x << " "
-	//           << player.getComponent<ColliderComponent>().collider.y << " "
-	//           << player.getComponent<ColliderComponent>().collider.w << " "
-	//           << player.getComponent<ColliderComponent>().collider.h << std::endl;
-
-	// if (serverMap->isInWater(&player.getComponent<ColliderComponent>().collider)) {
-	// 	player.getComponent<MoveComponent>().inWater = true;
-	// } else {
-	// 	player.getComponent<MoveComponent>().inWater = false;
-	// }
-
-	// ===================== outdated code ==========================
-	// for (auto &c : ServerManager.getGroup(groupColliders)) {
-
-	//   if (Collision::AABB(c->getComponent<ColliderComponent>().collider,
-	//                       playerCol)) {
-	//     player.getComponent<MoveComponent>().position = playerPos;
-	//   }
-	// }
-
-	// for (auto &p : ServerManager.getGroup(groupProjectiles)) {
-	//   if (Collision::AABB(playerCol,
-	//                       p->getComponent<ColliderComponent>().collider)) {
-	//     std::cout << "Hit player" << std::endl;
-	//     p->destroy();
-	//   }
-	// }
+	checkWaterCollisions();
+	checkPlattformCollisions();
 }
 
 bool ServerGame::running() {
@@ -131,6 +68,28 @@ bool ServerGame::running() {
 
 void ServerGame::stop() {
 	isRunning = false;
+}
+
+void ServerGame::checkWaterCollisions() {
+	for (auto &player : players) {
+		player->getComponent<MoveComponent>().inWater =
+		    serverMap->isInWater(&player->getComponent<ColliderComponent>().collider);
+	}
+}
+
+void ServerGame::checkPlattformCollisions() {
+	for (auto &player : players) {
+		if (serverMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider)) {
+			// check if player is moving downwards
+			if (player->getComponent<TransformComponent>().velocity.getY() > 0) {
+				player->getComponent<TransformComponent>().velocity.setY(0);
+			}
+		}
+	}
+}
+
+bool ServerGame::checkCollisions(Entity *player) {
+	return serverMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider);
 }
 
 } // namespace FishEngine

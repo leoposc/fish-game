@@ -8,8 +8,8 @@ namespace FishEngine {
 class TransformComponent : public Component {
 
   public:
-	Vector2D velocity;
-	Vector2D position;
+	Vector2D velocity{0, 0};
+	Vector2D position{0, 0};
 
 	int speed = 3;
 
@@ -42,6 +42,8 @@ class TransformComponent : public Component {
 	void init() override;
 
 	void update() override;
+
+	void gravity();
 };
 
 } // namespace FishEngine

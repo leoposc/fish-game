@@ -45,6 +45,12 @@ class Map {
 	 */
 	bool isInWater(SDL_Rect *collider);
 
+	/**
+	 * @brief: check if the player is on a plattform
+	 * @param: SDL_Rect *collider   the collider of the player
+	 */
+	bool isOnPlattform(SDL_Rect *collider);
+
 	std::vector<std::pair<uint16_t, uint16_t>> getPlayerSpawnpoints(size_t numPlayers);
 
 	std::vector<std::pair<uint16_t, uint16_t>> *getWeaponSpawnpoints();
@@ -55,8 +61,7 @@ class Map {
 	 * water=2, plattform=1, tree)
 	 */
 	template <typename T, size_t Row, size_t Col>
-	std::array<std::array<uint8_t, Col>, Row> *initMapArray()
-	{
+	std::array<std::array<uint8_t, Col>, Row> *initMapArray() {
 
 		tson::Vector2i mapSize = currentMap->getSize();
 		size_t rows = mapSize.y;

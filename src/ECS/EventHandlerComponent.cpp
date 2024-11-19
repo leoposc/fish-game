@@ -84,7 +84,7 @@ void EventHandlerComponent::update()
 			break;
 		}
 	}
-	std::cout << "EVENTHANDLER COMPONENT UPDATED" << std::endl;
+	// std::cout << "EVENTHANDLER COMPONENT UPDATED" << std::endl;
 }
 
 } // namespace FishEngine

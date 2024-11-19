@@ -17,6 +17,9 @@ void Map::loadMap(fs::path path) {
 
 	map = tileson.parse(path);
 
+	positionOffset = {0, 0};
+	currentMap = map.get();
+
 	if (map->getStatus() == tson::ParseStatus::OK) {
 		std::cout << "Map loaded successfully!" << std::endl;
 	} else {
@@ -32,9 +35,6 @@ void Map::loadMap(fs::path path) {
 }
 
 void Map::drawMap() {
-	positionOffset = {0, 0};
-	currentMap = map.get();
-
 	for (auto &layer : currentMap->getLayers()) {
 		drawLayer(layer);
 	}
@@ -144,6 +144,23 @@ bool Map::checkPlattformCollisions(SDL_Rect *collider) {
 		                  rect.width, rect.height};
 
 		if (SDL_HasIntersection(collider, &block)) {
+			SDL_Rect intersection;
+			if (SDL_IntersectRect(collider, &block, &intersection)) {
+				if (intersection.w > intersection.h) {
+					if (collider->y < block.y) {
+						collider->y -= intersection.h;
+					} else {
+						collider->y += intersection.h;
+					}
+				} else {
+					if (collider->x < block.x) {
+						collider->x -= intersection.w;
+					} else {
+						collider->x += intersection.w;
+					}
+				}
+			}
+
 			return true;
 		}
 
@@ -154,7 +171,26 @@ bool Map::checkPlattformCollisions(SDL_Rect *collider) {
 	return false;
 }
 
+bool Map::isOnPlattform(SDL_Rect *collider) {
+	// const SDL_Point point = {collider->x + (collider->w / 2), collider->y + collider->h};
+
+	tson::Layer *plattforms = currentMap->getLayer("plattforms");
+
+	for (auto &[pos, tileObject] : plattforms->getTileObjects()) {
+		tson::Rect rect = tileObject.getDrawingRect();
+		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
+		                  rect.width, rect.height};
+
+		if (SDL_HasIntersection(collider, &block)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool Map::isInWater(SDL_Rect *collider) {
+	const SDL_Point point = {collider->x + (collider->w / 2), collider->y + (collider->h / 2)};
+
 	tson::Layer *water = currentMap->getLayer("water");
 	tson::Layer *waterfall = currentMap->getLayer("waterfalls");
 
@@ -163,7 +199,7 @@ bool Map::isInWater(SDL_Rect *collider) {
 		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
 		                  rect.width, rect.height};
 
-		if (SDL_HasIntersection(collider, &block)) {
+		if (SDL_PointInRect(&point, &block)) {
 			return true;
 		}
 
@@ -177,7 +213,7 @@ bool Map::isInWater(SDL_Rect *collider) {
 		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
 		                  rect.width, rect.height};
 
-		if (SDL_HasIntersection(collider, &block)) {
+		if (SDL_PointInRect(&point, &block)) {
 			return true;
 		}
 

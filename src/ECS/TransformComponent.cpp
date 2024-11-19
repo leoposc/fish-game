@@ -1,4 +1,5 @@
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
+#include "../../include/fish_game/ECS/ColliderComponent.hpp"
 #include "../../include/fish_game/MockServer.hpp"
 // #include "ECS.hpp"
 
@@ -11,7 +12,7 @@ void TransformComponent::init() {
 }
 
 void TransformComponent::update() {
-	position += velocity * speed;
+	position += velocity;
 }
 
 } // namespace FishEngine

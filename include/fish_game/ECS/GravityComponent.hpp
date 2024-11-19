@@ -1,34 +1,22 @@
 #pragma once
 
 #include "ECS.hpp"
+#include "MoveComponent.hpp"
 #include "TransformComponent.hpp"
 
 namespace FishEngine {
 
-class MoveComponent : public Component {
+class GravityComponent : public Component {
 
 	TransformComponent *transform = nullptr;
-
-	bool canJump = false;
+	MoveComponent *move = nullptr;
 
   public:
-	bool inWater = false;
-
-	MoveComponent() {}
+	GravityComponent() {}
 
 	void init() override;
 
 	void update() override;
-
-	void up();
-
-	void down();
-
-	void left();
-
-	void right();
-
-	void stop();
 };
 
 } // namespace FishEngine

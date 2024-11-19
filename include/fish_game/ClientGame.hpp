@@ -22,6 +22,8 @@ class ClientGame {
 
 	void update();
 
+	void zoomIn();
+
 	void render();
 
 	void clean();
@@ -48,6 +50,8 @@ class ClientGame {
 	bool isRunning;
 	SDL_Window *window;
 	bool windowed = true;
+
+	std::vector<Entity *> players;
 };
 
 } // namespace FishEngine
