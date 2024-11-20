@@ -1,9 +1,11 @@
 #pragma once
 
 #include "ECS.hpp"
-#include "TransformComponent.hpp"
+// #include "TransformComponent.hpp"
 
 namespace FishEngine {
+
+class TransformComponent;
 
 class WearableComponent : public Component {
 
@@ -19,11 +21,13 @@ class WearableComponent : public Component {
 
 	void init() override;
 
-	void update() override {}
+	void update() override;
 
 	void attach(Entity *entity);
 
 	void detach();
+
+	void shoot();
 };
 
 } // namespace FishEngine

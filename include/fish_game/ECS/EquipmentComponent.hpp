@@ -1,15 +1,22 @@
 #pragma once
 
 #include "ECS.hpp"
-#include "WearableComponent.hpp"
+// #include "ColliderComponent.hpp"
+// #include "WearableComponent.hpp"
+
+#include <vector>
 
 namespace FishEngine {
+
+class ColliderComponent;
+class WearableComponent;
 
 class EquipmentComponent : public Component {
 
   private:
 	bool isEquipped = false;
 	WearableComponent *wearable = nullptr;
+	ColliderComponent *collider = nullptr;
 
   public:
 	EquipmentComponent() = default;
@@ -24,7 +31,7 @@ class EquipmentComponent : public Component {
 	 * @param: Entity *entity   the item to pick up. It can be nullptr when already equipped
 	 *                          or an already attached Entity should be dropped
 	 */
-	void processCommand(Entity *entity);
+	void processCommand();
 
 	/**
 	 * @brief: equip the item
@@ -37,6 +44,11 @@ class EquipmentComponent : public Component {
 	 * @details: function is automatically called by the processCommand function
 	 */
 	void unequip();
+
+	/**
+	 * @brief: shoot if equipped
+	 */
+	void shoot();
 };
 
 } // namespace FishEngine

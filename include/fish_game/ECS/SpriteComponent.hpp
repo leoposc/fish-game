@@ -1,14 +1,6 @@
 #pragma once
 
 #include "ECS.hpp"
-
-// #include "Components.hpp"
-
-// // #include "../AssetManager.hpp"
-// #include "../Game.hpp"
-// // // #include "ECS.hpp"
-
-// #include "../TextureManager.hpp"
 #include "TransformComponent.hpp"
 
 #include <SDL2/SDL.h>

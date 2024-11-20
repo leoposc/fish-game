@@ -1,11 +1,8 @@
 #pragma once
 
 #include "ECS/ECS.hpp"
-
 #include "TextureManager.hpp"
-
 #include "Vector2D.hpp"
-
 #include <SDL2/SDL.h>
 #include <filesystem>
 #include <map>
@@ -15,28 +12,18 @@ namespace fs = std::filesystem;
 namespace FishEngine {
 
 class AssetManager {
-public:
-  AssetManager(Manager *man);
-  ~AssetManager();
+  public:
+	AssetManager(Manager *man);
+	~AssetManager();
 
-  // Game objects
+	void addTexture(std::string id, fs::path path);
 
-  void createProjectile(Vector2D pos, Vector2D vel, int range, int speed,
-                        fs::path path);
+	SDL_Texture *getTexture(std::string id);
 
-  // Texture management
+  private:
+	Manager *manager;
 
-  void addTexture(std::string id, fs::path path);
-
-  SDL_Texture *getTexture(std::string id);
-
-  void addFont(std::string id, fs::path path, int fontSize);
-
-private:
-  Manager *manager;
-
-  std::map<std::string, SDL_Texture *> textures;
-  // std::map<std::string, TTF_Font *> fonts;
+	std::map<std::string, SDL_Texture *> textures;
 };
 
 } // namespace FishEngine
