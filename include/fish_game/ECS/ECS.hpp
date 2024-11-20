@@ -111,13 +111,22 @@ class Entity {
 
 	template <typename T, typename... TArgs>
 	T &addComponent(TArgs &&...mArgs) {
+		return *addComponent<T, -1>(std::forward<TArgs>(mArgs)...);
+	}
+
+	template <typename T, typename N, typename... TArgs>
+	T &addComponent(TArgs &&...mArgs) {
 		// check if the component already exists
 		assert(!hasComponent<T>());
 
 		T *c(new T(std::forward<TArgs>(mArgs)...));
 		c->entity = this;
 		std::unique_ptr<Component> uPtr{c};
-		components.emplace_back(std::move(uPtr));
+		if (N == -1) {
+			components.emplace_back(std::move(uPtr));
+		} else {
+			components.emplace(components.begin() + N, std::move(uPtr));
+		}
 
 		componentArray[getComponentTypeID<T>()] = c;
 		componentBitSet[getComponentTypeID<T>()] = true;
