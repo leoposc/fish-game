@@ -13,7 +13,6 @@
 class Serializable {
 	virtual std::string getDeltas(const Serializable oldState);
 	virtual void updateObject(Serializable &component);
-	virtual FishEngine::ComponentID getId();
 };
 
 class NetworkClient {
