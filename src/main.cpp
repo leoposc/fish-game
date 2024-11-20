@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <arpa/inet.h>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -16,33 +17,33 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
-FishEngine::ClientGame *clientGame = nullptr;
-FishEngine::ServerGame *serverGame = nullptr;
+using cG = FishEngine::ClientGame;
+using sG = FishEngine::ServerGame;
 
-int main(int argc, char *argv[]) {
-	const int FPS = 60;
+cG *clientGame = nullptr;
+sG *serverGame = nullptr;
+
+void combat(cG *clientGame, sG *serverGame) {
+	clientGame->handleEvents();
+	serverGame->handleEvents();
+
+	serverGame->update();
+	clientGame->update();
+
+	clientGame->render();
+}
+
+void loop(const int FPS, cG *client, sG *server, std::function<void(cG *, sG *)> func) {
+	// todo: read FPS from config file
 	const int frameDelay = 1000 / FPS;
 
 	u_int32_t frameStart;
 	int frameTime;
 
-	clientGame = new FishEngine::ClientGame();
-	serverGame = new FishEngine::ServerGame();
-
-	clientGame->init("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false, 2);
-	std::cout << "\nClient Game Initialized\n" << std::endl;
-	serverGame->init("Fish Game Server", 2);
-
 	while (clientGame->running()) {
 		frameStart = SDL_GetTicks();
 
-		clientGame->handleEvents();
-		serverGame->handleEvents();
-
-		serverGame->update();
-		clientGame->update();
-
-		clientGame->render();
+		func(client, server);
 
 		frameTime = SDL_GetTicks() - frameStart;
 
@@ -50,6 +51,18 @@ int main(int argc, char *argv[]) {
 			SDL_Delay(frameDelay - frameTime);
 		}
 	}
+}
+
+int main(int argc, char *argv[]) {
+	const int FPS = 60;
+
+	clientGame = new cG();
+	serverGame = new sG();
+
+	clientGame->init("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false, 2);
+	serverGame->init("Fish Game Server", 2);
+
+	loop(FPS, clientGame, serverGame, combat);
 
 	clientGame->clean();
 
