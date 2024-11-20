@@ -43,4 +43,4 @@ map01.tmx
 maps/fish-game.tiled-project
 *.tiled-session
 .clang-format 
-
+.clangd
