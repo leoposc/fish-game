@@ -4,58 +4,60 @@
 
 namespace FishEngine {
 
-// void MoveComponent::init() {
-//   // transform = &entity->getComponent<MoveComponent>();
-//   TransformComponent::init();
-// }
+// MoveComponent::MoveComponent() {}
 
-MoveComponent::MoveComponent(int x, int y) : TransformComponent(x, y) {}
-
-MoveComponent::MoveComponent(int sc) : TransformComponent(sc) {}
-
-MoveComponent::MoveComponent(int x, int y, int h, int w, float sc) : TransformComponent(x, y, h, w, sc) {
-	std::cout << "NOVECOMPONENT INITIALIZED with the addr: " << this << std::endl;
+void MoveComponent::init() {
+	std::cout << "MOVE COMPONENT INIT" << std::endl;
+	if (!entity->hasComponent<TransformComponent>()) {
+		std::cout << "MoveComponent: Creating TransformComponent" << std::endl;
+		entity->addComponent<TransformComponent>();
+	}
+	transform = &entity->getComponent<TransformComponent>();
+	transform->velocity.setX(0);
+	transform->velocity.setY(0);
 }
 
 void MoveComponent::update() {
-	// add gravity
-	// if (!inWater) {
-	// 	velocity.setY(1);
-	// }
-	TransformComponent::update();
+	// every entity with a MoveComponent ignores gravity while in water
+	if (inWater) {
+		transform->velocity.setY(0);
+	}
 }
 
 void MoveComponent::up() {
-	// if (inWater) {
-	velocity.setY(-1);
-	// }
+
+	if (inWater) {
+		transform->velocity.setY(-2);
+		canJump = true;
+	} else if (canJump) {
+		transform->velocity.setY(-5);
+		canJump = false;
+	}
 }
 
 void MoveComponent::down() {
-	// if (inWater) {
-	velocity.setY(1);
-	// }
+	transform->velocity.setY(2);
 }
 
 void MoveComponent::left() {
 	if (inWater) {
-		velocity.setX(-2);
+		transform->velocity.setX(-4);
 	} else {
-		velocity.setX(-1);
+		transform->velocity.setX(-2);
 	}
 }
 
 void MoveComponent::right() {
 	if (inWater) {
-		velocity.setX(2);
+		transform->velocity.setX(4);
 	} else {
-		velocity.setX(1);
+		transform->velocity.setX(2);
 	}
 }
 
 void MoveComponent::stop() {
-	velocity.setX(0);
-	velocity.setY(0);
+	transform->velocity.setX(0);
+	transform->velocity.setY(0);
 }
 
 } // namespace FishEngine

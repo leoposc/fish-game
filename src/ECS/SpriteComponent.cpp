@@ -1,8 +1,8 @@
 #include "../../include/fish_game/ECS/SpriteComponent.hpp"
+#include "../../include/fish_game/ClientGame.hpp"
 #include "../../include/fish_game/ECS/ECS.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
-#include "../../include/fish_game/Game.hpp"
 
 #include <SDL2/SDL.h>
 #include <filesystem>
@@ -20,7 +20,6 @@ SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isA
 	// TODO: implement animation with tiled/ tileson
 
 	setTexture(id);
-	std::cout << "SpriteComponent: " << id << " created!" << std::endl;
 }
 
 SpriteComponent::~SpriteComponent() {
@@ -28,23 +27,15 @@ SpriteComponent::~SpriteComponent() {
 }
 
 void SpriteComponent::setTexture(std::string id) {
-	texture = Game::assets->getTexture(id);
+	texture = ClientGame::assets->getTexture(id);
 }
 
 void SpriteComponent::init() {
-	if (id == "fish") {
-		if (entity->hasComponent<MoveComponent>()) {
-			transform = &entity->getComponent<MoveComponent>();
-			std::cout << "SpriteComponent: MoveComponent found." << std::endl;
-		} else {
-			std::cout << "SpriteComponent: no MoveComponent found." << std::endl;
-		}
+	std::cout << "SpriteComponent: initializing " << id << std::endl;
+	if (entity->hasComponent<TransformComponent>()) {
+		transform = &entity->getComponent<TransformComponent>();
 	} else {
-		if (entity->hasComponent<TransformComponent>()) {
-			transform = &entity->getComponent<TransformComponent>();
-		} else {
-			std::cout << "SpriteComponent: no TransformComponent found." << std::endl;
-		}
+		std::cout << "SpriteComponent: no ClientTransformComponent found." << std::endl;
 	}
 
 	srcRect.x = srcRect.y = 0;

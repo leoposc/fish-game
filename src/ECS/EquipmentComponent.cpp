@@ -3,13 +3,13 @@
 #include "../../include/fish_game/ECS/ECS.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/WearableComponent.hpp"
-#include "../../include/fish_game/Game.hpp"
+#include "../../include/fish_game/ServerGame.hpp"
 
 namespace FishEngine {
 
 void EquipmentComponent::init() {
+	std::cout << "EQUIPMENT COMPONENT INIT" << std::endl;
 	collider = &entity->getComponent<ColliderComponent>();
-	std::cout << "EQUIPMENT COMPONENT INITIALIZED" << std::endl;
 }
 
 // void EquipmentComponent::update() {
@@ -25,7 +25,7 @@ void EquipmentComponent::processCommand() {
 		unequip();
 	} else {
 		Manager *manager = entity->getManager();
-		std::vector<Entity *> weapons = manager->getGroup(Game::groupWeapons);
+		std::vector<Entity *> weapons = manager->getGroup(ClientGame::groupWeapons);
 		SDL_Rect col = collider->collider;
 		for (auto weapon : weapons) {
 			std::cout << "Checking weapon" << std::endl;
@@ -41,7 +41,7 @@ void EquipmentComponent::equip(Entity *entity) {
 	wearable = &entity->getComponent<WearableComponent>();
 	assert(wearable != nullptr);
 	wearable->attach(this->entity);
-	std::cout << this->entity->hasComponent<MoveComponent>() << std::endl;
+	// std::cout << this->entity->hasComponent<MoveComponent>() << std::endl;
 }
 
 void EquipmentComponent::unequip() {

@@ -15,19 +15,15 @@ namespace FishEngine {
 // class AssetManager;
 // class ColliderComponent;
 
-class Game {
+class ServerGame {
 
   public:
-	// static std::vector<ColliderComponent *> colliders;
-
-	Game();
-	~Game();
+	ServerGame();
+	~ServerGame();
 
 	SDL_Event getEvent() { return game_event; }
 
-	void init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen);
-
-	void initCombat();
+	void init(const char *title, int numPlayer);
 
 	void handleEvents();
 
@@ -41,25 +37,24 @@ class Game {
 
 	void stop();
 
+	void checkWaterCollisions();
+
+	void checkPlattformCollisions();
+
+	static bool checkCollisions(Entity *player);
+
 	static SDL_Renderer *renderer;
 	static SDL_Event game_event;
 	static SDL_Rect camera;
 	static AssetManager *assets;
 
-	enum groupLabels : std::size_t {
-		groupMap,
-		groupPlayers,
-		groupEnemies,
-		groupColliders,
-		groupProjectiles,
-		groupWeapons
-	};
+	enum groupLabels : std::size_t { groupMap, groupPlayers, groupEnemies, groupColliders, groupProjectiles };
 
   private:
-	int cnt;
 	bool isRunning;
 	SDL_Window *window;
-	bool windowed = true;
+
+	std::vector<Entity *> players;
 };
 
 } // namespace FishEngine

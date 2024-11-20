@@ -81,7 +81,7 @@ class Entity {
 	 */
 	void update() {
 		for (auto &c : components) {
-			std::cout << "ECS - Updating component" << std::endl;
+			// std::cout << "ECS - Updating component" << std::endl;
 			c->update();
 		}
 	}
@@ -111,13 +111,22 @@ class Entity {
 
 	template <typename T, typename... TArgs>
 	T &addComponent(TArgs &&...mArgs) {
+		return *addComponent<T, -1>(std::forward<TArgs>(mArgs)...);
+	}
+
+	template <typename T, typename N, typename... TArgs>
+	T &addComponent(TArgs &&...mArgs) {
 		// check if the component already exists
 		assert(!hasComponent<T>());
 
 		T *c(new T(std::forward<TArgs>(mArgs)...));
 		c->entity = this;
 		std::unique_ptr<Component> uPtr{c};
-		components.emplace_back(std::move(uPtr));
+		if (N == -1) {
+			components.emplace_back(std::move(uPtr));
+		} else {
+			components.emplace(components.begin() + N, std::move(uPtr));
+		}
 
 		componentArray[getComponentTypeID<T>()] = c;
 		componentBitSet[getComponentTypeID<T>()] = true;
@@ -141,7 +150,7 @@ class Manager {
   public:
 	void update() {
 		for (auto &e : entities) {
-			std::cout << "ECS - Updating entity" << std::endl;
+			// std::cout << "ECS - Updating entities" << std::endl;
 			e->update();
 		}
 	}
@@ -169,13 +178,13 @@ class Manager {
 	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 
 	Entity &addEntity() {
-		std::cout << "Adding entity" << std::endl;
+		// std::cout << "Adding entity" << std::endl;
 		Entity *e = new Entity(*this);
-		std::cout << "Entity created" << std::endl;
+		// std::cout << "Entity created" << std::endl;
 		std::unique_ptr<Entity> uPtr(e);
-		std::cout << "Unique pointer created" << std::endl;
+		// std::cout << "Unique pointer created" << std::endl;
 		entities.emplace_back(std::move(uPtr));
-		std::cout << "Entity moved" << std::endl;
+		// std::cout << "Entity moved" << std::endl;
 		return *e;
 	}
 };
