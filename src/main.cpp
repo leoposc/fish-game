@@ -39,9 +39,9 @@ FuncPtr combat() {
 		frameStart = SDL_GetTicks();
 
 		client->handleEvents();
-		server->handleEvents();
+		// server->handleEvents();
 
-		server->update();
+		// server->update();
 		client->update();
 
 		client->render();

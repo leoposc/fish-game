@@ -33,10 +33,6 @@ class ServerGame {
 
 	void stop();
 
-	void checkWaterCollisions();
-
-	void checkPlattformCollisions();
-
 	static bool checkCollisions(Entity *player);
 
 	static SDL_Renderer *renderer;

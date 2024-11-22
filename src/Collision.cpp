@@ -2,23 +2,22 @@
 
 namespace FishEngine {
 
-bool Collision::AABB(const SDL_Rect &recA, const SDL_Rect &recB) {
-  if (recA.x + recA.w >= recB.x && recB.x + recB.w >= recA.x &&
-      recA.y + recA.h >= recB.y && recB.y + recB.h >= recA.y) {
-    // std::cout << colA.tag << " hit: " << colB.tag << std::endl;
-    return true;
-  } else {
-    return false;
-  }
+void Collision::checkWaterCollisions(std::vector<Entity *> *players, Map *map) {
+	for (auto &player : *players) {
+		player->getComponent<MoveComponent>().inWater =
+		    map->isInWater(&player->getComponent<ColliderComponent>().collider);
+	}
 }
 
-bool Collision::AABB(const ColliderComponent &colA,
-                     const ColliderComponent &colB) {
-  if (AABB(colA.collider, colB.collider)) {
-    return true;
-  } else {
-    return false;
-  }
+void Collision::checkPlattformCollisions(std::vector<Entity *> *players, Map *serverMap) {
+	for (auto &player : *players) {
+		if (serverMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider)) {
+			// check if player is moving downwards
+			if (player->getComponent<TransformComponent>().velocity.getY() > 0) {
+				player->getComponent<TransformComponent>().velocity.setY(0);
+			}
+		}
+	}
 }
 
 } // namespace FishEngine

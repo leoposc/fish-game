@@ -76,22 +76,19 @@ void ClientGame::init(int numPlayers) {
 	std::cout << fs::path("../../maps") / mapPath << std::endl;
 	clientMap->loadMap(fs::path("../../maps") / mapPath);
 
-	for (int i = 0; i < numPlayers; ++i) {
-		auto &player(clientManager.addEntity());
-		// clientManager.addToGroup(&player, groupLabels::groupPlayers);
+	// ================== init player ==================
+	auto &player(clientManager.addEntity());
+	auto initPos = clientMap->getInitialPos().at(0);
+	ClientComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
+	players.push_back(&player);
+
+	// ================== init enemies ==================
+	for (int i = 1; i < numPlayers; ++i) {
+		auto &opponent(clientManager.addEntity());
 		auto initPos = clientMap->getInitialPos().at(i);
-		ClientComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
+		ClientComponentsGenerator::forEnemy(opponent, initPos.first, initPos.second);
+		players.push_back(&opponent);
 	}
-
-	// =================== init weapon ===========================
-	// weapon.addComponent<ClientTransformComponent>(410, 250, 13, 18, 1.0);
-	// weapon.addComponent<SpriteComponent>("pistol", false);
-	// weapon.addComponent<ColliderComponent>("weapon", 410, 250, 13, 18);
-	// weapon.addComponent<WearableComponent>();
-	// weapon.addGroup(groupLabels::groupWeapons);
-
-	// =================== init projectile =======================
-	// projectile.addComponent<ClientTransformComponent>(0, 0, 16, 16, 1.0);
 }
 
 void toggleWindowMode(SDL_Window *win, bool *windowed) {
@@ -141,18 +138,10 @@ void ClientGame::handleEvents() {
 }
 
 void ClientGame::update() {
-
 	clientManager.refresh();
 	clientManager.update();
-
-	// ===================== outdated code ==========================
-	// for (auto &c : clientManager.getGroup(groupColliders)) {
-
-	//   if (Collision::AABB(c->getComponent<ColliderComponent>().collider,
-	//                       playerCol)) {
-	//     player.getComponent<MoveComponent>().position = playerPos;
-	//   }
-	// }
+	Collision::checkWaterCollisions(&players, clientMap);
+	Collision::checkPlattformCollisions(&players, clientMap);
 }
 
 // todo: does not work yet - prob pretty wrong
