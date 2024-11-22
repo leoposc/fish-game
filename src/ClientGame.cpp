@@ -32,11 +32,7 @@ Map *clientMap;
 auto &weapon(clientManager.addEntity());
 auto &projectile(clientManager.addEntity());
 
-ClientGame::ClientGame() : isRunning(false) {}
-
-ClientGame::~ClientGame() {}
-
-void ClientGame::init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen, int numPlayers) {
+ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen) {
 	int flags = 0;
 	if (fullscreen) {
 		flags = SDL_WINDOW_FULLSCREEN;
@@ -56,32 +52,56 @@ void ClientGame::init(const char *title, int xpos, int ypos, int width, int heig
 
 		isRunning = true;
 	} else {
+		std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
 		isRunning = false;
 	}
 
-	// ================== init clientMap and assets ==================
-	clientMap = new Map();
-	clientMap->loadMap("../../maps/map03.tmj");
+	// load assets
 	assets->addTexture("fish", "../../assets/RedFishSmall.png");
 	assets->addTexture("pistol", "../../assets/PistolSmall.png");
 	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
+}
 
-	for (int i = 0; i < numPlayers; ++i) {
-		auto &player(clientManager.addEntity());
-		// clientManager.addToGroup(&player, groupLabels::groupPlayers);
-		auto initPos = clientMap->getInitialPos().at(i);
-		ClientComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
+ClientGame::~ClientGame() {
+	SDL_DestroyWindow(window);
+	SDL_DestroyRenderer(renderer);
+	SDL_Quit();
+	// log clean
+}
+
+// todo: sync player positions with server/ fetch them from server
+// todo: sync weapon positions with server/ fetch them from server / spawn them periodically
+void ClientGame::init(int numPlayers) {
+
+	// ================== init clientMap and assets ==================
+	clientMap = new Map();
+	std::cout << fs::path("../../maps") / mapPath << std::endl;
+	clientMap->loadMap(fs::path("../../maps") / mapPath);
+
+	// ================== init player ==================
+	auto &player(clientManager.addEntity());
+	auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
+	ClientComponentsGenerator::forPlayer(player, initPos.at(0).first, initPos.at(0).second);
+	players.push_back(&player);
+
+	// ================== init enemies ==================
+	for (int i = 1; i < numPlayers; ++i) {
+		auto &opponent(clientManager.addEntity());
+		ClientComponentsGenerator::forEnemy(opponent, initPos.at(i).first, initPos.at(i).second);
+		players.push_back(&opponent);
 	}
 
-	// =================== init weapon ===========================
-	// weapon.addComponent<ClientTransformComponent>(410, 250, 13, 18, 1.0);
-	// weapon.addComponent<SpriteComponent>("pistol", false);
-	// weapon.addComponent<ColliderComponent>("weapon", 410, 250, 13, 18);
-	// weapon.addComponent<WearableComponent>();
-	// weapon.addGroup(groupLabels::groupWeapons);
+	// ================== init weapons ==================
+	spawnWeapons();
+}
 
-	// =================== init projectile =======================
-	// projectile.addComponent<ClientTransformComponent>(0, 0, 16, 16, 1.0);
+void ClientGame::spawnWeapons() {
+	// ================== init weapons ==================
+	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
+	for (auto &spawnpoint : *spawnpoints) {
+		auto &weapon(clientManager.addEntity());
+		ClientComponentsGenerator::forWeapon(weapon, spawnpoint.first, spawnpoint.second);
+	}
 }
 
 void toggleWindowMode(SDL_Window *win, bool *windowed) {
@@ -131,18 +151,10 @@ void ClientGame::handleEvents() {
 }
 
 void ClientGame::update() {
-
 	clientManager.refresh();
 	clientManager.update();
-
-	// ===================== outdated code ==========================
-	// for (auto &c : clientManager.getGroup(groupColliders)) {
-
-	//   if (Collision::AABB(c->getComponent<ColliderComponent>().collider,
-	//                       playerCol)) {
-	//     player.getComponent<MoveComponent>().position = playerPos;
-	//   }
-	// }
+	Collision::checkWaterCollisions(&players, clientMap);
+	Collision::checkPlattformCollisions(&players, clientMap);
 }
 
 // todo: does not work yet - prob pretty wrong
@@ -196,20 +208,7 @@ void ClientGame::render() {
 	// SDL_RenderSetViewport(renderer, &camera);
 
 	clientMap->drawMap();
-
 	clientManager.draw();
-
-	// ===================== test if adaptive movement works ==========================
-	// Entity *player = clientManager.getGroup(groupLabels::groupPlayers).back();
-	// bool swimming = clientMap->isInWater(&player->getComponent<ColliderComponent>().collider);
-	// player->getComponent<MoveComponent>().inWater = swimming;
-
-	// bool collision = clientMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider);
-	//  do something with the collision - don't know how to handle movements in x - y axis yet
-
-	// for (auto &t : clientManager.getGroup(groupLabels::groupColliders)) {
-	//   t->draw();
-	// }
 
 	for (auto &t : clientManager.getGroup(groupLabels::groupPlayers)) {
 		t->draw();
@@ -228,11 +227,20 @@ void ClientGame::render() {
 	SDL_RenderPresent(renderer);
 }
 
-void ClientGame::clean() {
-	SDL_DestroyWindow(window);
-	SDL_DestroyRenderer(renderer);
-	SDL_Quit();
-	// log clean
+bool ClientGame::joinGame(std::string ip) {
+
+	// todo: connect to the server
+	return false;
+}
+
+bool ClientGame::hasStarted() {
+	mapPath = "map03.tmj";
+	return true;
+
+	// TODO: check if the game is started
+	// fetch the number of players from the server and map
+	// sth. like server->fetchState(struct with &mapPath, &numPlayers, &started);
+	// return started;
 }
 
 bool ClientGame::running() {

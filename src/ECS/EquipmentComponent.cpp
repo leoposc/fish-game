@@ -28,9 +28,9 @@ void EquipmentComponent::processCommand() {
 		std::vector<Entity *> weapons = manager->getGroup(ClientGame::groupWeapons);
 		SDL_Rect col = collider->collider;
 		for (auto weapon : weapons) {
-			std::cout << "Checking weapon" << std::endl;
 			if (SDL_HasIntersection(&col, &weapon->getComponent<ColliderComponent>().collider)) {
 				equip(weapon);
+				break;
 			}
 		}
 	}
@@ -41,7 +41,6 @@ void EquipmentComponent::equip(Entity *entity) {
 	wearable = &entity->getComponent<WearableComponent>();
 	assert(wearable != nullptr);
 	wearable->attach(this->entity);
-	// std::cout << this->entity->hasComponent<MoveComponent>() << std::endl;
 }
 
 void EquipmentComponent::unequip() {

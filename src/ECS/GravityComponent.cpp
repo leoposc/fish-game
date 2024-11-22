@@ -7,7 +7,7 @@ namespace FishEngine {
 constexpr float MAX_GRAVITY = 5.0;
 
 void GravityComponent::init() {
-	std::cout << "GRAVITY COMPONENT INIT" << std::endl;
+	// std::cout << "GRAVITY COMPONENT INIT" << std::endl;
 	if (!entity->hasComponent<MoveComponent>()) {
 		std::cout << "Gravity Component: Creating MoveComponent." << std::endl;
 		entity->addComponent<MoveComponent>();

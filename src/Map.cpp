@@ -55,7 +55,8 @@ void Map::drawLayer(tson::Layer &layer) {
 		break;
 	}
 	default:
-		std::cout << "Layer type not supported!" << std::endl;
+		break;
+		// std::cout << "Layer type not supported!" << std::endl;
 	}
 }
 
@@ -240,17 +241,14 @@ std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints(size_t numP
 	return spawnpointsVec;
 }
 
-/*
-std::vector<std::pair<uint16_t, uint16_t>> *Map::getWeaponSpawnpoints()
-{
-    tson::Layer *spawnpoints = currentMap->getLayer("weaponSpawnpoints");
+std::vector<std::pair<uint16_t, uint16_t>> *Map::loadWeaponSpawnpoints() {
+	tson::Layer *spawnpoints = currentMap->getLayer("weaponSpawnpoints");
 
-    for (auto &[pos, tileObject] : spawnpoints->getTileObjects()) {
-        tson::Vector2f position = tileObject.getPosition();
-        weaponSpawnpoints.emplace_back(static_cast<uint16_t>(position.x), static_cast<uint16_t>(position.y));
-    }
-    return &weaponSpawnpoints;
+	for (auto &[pos, tileObject] : spawnpoints->getTileObjects()) {
+		tson::Vector2f position = tileObject.getPosition();
+		weaponSpawnpoints.emplace_back(static_cast<uint16_t>(position.x), static_cast<uint16_t>(position.y));
+	}
+	return &weaponSpawnpoints;
 }
-*/
 
 } // namespace FishEngine

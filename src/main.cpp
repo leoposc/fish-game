@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <arpa/inet.h>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -16,33 +17,34 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
-FishEngine::ClientGame *clientGame = nullptr;
-FishEngine::ServerGame *serverGame = nullptr;
+using cG = FishEngine::ClientGame;
+using sG = FishEngine::ServerGame;
 
-int main(int argc, char *argv[]) {
+typedef void (*FuncPtr)();
+
+cG *client = nullptr;
+sG *server = nullptr;
+
+FuncPtr mainMenu();
+FuncPtr hostLobby();
+
+FuncPtr combat() {
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 
 	u_int32_t frameStart;
 	int frameTime;
 
-	clientGame = new FishEngine::ClientGame();
-	serverGame = new FishEngine::ServerGame();
-
-	clientGame->init("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false, 2);
-	std::cout << "\nClient Game Initialized\n" << std::endl;
-	serverGame->init("Fish Game Server", 2);
-
-	while (clientGame->running()) {
+	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
-		clientGame->handleEvents();
-		serverGame->handleEvents();
+		client->handleEvents();
+		// server->handleEvents();
 
-		serverGame->update();
-		clientGame->update();
+		// server->update();
+		client->update();
 
-		clientGame->render();
+		client->render();
 
 		frameTime = SDL_GetTicks() - frameStart;
 
@@ -51,7 +53,78 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	clientGame->clean();
+	return mainMenu();
+}
+
+FuncPtr hostLobby() {
+	std::cout << "Host Lobby - not implemented yet - back to mainMenu" << std::endl;
+
+	return mainMenu();
+}
+
+FuncPtr joinLobby() {
+	std::cout << "Join Lobby" << std::endl;
+	std::cout << "Enter IP: ";
+	std::string ip;
+	std::cin >> ip;
+	client->joinGame(ip);
+	// ================================================================
+	// being able to swim a little around with the other players
+	const int FPS = 60;
+	const int frameDelay = 1000 / FPS;
+
+	u_int32_t frameStart;
+	int frameTime;
+	// client->init("map03.tmj", 2);
+	// server->init("map03.tmj", 2);
+	while (!client->hasStarted()) {
+		// 	frameStart = SDL_GetTicks();
+		// 	client->handleEvents();
+		// 	server->handleEvents();
+		// 	server->update();
+		// 	client->update();
+		// 	client->render();
+		// 	frameTime = SDL_GetTicks() - frameStart;
+		// 	if (frameDelay > frameTime) {
+		// 		SDL_Delay(frameDelay - frameTime);
+		// 	}
+	}
+	// ======================== INIT GAME ============================
+	client->init(2);
+	server->init("map03.tmj", 2);
+
+	std::cout << "====================GAME STARTED==================" << std::endl;
+	return combat();
+}
+
+FuncPtr mainMenu() {
+	std::cout << "Main Menu - choose" << std::endl;
+	std::cout << "1. Host Lobby" << std::endl;
+	std::cout << "2. Join Lobby" << std::endl;
+	std::cout << "3. Quit" << std::endl;
+	std::cout << "Enter choice: ";
+	std::cin.clear();
+	int choice;
+	std::cin >> choice;
+	switch (choice) {
+	case 1:
+		return hostLobby();
+		break;
+	case 2:
+		return joinLobby();
+		break;
+	default:
+		break;
+	}
+	return nullptr;
+}
+
+int main(int argc, char *argv[]) {
+
+	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
+	server = new sG();
+
+	mainMenu();
 
 	return 0;
 }

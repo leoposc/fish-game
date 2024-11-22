@@ -15,7 +15,7 @@ ColliderComponent::ColliderComponent(std::string t, int xpos, int ypos, int xsiz
 }
 
 void ColliderComponent::init() {
-	std::cout << "COLLIDER COMPONENT INITS" << std::endl;
+	// std::cout << "COLLIDER COMPONENT INITS" << std::endl;
 	transform = &entity->getComponent<TransformComponent>();
 	lastPosition = transform->position;
 	collider.x = static_cast<int>(transform->position.getX());

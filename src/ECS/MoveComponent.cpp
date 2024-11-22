@@ -7,7 +7,7 @@ namespace FishEngine {
 // MoveComponent::MoveComponent() {}
 
 void MoveComponent::init() {
-	std::cout << "MOVE COMPONENT INIT" << std::endl;
+	// std::cout << "MOVE COMPONENT INIT" << std::endl;
 	if (!entity->hasComponent<TransformComponent>()) {
 		std::cout << "MoveComponent: Creating TransformComponent" << std::endl;
 		entity->addComponent<TransformComponent>();

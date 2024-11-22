@@ -31,7 +31,7 @@ void SpriteComponent::setTexture(std::string id) {
 }
 
 void SpriteComponent::init() {
-	std::cout << "SpriteComponent: initializing " << id << std::endl;
+	// std::cout << "SpriteComponent: initializing " << id << std::endl;
 	if (entity->hasComponent<TransformComponent>()) {
 		transform = &entity->getComponent<TransformComponent>();
 	} else {
@@ -44,9 +44,9 @@ void SpriteComponent::init() {
 }
 
 void SpriteComponent::update() {
-	if (id == "pistol") {
-		std::cout << "SpriteComponent: updating " << id << std::endl;
-	}
+	// if (id == "pistol") {
+	// 	std::cout << "SpriteComponent: updating " << id << std::endl;
+	// }
 	dstRect.x = (int)transform->getX();
 	dstRect.y = (int)transform->getY();
 	dstRect.w = transform->width;

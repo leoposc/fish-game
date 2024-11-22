@@ -46,6 +46,7 @@ void EventHandlerComponent::update()
 			break;
 		// equip/ unequip
 		case SDLK_j:
+			std::cout << "J pressed" << std::endl;
 			equip->processCommand();
 			break;
 		case SDLK_k:

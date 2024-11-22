@@ -111,10 +111,10 @@ class Entity {
 
 	template <typename T, typename... TArgs>
 	T &addComponent(TArgs &&...mArgs) {
-		return *addComponent<T, -1>(std::forward<TArgs>(mArgs)...);
+		return addComponent<T, -1>(std::forward<TArgs>(mArgs)...);
 	}
 
-	template <typename T, typename N, typename... TArgs>
+	template <typename T, int N, typename... TArgs>
 	T &addComponent(TArgs &&...mArgs) {
 		// check if the component already exists
 		assert(!hasComponent<T>());

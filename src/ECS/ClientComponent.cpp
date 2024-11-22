@@ -5,7 +5,7 @@
 namespace FishEngine {
 
 void ClientComponent::init() {
-	std::cout << "CLIENT COMPONENT INIT" << std::endl;
+	// std::cout << "CLIENT COMPONENT INIT" << std::endl;
 	transform = &entity->getComponent<TransformComponent>();
 }
 
