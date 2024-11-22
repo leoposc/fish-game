@@ -4,6 +4,7 @@
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
+#include <string>
 #include <vector>
 
 namespace FishEngine {
@@ -11,12 +12,13 @@ namespace FishEngine {
 class ClientGame {
 
   public:
-	ClientGame();
+	ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen);
+
 	~ClientGame();
 
 	SDL_Event getEvent() { return game_event; }
 
-	void init(const char *title, int xpos, int ypos, int width, int height, bool fullscreen, int numPlayers);
+	void init(int numPlayers);
 
 	void handleEvents();
 
@@ -26,11 +28,13 @@ class ClientGame {
 
 	void render();
 
-	void clean();
-
 	bool running();
 
+	bool hasStarted();
+
 	void stop();
+
+	bool joinGame(std::string ip);
 
 	static SDL_Renderer *renderer;
 	static SDL_Event game_event;
@@ -47,7 +51,11 @@ class ClientGame {
 	};
 
   private:
+	fs::path mapPath;
+	int numPlayers;
 	bool isRunning;
+	bool started;
+
 	SDL_Window *window;
 	bool windowed = true;
 

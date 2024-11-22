@@ -20,30 +20,31 @@
 using cG = FishEngine::ClientGame;
 using sG = FishEngine::ServerGame;
 
-cG *clientGame = nullptr;
-sG *serverGame = nullptr;
+typedef void (*FuncPtr)();
 
-void combat(cG *clientGame, sG *serverGame) {
-	clientGame->handleEvents();
-	serverGame->handleEvents();
+cG *client = nullptr;
+sG *server = nullptr;
 
-	serverGame->update();
-	clientGame->update();
+FuncPtr mainMenu();
+FuncPtr hostLobby();
 
-	clientGame->render();
-}
-
-void loop(const int FPS, cG *client, sG *server, std::function<void(cG *, sG *)> func) {
-	// todo: read FPS from config file
+FuncPtr combat() {
+	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 
 	u_int32_t frameStart;
 	int frameTime;
 
-	while (clientGame->running()) {
+	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
-		func(client, server);
+		client->handleEvents();
+		server->handleEvents();
+
+		server->update();
+		client->update();
+
+		client->render();
 
 		frameTime = SDL_GetTicks() - frameStart;
 
@@ -51,20 +52,76 @@ void loop(const int FPS, cG *client, sG *server, std::function<void(cG *, sG *)>
 			SDL_Delay(frameDelay - frameTime);
 		}
 	}
+
+	return mainMenu();
+}
+
+FuncPtr hostLobby() {
+	std::cout << "Host Lobby - not implemented yet - back to mainMenu" << std::endl;
+
+	return mainMenu();
+}
+
+FuncPtr joinLobby() {
+	std::cout << "Join Lobby" << std::endl;
+	std::cout << "Enter IP: ";
+	std::string ip;
+	std::cin >> ip;
+	client->joinGame(ip);
+	// ================================================================
+	// being able to swim a little around with the other players
+	const int FPS = 60;
+	const int frameDelay = 1000 / FPS;
+
+	u_int32_t frameStart;
+	int frameTime;
+	// client->init("map03.tmj", 2);
+	// server->init("map03.tmj", 2);
+	while (!client->hasStarted()) {
+		// 	frameStart = SDL_GetTicks();
+		// 	client->handleEvents();
+		// 	server->handleEvents();
+		// 	server->update();
+		// 	client->update();
+		// 	client->render();
+		// 	frameTime = SDL_GetTicks() - frameStart;
+		// 	if (frameDelay > frameTime) {
+		// 		SDL_Delay(frameDelay - frameTime);
+		// 	}
+	}
+	client->init(2);
+	server->init("map03.tmj", 2);
+	return combat();
+}
+
+FuncPtr mainMenu() {
+	std::cout << "Main Menu - choose" << std::endl;
+	std::cout << "1. Host Lobby" << std::endl;
+	std::cout << "2. Join Lobby" << std::endl;
+	std::cout << "3. Quit" << std::endl;
+	std::cout << "Enter choice: ";
+	std::cin.clear();
+	int choice;
+	std::cin >> choice;
+	switch (choice) {
+	case 1:
+		return hostLobby();
+		break;
+	case 2:
+		return joinLobby();
+		break;
+	default:
+		break;
+	}
+	return nullptr;
 }
 
 int main(int argc, char *argv[]) {
-	const int FPS = 60;
 
-	clientGame = new cG();
-	serverGame = new sG();
+	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
+	server = new sG();
 
-	clientGame->init("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false, 2);
-	serverGame->init("Fish Game Server", 2);
-
-	loop(FPS, clientGame, serverGame, combat);
-
-	clientGame->clean();
+	mainMenu();
 
 	return 0;
 }

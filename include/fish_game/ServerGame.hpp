@@ -23,15 +23,11 @@ class ServerGame {
 
 	SDL_Event getEvent() { return game_event; }
 
-	void init(const char *title, int numPlayer);
+	void init(fs::path mapPath, int numPlayer);
 
 	void handleEvents();
 
 	void update();
-
-	void render();
-
-	void clean();
 
 	bool running();
 
@@ -51,6 +47,8 @@ class ServerGame {
 	enum groupLabels : std::size_t { groupMap, groupPlayers, groupEnemies, groupColliders, groupProjectiles };
 
   private:
+	// fs::path mapPath;
+	// bool started;
 	bool isRunning;
 	SDL_Window *window;
 

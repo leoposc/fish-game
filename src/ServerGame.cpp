@@ -29,10 +29,11 @@ ServerGame::ServerGame() : isRunning(false) {}
 
 ServerGame::~ServerGame() {}
 
-void ServerGame::init(const char *title, int numPlayers) {
+void ServerGame::init(fs::path mapPath, int numPlayers) {
 	// ================== init serverMap and assets ==================
+	// mapPath = fs::path("../../maps") / mapPath;
 	serverMap = new Map();
-	serverMap->loadMap("../../maps/map03.tmj");
+	serverMap->loadMap(fs::path("../../maps") / mapPath);
 	// assets->addTexture("fish", "../../assets/RedFishSmall.pname"); any reason to load it here as well?
 
 	// =================== init player===========================
