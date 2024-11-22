@@ -69,6 +69,8 @@ ClientGame::~ClientGame() {
 	// log clean
 }
 
+// todo: sync player positions with server/ fetch them from server
+// todo: sync weapon positions with server/ fetch them from server / spawn them periodically
 void ClientGame::init(int numPlayers) {
 
 	// ================== init clientMap and assets ==================
@@ -78,16 +80,27 @@ void ClientGame::init(int numPlayers) {
 
 	// ================== init player ==================
 	auto &player(clientManager.addEntity());
-	auto initPos = clientMap->getInitialPos().at(0);
-	ClientComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
+	auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
+	ClientComponentsGenerator::forPlayer(player, initPos.at(0).first, initPos.at(0).second);
 	players.push_back(&player);
 
 	// ================== init enemies ==================
 	for (int i = 1; i < numPlayers; ++i) {
 		auto &opponent(clientManager.addEntity());
-		auto initPos = clientMap->getInitialPos().at(i);
-		ClientComponentsGenerator::forEnemy(opponent, initPos.first, initPos.second);
+		ClientComponentsGenerator::forEnemy(opponent, initPos.at(i).first, initPos.at(i).second);
 		players.push_back(&opponent);
+	}
+
+	// ================== init weapons ==================
+	spawnWeapons();
+}
+
+void ClientGame::spawnWeapons() {
+	// ================== init weapons ==================
+	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
+	for (auto &spawnpoint : *spawnpoints) {
+		auto &weapon(clientManager.addEntity());
+		ClientComponentsGenerator::forWeapon(weapon, spawnpoint.first, spawnpoint.second);
 	}
 }
 
@@ -195,20 +208,7 @@ void ClientGame::render() {
 	// SDL_RenderSetViewport(renderer, &camera);
 
 	clientMap->drawMap();
-
 	clientManager.draw();
-
-	// ===================== test if adaptive movement works ==========================
-	// Entity *player = clientManager.getGroup(groupLabels::groupPlayers).back();
-	// bool swimming = clientMap->isInWater(&player->getComponent<ColliderComponent>().collider);
-	// player->getComponent<MoveComponent>().inWater = swimming;
-
-	// bool collision = clientMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider);
-	//  do something with the collision - don't know how to handle movements in x - y axis yet
-
-	// for (auto &t : clientManager.getGroup(groupLabels::groupColliders)) {
-	//   t->draw();
-	// }
 
 	for (auto &t : clientManager.getGroup(groupLabels::groupPlayers)) {
 		t->draw();

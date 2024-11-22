@@ -18,6 +18,8 @@ class ClientGame {
 
 	SDL_Event getEvent() { return game_event; }
 
+	void spawnWeapons();
+
 	void init(int numPlayers);
 
 	void handleEvents();

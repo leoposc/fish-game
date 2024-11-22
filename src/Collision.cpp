@@ -2,14 +2,16 @@
 
 namespace FishEngine {
 
-void Collision::checkWaterCollisions(std::vector<Entity *> *players, Map *map) {
+namespace Collision {
+
+void checkWaterCollisions(std::vector<Entity *> *players, Map *map) {
 	for (auto &player : *players) {
 		player->getComponent<MoveComponent>().inWater =
 		    map->isInWater(&player->getComponent<ColliderComponent>().collider);
 	}
 }
 
-void Collision::checkPlattformCollisions(std::vector<Entity *> *players, Map *serverMap) {
+void checkPlattformCollisions(std::vector<Entity *> *players, Map *serverMap) {
 	for (auto &player : *players) {
 		if (serverMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider)) {
 			// check if player is moving downwards
@@ -19,5 +21,7 @@ void Collision::checkPlattformCollisions(std::vector<Entity *> *players, Map *se
 		}
 	}
 }
+
+} // namespace Collision
 
 } // namespace FishEngine

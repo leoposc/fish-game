@@ -53,7 +53,7 @@ class Map {
 
 	std::vector<std::pair<uint16_t, uint16_t>> getPlayerSpawnpoints(size_t numPlayers);
 
-	std::vector<std::pair<uint16_t, uint16_t>> *getWeaponSpawnpoints();
+	std::vector<std::pair<uint16_t, uint16_t>> *loadWeaponSpawnpoints();
 	/*
 	 * @brief: create a two dimensional array of the size of the map
 	 * @param: void
@@ -119,6 +119,8 @@ class Map {
 	std::map<uint32_t, tson::Animation *> animationUpdateQueue;
 
 	std::vector<std::pair<std::uint16_t, std::uint16_t>> initialPos;
+
+	std::vector<std::pair<uint16_t, uint16_t>> weaponSpawnpoints;
 };
 
 } // namespace FishEngine

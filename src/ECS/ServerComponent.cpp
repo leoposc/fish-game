@@ -5,7 +5,7 @@
 namespace FishEngine {
 
 void ServerComponent::init() {
-	std::cout << "SERVER COMPONENT INIT" << std::endl;
+	// std::cout << "SERVER COMPONENT INIT" << std::endl;
 	transform = &entity->getComponent<TransformComponent>();
 }
 

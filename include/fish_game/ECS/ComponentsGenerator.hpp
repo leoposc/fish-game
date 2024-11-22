@@ -20,8 +20,8 @@ class ClientComponentsGenerator {
 		player.addComponent<ColliderComponent>("player", x, y, 45, 60);
 		player.addComponent<MoveComponent>();
 		player.addComponent<GravityComponent>();
-		player.addComponent<EventHandlerComponent>();
 		player.addComponent<EquipmentComponent>();
+		player.addComponent<EventHandlerComponent>();
 		player.addGroup(ClientGame::groupLabels::groupPlayers);
 	}
 

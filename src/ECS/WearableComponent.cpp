@@ -8,7 +8,7 @@
 namespace FishEngine {
 
 void WearableComponent::init() {
-	std::cout << "WearableComponent - init" << std::endl;
+	// std::cout << "WearableComponent - init" << std::endl;
 	if (!entity->hasComponent<TransformComponent>()) {
 		entity->addComponent<TransformComponent>();
 	}
@@ -36,18 +36,6 @@ void WearableComponent::detach() {
 
 void WearableComponent::shoot() {
 	std::cout << "WearableComponent - shoot" << std::endl;
-	// get manager
-	auto man = entity->getManager();
-	// create a new projectile
-	auto &projectile(man->addEntity());
-	// auto &projectile(this->entity->getManager()->addEntity());
-	// projectile.addComponent<TransformComponent>(transform->position.getX(), transform->position.getY(), 16, 16, 1);
-	// projectile.addComponent<ProjectileComponent>(500, 2, Vector2D(2, 0));
-	// projectile.addComponent<ColliderComponent>("projectile");
-	// projectile.addComponent<SpriteComponent>("projectile");
-	// projectile.addGroup(Game::groupProjectiles);
-	std::cout << "Projectile created, addr: " << &projectile << std::endl;
-	// projectile.destroy();
 }
 
 } // namespace FishEngine

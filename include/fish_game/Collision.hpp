@@ -8,13 +8,12 @@
 
 namespace FishEngine {
 
-class Collision {
-  public:
-	static void test() {}
+namespace Collision {
 
-	static void checkWaterCollisions(std::vector<Entity *> *players, Map *map);
+void checkWaterCollisions(std::vector<Entity *> *players, Map *map);
 
-	static void checkPlattformCollisions(std::vector<Entity *> *players, Map *map);
-};
+void checkPlattformCollisions(std::vector<Entity *> *players, Map *map);
+
+} // namespace Collision
 
 } // namespace FishEngine

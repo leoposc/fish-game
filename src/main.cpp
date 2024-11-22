@@ -89,8 +89,11 @@ FuncPtr joinLobby() {
 		// 		SDL_Delay(frameDelay - frameTime);
 		// 	}
 	}
+	// ======================== INIT GAME ============================
 	client->init(2);
 	server->init("map03.tmj", 2);
+
+	std::cout << "====================GAME STARTED==================" << std::endl;
 	return combat();
 }
 

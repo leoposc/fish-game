@@ -8,7 +8,7 @@ namespace FishEngine {
 ProjectileComponent::ProjectileComponent(int rng, int sp, Vector2D vel) : range(rng), speed(sp), velocity(vel) {}
 
 void ProjectileComponent::init() {
-	std::cout << "PROJECTILE COMPONENT INIT" << std::endl;
+	// std::cout << "PROJECTILE COMPONENT INIT" << std::endl;
 	transform = &entity->getComponent<TransformComponent>();
 	transform->velocity = velocity;
 }
