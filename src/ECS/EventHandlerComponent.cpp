@@ -2,18 +2,19 @@
 #include "../../include/fish_game/ClientGame.hpp"
 #include "../../include/fish_game/ECS/EquipmentComponent.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
+#include "spdlog/spdlog.h"
 
 namespace FishEngine {
 
 void EventHandlerComponent::init() {
-	std::cout << "EVENT HANDLER COMPONENT INTI" << std::endl;
+	spdlog::get("console")->debug("EVENT HANDLER COMPONENT INTI");
 	if (!entity->hasComponent<MoveComponent>()) {
-		std::cout << "Event Handler Component: no MoveComponent found." << std::endl;
+		spdlog::get("console")->debug("Event Handler Component: no MoveComponent found.");
 	} else {
 		move = &entity->getComponent<MoveComponent>();
 	}
 	if (!entity->hasComponent<EquipmentComponent>()) {
-		std::cout << "Event Handler Component: no EquipmentComponent found." << std::endl;
+		spdlog::get("console")->debug("Event Handler Component: no EquipmentComponent found.");
 	} else {
 		equip = &entity->getComponent<EquipmentComponent>();
 	}
@@ -46,7 +47,7 @@ void EventHandlerComponent::update()
 			break;
 		// equip/ unequip
 		case SDLK_j:
-			std::cout << "J pressed" << std::endl;
+			spdlog::get("console")->debug("J pressed");
 			equip->processCommand();
 			break;
 		case SDLK_k:
@@ -85,7 +86,7 @@ void EventHandlerComponent::update()
 			break;
 		}
 	}
-	// std::cout << "EVENTHANDLER COMPONENT UPDATED" << std::endl;
+	spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
 }
 
 } // namespace FishEngine

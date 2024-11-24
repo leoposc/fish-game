@@ -4,6 +4,8 @@
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 
+#include "spdlog/spdlog.h"
+
 #include <SDL2/SDL.h>
 #include <filesystem>
 #include <map>
@@ -31,11 +33,11 @@ void SpriteComponent::setTexture(std::string id) {
 }
 
 void SpriteComponent::init() {
-	// std::cout << "SpriteComponent: initializing " << id << std::endl;
+	// spdlog::get("console")->debug( "SpriteComponent: initializing " << id );
 	if (entity->hasComponent<TransformComponent>()) {
 		transform = &entity->getComponent<TransformComponent>();
 	} else {
-		std::cout << "SpriteComponent: no ClientTransformComponent found." << std::endl;
+		spdlog::get("console")->debug("SpriteComponent: no ClientTransformComponent found.");
 	}
 
 	srcRect.x = srcRect.y = 0;
@@ -45,7 +47,7 @@ void SpriteComponent::init() {
 
 void SpriteComponent::update() {
 	// if (id == "pistol") {
-	// 	std::cout << "SpriteComponent: updating " << id << std::endl;
+	// 	spdlog::get("console")->debug( "SpriteComponent: updating " << id );
 	// }
 	dstRect.x = (int)transform->getX();
 	dstRect.y = (int)transform->getY();

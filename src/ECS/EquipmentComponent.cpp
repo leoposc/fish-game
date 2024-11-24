@@ -5,18 +5,20 @@
 #include "../../include/fish_game/ECS/WearableComponent.hpp"
 #include "../../include/fish_game/ServerGame.hpp"
 
+#include "spdlog/spdlog.h"
+
 namespace FishEngine {
 
 void EquipmentComponent::init() {
-	std::cout << "EQUIPMENT COMPONENT INIT" << std::endl;
+	spdlog::get("console")->debug("EQUIPMENT COMPONENT INIT");
 	collider = &entity->getComponent<ColliderComponent>();
 }
 
 // void EquipmentComponent::update() {
 // 	if (isEquipped) {
-// 		std::cout << "EquipmentComponent - equipped" << std::endl;
+// 		spdlog::get("console")->debug( "EquipmentComponent - equipped" );
 // 	} else {
-// 		std::cout << "EquipmentComponent - not equipped" << std::endl;
+// 		spdlog::get("console")->debug( "EquipmentComponent - not equipped" );
 // 	}
 // }
 
@@ -48,7 +50,7 @@ void EquipmentComponent::unequip() {
 	if (wearable != nullptr) {
 		wearable->detach();
 	} else {
-		std::cout << "No wearable attached!" << std::endl;
+		spdlog::info("No wearable attached!");
 	}
 }
 
@@ -56,7 +58,7 @@ void EquipmentComponent::shoot() {
 	if (isEquipped) {
 		wearable->shoot();
 	} else {
-		std::cout << "No weapon equipped!" << std::endl;
+		spdlog::info("No weapon equipped!");
 	}
 }
 

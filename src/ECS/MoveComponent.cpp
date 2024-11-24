@@ -1,5 +1,8 @@
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/Vector2D.hpp"
+
+#include "spdlog/spdlog.h"
+
 // #include "MoveComponent.hpp"
 
 namespace FishEngine {
@@ -7,9 +10,9 @@ namespace FishEngine {
 // MoveComponent::MoveComponent() {}
 
 void MoveComponent::init() {
-	// std::cout << "MOVE COMPONENT INIT" << std::endl;
+	// spdlog::get("console")->debug( "MOVE COMPONENT INIT");
 	if (!entity->hasComponent<TransformComponent>()) {
-		std::cout << "MoveComponent: Creating TransformComponent" << std::endl;
+		spdlog::get("console")->debug("MoveComponent: Creating TransformComponent");
 		entity->addComponent<TransformComponent>();
 	}
 	transform = &entity->getComponent<TransformComponent>();

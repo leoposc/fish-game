@@ -4,11 +4,12 @@
 #include "../../include/fish_game/ECS/ProjectileComponent.hpp"
 #include "../../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
+#include "spdlog/spdlog.h"
 
 namespace FishEngine {
 
 void WearableComponent::init() {
-	// std::cout << "WearableComponent - init" << std::endl;
+	// spdlog::get("console")->debug( "WearableComponent - init" );
 	if (!entity->hasComponent<TransformComponent>()) {
 		entity->addComponent<TransformComponent>();
 	}
@@ -23,19 +24,19 @@ void WearableComponent::update() {
 }
 
 void WearableComponent::attach(Entity *entity) {
-	std::cout << "WearableComponent - attach" << std::endl;
+	spdlog::get("console")->debug("WearableComponent - attach");
 	attachedEntity = entity;
 	isAttached = true;
 }
 
 void WearableComponent::detach() {
-	std::cout << "WearableComponent - detach" << std::endl;
+	spdlog::get("console")->debug("WearableComponent - detach");
 	attachedEntity = nullptr;
 	isAttached = false;
 }
 
 void WearableComponent::shoot() {
-	std::cout << "WearableComponent - shoot" << std::endl;
+	spdlog::get("console")->debug("WearableComponent - shoot");
 }
 
 } // namespace FishEngine

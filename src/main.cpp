@@ -3,6 +3,8 @@
 #include "../include/fish_game/NetworkClient.hpp"
 #include "../include/fish_game/NetworkHost.hpp"
 #include "../include/fish_game/ServerGame.hpp"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/spdlog.h"
 
 #include <SDL2/SDL.h>
 #include <arpa/inet.h>
@@ -64,7 +66,7 @@ FuncPtr hostLobby() {
 
 FuncPtr joinLobby() {
 	std::cout << "Join Lobby" << std::endl;
-	std::cout << "Enter IP: ";
+	std::cout << "Enter IP: " << std::endl;
 	std::string ip;
 	std::cin >> ip;
 	client->joinGame(ip);
@@ -102,7 +104,7 @@ FuncPtr mainMenu() {
 	std::cout << "1. Host Lobby" << std::endl;
 	std::cout << "2. Join Lobby" << std::endl;
 	std::cout << "3. Quit" << std::endl;
-	std::cout << "Enter choice: ";
+	std::cout << "Enter choice: " << std::endl;
 	std::cin.clear();
 	int choice;
 	std::cin >> choice;
@@ -120,6 +122,9 @@ FuncPtr mainMenu() {
 }
 
 int main(int argc, char *argv[]) {
+	spdlog::set_level(spdlog::level::debug);
+	auto console = spdlog::stdout_color_mt("console");
+	auto err_logger = spdlog::stderr_color_mt("stderr");
 
 	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
