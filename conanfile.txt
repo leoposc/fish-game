@@ -10,3 +10,5 @@ CMakeToolchain
 [layout]
 cmake_layout
 
+[options]
+*:CMAKE_EXPORT_COMPILE_COMMANDS=ON
