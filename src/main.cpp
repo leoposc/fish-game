@@ -1,95 +1,130 @@
-#include <cereal/archives/json.hpp>
-#include <cereal/types/memory.hpp>
-#include <cereal/types/unordered_map.hpp>
-#include <cereal/types/vector.hpp>
+#include "../include/fish_game/ClientGame.hpp"
+#include "../include/fish_game/GameInputEvents.hpp"
+#include "../include/fish_game/NetworkClient.hpp"
+#include "../include/fish_game/NetworkHost.hpp"
+#include "../include/fish_game/ServerGame.hpp"
+
+#include <SDL2/SDL.h>
+#include <arpa/inet.h>
+#include <cstring>
+#include <functional>
 #include <iostream>
-#include <memory>
-#include <sstream>
-#include <vector>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-class MyRecord {
-  public:
-	uint8_t x, y;
-	float z;
+#define PORT 8080
+#define BUFFER_SIZE 1024
 
-	MyRecord() = default;
-	MyRecord(uint8_t x, uint8_t y, float z) : x(x), y(y), z(z) {}
+using cG = FishEngine::ClientGame;
+using sG = FishEngine::ServerGame;
 
-	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(x, y, z);
-	}
-};
+typedef void (*FuncPtr)();
 
-class SomeData {
-  public:
-	std::vector<std::unique_ptr<MyRecord>> data;
-	std::string name;
-	double value;
-	std::vector<int> largeVector; // This member will not be serialized
+cG *client = nullptr;
+sG *server = nullptr;
 
-	SomeData() = default;
-	SomeData(std::vector<std::unique_ptr<MyRecord>> data, std::string name, double value, std::vector<int> largeVector)
-	    : data(std::move(data)), name(name), value(value), largeVector(largeVector) {}
+FuncPtr mainMenu();
+FuncPtr hostLobby();
 
-	template <class Archive>
-	void save(Archive &ar) const {
-		ar(data, name, value);
-		// largeVector is not serialized
-	}
+FuncPtr combat() {
+	const int FPS = 60;
+	const int frameDelay = 1000 / FPS;
 
-	template <class Archive>
-	void load(Archive &ar) {
-		ar(data, name, value);
-		// largeVector is not deserialized
-	}
-};
+	u_int32_t frameStart;
+	int frameTime;
 
-int main() {
-	// Create an output string stream
-	std::ostringstream os;
-	{
-		cereal::JSONOutputArchive archive(os);
-		std::vector<std::unique_ptr<MyRecord>> records;
-		records.push_back(std::make_unique<MyRecord>(1, 2, 3.0f));
-		records.push_back(std::make_unique<MyRecord>(4, 5, 6.0f));
-		SomeData myData(std::move(records), "ExampleName", 42.42, {1, 2, 3, 4, 5});
-		archive(myData);
+	while (client->running()) {
+		frameStart = SDL_GetTicks();
+
+		client->handleEvents();
+		// server->handleEvents();
+
+		// server->update();
+		client->update();
+
+		client->render();
+
+		frameTime = SDL_GetTicks() - frameStart;
+
+		if (frameDelay > frameTime) {
+			SDL_Delay(frameDelay - frameTime);
+		}
 	}
 
-	// Get the serialized string
-	std::string serializedData = os.str();
-	std::cout << "Serialized Data: " << serializedData << std::endl;
+	return mainMenu();
+}
 
-	// Create an existing SomeData object with a different largeVector
-	std::vector<std::unique_ptr<MyRecord>> existingRecords;
-	existingRecords.push_back(std::make_unique<MyRecord>(7, 8, 9.0f));
-	SomeData existingData(std::move(existingRecords), "OldName", 24.24, {10, 20, 30});
+FuncPtr hostLobby() {
+	std::cout << "Host Lobby - not implemented yet - back to mainMenu" << std::endl;
 
-	// Deserialize from the string into the existing object
-	try {
-		std::istringstream is(serializedData);
-		cereal::JSONInputArchive archive(is);
-		archive(existingData);
-	} catch (const cereal::Exception &e) {
-		std::cerr << "Deserialization error: " << e.what() << std::endl;
-		return 1;
+	return mainMenu();
+}
+
+FuncPtr joinLobby() {
+	std::cout << "Join Lobby" << std::endl;
+	std::cout << "Enter IP: ";
+	std::string ip;
+	std::cin >> ip;
+	client->joinGame(ip);
+	// ================================================================
+	// being able to swim a little around with the other players
+	const int FPS = 60;
+	const int frameDelay = 1000 / FPS;
+
+	u_int32_t frameStart;
+	int frameTime;
+	// client->init("map03.tmj", 2);
+	// server->init("map03.tmj", 2);
+	while (!client->hasStarted()) {
+		// 	frameStart = SDL_GetTicks();
+		// 	client->handleEvents();
+		// 	server->handleEvents();
+		// 	server->update();
+		// 	client->update();
+		// 	client->render();
+		// 	frameTime = SDL_GetTicks() - frameStart;
+		// 	if (frameDelay > frameTime) {
+		// 		SDL_Delay(frameDelay - frameTime);
+		// 	}
 	}
+	// ======================== INIT GAME ============================
+	client->init(2);
+	server->init("map03.tmj", 2);
 
-	// Print the values of the loaded data
-	std::cout << "Name: " << existingData.name << std::endl;
-	std::cout << "Value: " << existingData.value << std::endl;
-	for (const auto &record : existingData.data) {
-		std::cout << "x: " << static_cast<int>(record->x) << ", y: " << static_cast<int>(record->y)
-		          << ", z: " << record->z << std::endl;
-	}
+	std::cout << "====================GAME STARTED==================" << std::endl;
+	return combat();
+}
 
-	// Print the largeVector to show it retains its previous value
-	std::cout << "largeVector: ";
-	for (const auto &val : existingData.largeVector) {
-		std::cout << val << " ";
+FuncPtr mainMenu() {
+	std::cout << "Main Menu - choose" << std::endl;
+	std::cout << "1. Host Lobby" << std::endl;
+	std::cout << "2. Join Lobby" << std::endl;
+	std::cout << "3. Quit" << std::endl;
+	std::cout << "Enter choice: ";
+	std::cin.clear();
+	int choice;
+	std::cin >> choice;
+	switch (choice) {
+	case 1:
+		return hostLobby();
+		break;
+	case 2:
+		return joinLobby();
+		break;
+	default:
+		break;
 	}
-	std::cout << std::endl;
+	return nullptr;
+}
+
+int main(int argc, char *argv[]) {
+
+	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
+	server = new sG();
+
+	mainMenu();
 
 	return 0;
 }
