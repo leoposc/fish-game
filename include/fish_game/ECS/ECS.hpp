@@ -1,11 +1,15 @@
 #pragma once
 
+#include <cereal/archives/json.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
 // #include "Components.hpp"
 #include <algorithm>
 #include <array>
 #include <bitset>
 #include <cassert>
-#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -18,8 +22,6 @@ class Component;
 
 using ComponentID = std::size_t;
 using Group = std::size_t;
-
-const std::string tmp_username = "username";
 
 inline ComponentID generateComponentID() {
 	static ComponentID lastID = 0u;
@@ -79,6 +81,10 @@ class Entity {
 
 	void addGroup(Group group);
 
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(active, components, componentArray, componentBitSet, groupBitSet);
+	}
 	/**
 	 * @brief: update all components which belong to a instance of an entity
 	 * @details: The order of updating components is important. It is defined by the order
@@ -154,6 +160,13 @@ class Manager {
 	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
 
   public:
+	void update() {
+		for (auto &e : entities) {
+			// std::cout << "ECS - Updating entities" << std::endl;
+			e->update();
+		}
+	}
+
 	template <class Archive>
 	void save(Archive &ar) const {
 		ar(entities, groupedEntities);
@@ -163,13 +176,6 @@ class Manager {
 	void load(Archive &ar) {
 		// TODO: maybe restore gouped Entities pointer correctly
 		ar(entities, groupedEntities);
-	}
-
-	void update() {
-		for (auto &e : entities) {
-			// std::cout << "ECS - Updating entities" << std::endl;
-			e->update();
-		}
 	}
 
 	void draw() {
@@ -195,8 +201,13 @@ class Manager {
 	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 
 	Entity &addEntity() {
-		auto e = std::make_unique<Entity>(*this);
-		entities.emplace_back(std::move(e));
+		// std::cout << "Adding entity" << std::endl;
+		Entity *e = new Entity(*this);
+		// std::cout << "Entity created" << std::endl;
+		std::unique_ptr<Entity> uPtr(e);
+		// std::cout << "Unique pointer created" << std::endl;
+		entities.emplace_back(std::move(uPtr));
+		// std::cout << "Entity moved" << std::endl;
 		return *e;
 	}
 };
