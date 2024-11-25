@@ -10,12 +10,6 @@
 #include <thread>
 #include <vector>
 
-class Serializable {
-	virtual std::string getDeltas(const Serializable oldState);
-	virtual void updateObject(Serializable &component);
-	virtual FishEngine::ComponentID getId();
-};
-
 class NetworkClient {
   public:
 	NetworkClient(const std::string hostIP, const std::string username);
@@ -50,8 +44,6 @@ class NetworkClient {
 	// clinet:  - needs to update his own stuff from deltas
 	//          - needs to disable generation of items etc
 	//          - sends input to host and processes them
-
-	std::vector<Serializable> elements;
 
 	// functional variables
 	SocketManager socket;
