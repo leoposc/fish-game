@@ -44,3 +44,5 @@ maps/fish-game.tiled-project
 *.tiled-session
 .clang-format 
 .clangd
+compile_commands.json
+.cache

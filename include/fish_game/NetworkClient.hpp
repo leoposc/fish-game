@@ -1,9 +1,9 @@
 #ifndef NETWORK_CLIENT
 #define NETWORK_CLIENT
 
+#include "./ECS/ECS.hpp"
 #include "./GameInputEvents.hpp"
 #include "./SocketManager.hpp"
-#include "ECS.hpp"
 #include <mutex>
 #include <queue>
 #include <string>
@@ -13,7 +13,7 @@
 class Serializable {
 	virtual std::string getDeltas(const Serializable oldState);
 	virtual void updateObject(Serializable &component);
-	virtual ComponentID getId();
+	virtual FishEngine::ComponentID getId();
 };
 
 class NetworkClient {
@@ -42,6 +42,14 @@ class NetworkClient {
 	// 4. client1 sends button Press -> server receives, updates its player broadcasts the delta out
 	//
 	// Where do we call all the updateObjects? In the loop would probably be best?
+	//
+	//
+	// host:    - needs to monitor what fields change to create deltas
+	//          - processes all events, own and incoming
+	//
+	// clinet:  - needs to update his own stuff from deltas
+	//          - needs to disable generation of items etc
+	//          - sends input to host and processes them
 
 	std::vector<Serializable> elements;
 

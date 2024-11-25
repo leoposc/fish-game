@@ -5,6 +5,7 @@
 #include <array>
 #include <bitset>
 #include <cassert>
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -17,6 +18,8 @@ class Component;
 
 using ComponentID = std::size_t;
 using Group = std::size_t;
+
+const std::string tmp_username = "username";
 
 inline ComponentID generateComponentID() {
 	static ComponentID lastID = 0u;
@@ -52,6 +55,9 @@ class Component {
 	 * will be called. Meaning that nothing will happen.
 	 */
 	virtual void draw() {}
+
+	template <class Archive>
+	void serialize(Archive &ar) {}
 
 	virtual ~Component() {}
 };
@@ -148,6 +154,17 @@ class Manager {
 	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
 
   public:
+	template <class Archive>
+	void save(Archive &ar) const {
+		ar(entities, groupedEntities);
+	}
+
+	template <class Archive>
+	void load(Archive &ar) {
+		// TODO: maybe restore gouped Entities pointer correctly
+		ar(entities, groupedEntities);
+	}
+
 	void update() {
 		for (auto &e : entities) {
 			// std::cout << "ECS - Updating entities" << std::endl;
@@ -178,15 +195,22 @@ class Manager {
 	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 
 	Entity &addEntity() {
-		// std::cout << "Adding entity" << std::endl;
-		Entity *e = new Entity(*this);
-		// std::cout << "Entity created" << std::endl;
-		std::unique_ptr<Entity> uPtr(e);
-		// std::cout << "Unique pointer created" << std::endl;
-		entities.emplace_back(std::move(uPtr));
-		// std::cout << "Entity moved" << std::endl;
+		auto e = std::make_unique<Entity>(*this);
+		entities.emplace_back(std::move(e));
 		return *e;
 	}
 };
+
+// id synchronizaiton? maybe not needed if manager is always kept in synch, with cereal we can only update the changing
+// variables
+//
+// if i created the object it might not match with the id of the host should i just prepend my username to all ids, and
+// strip it when upacking? What if i get a whole new object? How do i match that?
+//
+// Other option: get all components and entities from server when joining -> all ids would auto match
+//
+//
+// protocol: array of messages; if update: - update
+//                              if new:    - generate Component, needed arguemnts given
 
 } // namespace FishEngine
