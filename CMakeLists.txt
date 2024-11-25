@@ -9,7 +9,6 @@ file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 
 # Configure a header file to pass the version number to the source code
 configure_file(include/fish_game/Config.hpp.in Config.hpp)
-include_directories(${CMAKE_SOURCE_DIR}/include)
 
 include_directories(include)
 
