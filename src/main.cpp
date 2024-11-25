@@ -12,49 +12,60 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
+
+#include <SDL2/SDL.h>
+#include <arpa/inet.h>
 #include <cstring>
 #include <functional>
 #include <iostream>
-#include <memory>
-#include <sstream>
-#include <vector>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-class MyRecord {
-  public:
-	uint8_t x, y;
-	float z;
+#define PORT 8080
+#define BUFFER_SIZE 1024
 
-	MyRecord() = default;
-	MyRecord(uint8_t x, uint8_t y, float z) : x(x), y(y), z(z) {}
+using cG = FishEngine::ClientGame;
+using sG = FishEngine::ServerGame;
 
-	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(x, y, z);
-	}
-};
+typedef void (*FuncPtr)();
 
-class SomeData {
-  public:
-	std::vector<std::unique_ptr<MyRecord>> data;
-	std::string name;
-	double value;
-	std::vector<int> largeVector; // This member will not be serialized
+cG *client = nullptr;
+sG *server = nullptr;
 
-	SomeData() = default;
-	SomeData(std::vector<std::unique_ptr<MyRecord>> data, std::string name, double value, std::vector<int> largeVector)
-	    : data(std::move(data)), name(name), value(value), largeVector(largeVector) {}
+FuncPtr mainMenu();
+FuncPtr hostLobby();
 
-	template <class Archive>
-	void save(Archive &ar) const {
-		ar(data, name, value);
-		// largeVector is not serialized
+FuncPtr combat() {
+	const int FPS = 60;
+	const int frameDelay = 1000 / FPS;
+
+	u_int32_t frameStart;
+	int frameTime;
+
+	while (client->running()) {
+		frameStart = SDL_GetTicks();
+
+		client->handleEvents();
+		// server->handleEvents();
+
+		// server->update();
+		client->update();
+
+		client->render();
+
+		frameTime = SDL_GetTicks() - frameStart;
+
+		if (frameDelay > frameTime) {
+			SDL_Delay(frameDelay - frameTime);
+		}
 	}
 
 	return mainMenu();
 }
 
-FuncPtr
-hostLobby() {
+FuncPtr hostLobby() {
 	std::cout << "Host Lobby - not implemented yet - back to mainMenu" << std::endl;
 
 	return mainMenu();
@@ -87,10 +98,44 @@ FuncPtr joinLobby() {
 		// 		SDL_Delay(frameDelay - frameTime);
 		// 	}
 	}
-};
+	// ======================== INIT GAME ============================
+	client->init(2);
+	server->init("map03.tmj", 2);
 
-std::cout << "====================GAME STARTED==================" << std::endl;
-return combat();
+	std::cout << "====================GAME STARTED==================" << std::endl;
+	return combat();
+}
+
+FuncPtr mainMenu() {
+	std::cout << "Main Menu - choose" << std::endl;
+	std::cout << "1. Host Lobby" << std::endl;
+	std::cout << "2. Join Lobby" << std::endl;
+	std::cout << "3. Quit" << std::endl;
+	std::cout << "Enter choice: ";
+	std::cin.clear();
+	int choice;
+	std::cin >> choice;
+	switch (choice) {
+	case 1:
+		return hostLobby();
+		break;
+	case 2:
+		return joinLobby();
+		break;
+	default:
+		break;
+	}
+	return nullptr;
+}
+
+int main(int argc, char *argv[]) {
+
+	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
+	server = new sG();
+
+	mainMenu();
+
+	return 0;
 }
 
 FuncPtr mainMenu() {
