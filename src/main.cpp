@@ -73,6 +73,20 @@ FuncPtr hostLobby() {
 	return mainMenu();
 }
 
+class MyRecord {
+  public:
+	uint8_t x, y;
+	float z;
+
+	MyRecord() = default;
+	MyRecord(uint8_t x, uint8_t y, float z) : x(x), y(y), z(z) {}
+
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(x, y, z);
+	}
+};
+
 FuncPtr joinLobby() {
 	std::cout << "Join Lobby" << std::endl;
 	std::cout << "Enter IP: " << std::endl;
@@ -102,13 +116,15 @@ FuncPtr joinLobby() {
 	}
 	// ======================== INIT GAME ============================
 	client->init(2);
-	auto manager = client->getManager();
 
-	// test serialization
+	// serialization test
+	auto manager = client->getManager();
+	MyRecord record = MyRecord();
+
 	std::ostringstream os;
 	{
 		cereal::JSONOutputArchive archive(os);
-		archive(manager);
+		archive(record);
 	}
 
 	std::string serializedData = os.str();

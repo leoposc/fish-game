@@ -158,8 +158,8 @@ void ClientGame::update() {
 	Collision::checkPlattformCollisions(&players, clientMap);
 }
 
-Manager getManager() {
-	return clientManager;
+Manager *getManager() {
+	return &clientManager;
 }
 
 // todo: does not work yet - prob pretty wrong

@@ -45,7 +45,7 @@ class SomeData {
 	}
 };
 
-int main() {
+int test_main() {
 	// Create an output string stream
 	std::ostringstream os;
 	{

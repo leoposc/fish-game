@@ -36,7 +36,7 @@ class ClientGame {
 
 	void stop();
 
-	Manager getManager();
+	Manager *getManager();
 
 	bool joinGame(std::string ip);
 
