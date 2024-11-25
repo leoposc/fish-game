@@ -8,13 +8,6 @@
 
 #include <SDL2/SDL.h>
 #include <arpa/inet.h>
-#include <cereal/archives/json.hpp>
-#include <cereal/types/memory.hpp>
-#include <cereal/types/unordered_map.hpp>
-#include <cereal/types/vector.hpp>
-
-#include <SDL2/SDL.h>
-#include <arpa/inet.h>
 #include <cstring>
 #include <functional>
 #include <iostream>
@@ -111,7 +104,7 @@ FuncPtr mainMenu() {
 	std::cout << "1. Host Lobby" << std::endl;
 	std::cout << "2. Join Lobby" << std::endl;
 	std::cout << "3. Quit" << std::endl;
-	std::cout << "Enter choice: ";
+	std::cout << "Enter choice: " << std::endl;
 	std::cin.clear();
 	int choice;
 	std::cin >> choice;
@@ -129,6 +122,9 @@ FuncPtr mainMenu() {
 }
 
 int main(int argc, char *argv[]) {
+	spdlog::set_level(spdlog::level::debug);
+	auto console = spdlog::stdout_color_mt("console");
+	auto err_logger = spdlog::stderr_color_mt("stderr");
 
 	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
@@ -137,61 +133,3 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
-
-FuncPtr mainMenu() {
-	std::cout << "Main Menu - choose" << std::endl;
-	std::cout << "1. Host Lobby" << std::endl;
-	std::cout << "2. Join Lobby" << std::endl;
-	std::cout << "3. Quit" << std::endl;
-	std::cout << "Enter choice: " << std::endl;
-	std::cin.clear();
-	int choice;
-	std::cin >> choice;
-	switch (choice) {
-	case 1:
-		return hostLobby();
-		break;
-	case 2:
-		return joinLobby();
-		break;
-	default:
-		break;
-	}
-
-	int main(int argc, char *argv[]) {
-		spdlog::set_level(spdlog::level::debug);
-		auto console = spdlog::stdout_color_mt("console");
-		auto err_logger = spdlog::stderr_color_mt("stderr");
-
-		// Create an existing SomeData object with a different largeVector
-		std::vector<std::unique_ptr<MyRecord>> existingRecords;
-		existingRecords.push_back(std::make_unique<MyRecord>(7, 8, 9.0f));
-		SomeData existingData(std::move(existingRecords), "OldName", 24.24, {10, 20, 30});
-
-		// Deserialize from the string into the existing object
-		try {
-			std::istringstream is(serializedData);
-			cereal::JSONInputArchive archive(is);
-			archive(existingData);
-		} catch (const cereal::Exception &e) {
-			std::cerr << "Deserialization error: " << e.what() << std::endl;
-			return 1;
-		}
-
-		// Print the values of the loaded data
-		std::cout << "Name: " << existingData.name << std::endl;
-		std::cout << "Value: " << existingData.value << std::endl;
-		for (const auto &record : existingData.data) {
-			std::cout << "x: " << static_cast<int>(record->x) << ", y: " << static_cast<int>(record->y)
-			          << ", z: " << record->z << std::endl;
-		}
-
-		// Print the largeVector to show it retains its previous value
-		std::cout << "largeVector: ";
-		for (const auto &val : existingData.largeVector) {
-			std::cout << val << " ";
-		}
-		std::cout << std::endl;
-
-		return 0;
-	}
