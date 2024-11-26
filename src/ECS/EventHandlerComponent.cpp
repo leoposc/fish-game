@@ -6,7 +6,7 @@
 namespace FishEngine {
 
 void EventHandlerComponent::init() {
-	std::cout << "EVENT HANDLER COMPONENT INTI" << std::endl;
+	// std::cout << "EVENT HANDLER COMPONENT INTI" << std::endl;
 	if (!entity->hasComponent<MoveComponent>()) {
 		std::cout << "Event Handler Component: no MoveComponent found." << std::endl;
 	} else {

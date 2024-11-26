@@ -8,7 +8,12 @@ namespace FishEngine {
 
 AssetManager::AssetManager(Manager *m) : manager(m) {}
 
-AssetManager::~AssetManager() {}
+AssetManager::~AssetManager() {
+	for (auto &tex : textures) {
+		std::cout << "Destroying texture: " << tex.first << std::endl;
+		SDL_DestroyTexture(tex.second);
+	}
+}
 
 void AssetManager::addTexture(std::string id, fs::path path) {
 	std::cout << "Loading texture from: " << path << std::endl;

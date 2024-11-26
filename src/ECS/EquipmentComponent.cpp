@@ -8,7 +8,7 @@
 namespace FishEngine {
 
 void EquipmentComponent::init() {
-	std::cout << "EQUIPMENT COMPONENT INIT" << std::endl;
+	// std::cout << "EQUIPMENT COMPONENT INIT" << std::endl;
 	collider = &entity->getComponent<ColliderComponent>();
 }
 

@@ -27,8 +27,14 @@ class Map {
 
 	void drawTileLayer(tson::Layer &layer);
 
+	void drawImageLayer(tson::Layer &layer);
+
+	void drawObjectLayer(tson::Layer &layer);
+
 	// fetch the path to the tileset
 	fs::path getTilePath(int id);
+
+	fs::path getImagePath(std::string const &image);
 
 	fs::path getImagePath(tson::Tile &tile);
 
@@ -38,6 +44,12 @@ class Map {
 	 * @brief: idea: pass colllider components to the map and check for collision
 	 */
 	bool checkPlattformCollisions(SDL_Rect *collider);
+
+	/**
+	 * @brief: checks if the player is on the specifies layer
+	 * @details: the map is divided into layers, the map needs a layer which matches the provided layerName
+	 */
+	bool checkLayer(SDL_Rect *collider, std::string layerName);
 
 	/**
 	 * @brief: check if the player is in water
@@ -54,39 +66,8 @@ class Map {
 	std::vector<std::pair<uint16_t, uint16_t>> getPlayerSpawnpoints(size_t numPlayers);
 
 	std::vector<std::pair<uint16_t, uint16_t>> *loadWeaponSpawnpoints();
-	/*
-	 * @brief: create a two dimensional array of the size of the map
-	 * @param: void
-	 * @details: the array is used to store type of the tile at the position (e.g.
-	 * water=2, plattform=1, tree)
-	 */
-	template <typename T, size_t Row, size_t Col>
-	std::array<std::array<uint8_t, Col>, Row> *initMapArray() {
 
-		tson::Vector2i mapSize = currentMap->getSize();
-		size_t rows = mapSize.y;
-		size_t cols = mapSize.x;
-		// TODO: dynamic allocation, delete in destructor? or use std::unique_pt?
-		std::array<std::array<uint8_t, Col>, Row> *mapArray =
-		    new std::array<std::array<uint8_t, mapSize.x>, mapSize.y>();
-		for (size_t i = 0; i < rows; ++i) {
-			for (size_t j = 0; j < cols; ++j) {
-				(*mapArray)[i][j] = 0;
-			}
-		}
-
-		// loop through the plattforms layer and set the plattform tiles to 1
-		for (auto &[pos, tileObject] : currentMap->getLayer("plattforms")->getTileObjects()) {
-			(*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 1;
-		}
-
-		// loop through the water layer and set the water tiles to 2
-		for (auto &[pos, tileObject] : currentMap->getLayer("water")->getTileObjects()) {
-			(*mapArray)[std::get<1>(pos)][std::get<0>(pos)] = 2;
-		}
-
-		return mapArray;
-	}
+	void loadBackground();
 
 	void loadTilesetTextures();
 

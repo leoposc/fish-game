@@ -16,14 +16,12 @@ SpriteComponent::SpriteComponent(std::string id) : id(id) {
 }
 
 SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isAnimated), id(id) {
-
 	// TODO: implement animation with tiled/ tileson
-
 	setTexture(id);
 }
 
 SpriteComponent::~SpriteComponent() {
-	SDL_DestroyTexture(texture);
+	// SDL_DestroyTexture(texture);
 }
 
 void SpriteComponent::setTexture(std::string id) {
