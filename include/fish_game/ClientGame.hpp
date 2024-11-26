@@ -36,6 +36,8 @@ class ClientGame {
 
 	void stop();
 
+	Manager *getManager();
+
 	bool joinGame(std::string ip);
 
 	static SDL_Renderer *renderer;

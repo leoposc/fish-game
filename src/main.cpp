@@ -1,10 +1,19 @@
 #include "../include/fish_game/ClientGame.hpp"
+#include "../include/fish_game/ECS/ECS.hpp"
 #include "../include/fish_game/GameInputEvents.hpp"
 #include "../include/fish_game/NetworkClient.hpp"
 #include "../include/fish_game/NetworkHost.hpp"
 #include "../include/fish_game/ServerGame.hpp"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
+#include <cereal/archives/json.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <vector>
 
 #include <SDL2/SDL.h>
 #include <arpa/inet.h>
@@ -64,6 +73,20 @@ FuncPtr hostLobby() {
 	return mainMenu();
 }
 
+class MyRecord {
+  public:
+	uint8_t x, y;
+	float z;
+
+	MyRecord() = default;
+	MyRecord(uint8_t x, uint8_t y, float z) : x(x), y(y), z(z) {}
+
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(x, y, z);
+	}
+};
+
 FuncPtr joinLobby() {
 	std::cout << "Join Lobby" << std::endl;
 	std::cout << "Enter IP: " << std::endl;
@@ -93,6 +116,20 @@ FuncPtr joinLobby() {
 	}
 	// ======================== INIT GAME ============================
 	client->init(2);
+
+	// serialization test
+	auto manager = client->getManager();
+	MyRecord record = MyRecord();
+
+	std::ostringstream os;
+	{
+		cereal::JSONOutputArchive archive(os);
+		archive(record);
+	}
+
+	std::string serializedData = os.str();
+	std::cout << "Serialized Data: " << serializedData << std::endl;
+
 	server->init("map03.tmj", 2);
 
 	std::cout << "====================GAME STARTED==================" << std::endl;

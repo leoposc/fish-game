@@ -158,6 +158,10 @@ void ClientGame::update() {
 	Collision::checkPlattformCollisions(&players, clientMap);
 }
 
+Manager *getManager() {
+	return &clientManager;
+}
+
 // todo: does not work yet - prob pretty wrong
 void ClientGame::zoomIn() {
 	// Get the most outer players

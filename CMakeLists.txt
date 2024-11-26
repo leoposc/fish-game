@@ -21,7 +21,7 @@ add_executable(fish_game ${SOURCE_FILES})
 # Main SDL library for init
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2main SDL2::SDL2-static)
 
- # SDL image to make a surface (aka what we'll render)
+# SDL image to make a surface (aka what we'll render)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_image::SDL2_image-static)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
