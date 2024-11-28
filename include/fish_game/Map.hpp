@@ -31,6 +31,8 @@ class Map {
 
 	void drawObjectLayer(tson::Layer &layer);
 
+	void updateAnimations();
+
 	// fetch the path to the tileset
 	fs::path getTilePath(int id);
 

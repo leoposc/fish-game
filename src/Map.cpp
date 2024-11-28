@@ -137,6 +137,12 @@ void Map::drawObjectLayer(tson::Layer &layer) {
 	}
 }
 
+void Map::updateAnimations() {
+	for (auto &[id, animation] : animationUpdateQueue) {
+		animation->update(30);
+	}
+}
+
 fs::path Map::getImagePath(std::string const &image) {
 	// expect the exe to be in the build/Release or build/Debug directory
 	fs::path fullPath = fs::path("../../maps") / image;

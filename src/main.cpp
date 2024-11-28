@@ -164,7 +164,8 @@ int main(int argc, char *argv[]) {
 	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
 
-	mainMenu();
+	combat();
+	// mainMenu();
 
 	return 0;
 }

@@ -161,6 +161,7 @@ void ClientGame::update() {
 	clientManager.update();
 	Collision::checkWaterCollisions(&players, clientMap);
 	Collision::checkPlattformCollisions(&players, clientMap);
+	clientMap->updateAnimations();
 }
 
 void ClientGame::render() {
