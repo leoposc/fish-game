@@ -1,0 +1,30 @@
+{
+    "animals": [
+        {
+            "polymorphic_id": 2147483649,
+            "polymorphic_name": "Dog",
+            "ptr_wrapper": {
+                "id": 2147483649,
+                "data": {
+                    "value0": {
+                        "name": "Buddy"
+                    },
+                    "breed": "Golden Retriever"
+                }
+            }
+        },
+        {
+            "polymorphic_id": 2147483650,
+            "polymorphic_name": "Cat",
+            "ptr_wrapper": {
+                "id": 2147483650,
+                "data": {
+                    "value0": {
+                        "name": "Whiskers"
+                    },
+                    "lives": 9
+                }
+            }
+        }
+    ]
+}

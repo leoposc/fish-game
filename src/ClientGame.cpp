@@ -12,6 +12,7 @@
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
 
+#include "spdlog/spdlog.h"
 #include <SDL2/SDL.h>
 #include <iostream>
 
@@ -75,7 +76,7 @@ ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int hei
 		}
 
 	} else {
-		std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+		spdlog::get("stderr")->error("SDL could not initialize! SDL_Error:{}", SDL_GetError());
 		isRunning = false;
 	}
 
@@ -105,6 +106,9 @@ void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
 	std::cout << "start: " << players.size() << std::endl;
 	// ================== init clientMap and assets ==================
 	clientMap = new Map();
+
+	spdlog::get("console")->debug("{}/{}", fs::path("../../maps").string(), mapPath.string());
+
 	clientMap->loadMap(fs::path("../../maps") / mapPath);
 
 	// ================== init player ==================
@@ -135,6 +139,31 @@ void ClientGame::spawnWeapons() {
 	}
 }
 
+void toggleWindowMode(SDL_Window *win, bool *windowed) {
+	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
+	// changes.
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	spdlog::get("console")->debug("first: {}", *windowed);
+	*windowed = !*windowed;
+	spdlog::get("console")->debug("second: {}", *windowed);
+	if (*windowed) {
+		int i = SDL_GetWindowDisplayIndex(win);
+		// screenWidth = 1280;
+		// screenHeight = 720;
+		SDL_SetWindowFullscreen(win, 0);
+		spdlog::get("console")->debug("Windowed");
+	} else {
+		int i = SDL_GetWindowDisplayIndex(win);
+		SDL_Rect j;
+		SDL_GetDisplayBounds(i, &j);
+		// screenWidth = j.w;
+		// screenHeight = j.h;
+		SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		spdlog::get("console")->debug("Fullscreen");
+	}
+	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
+}
+
 void ClientGame::handleEvents() {
 	// TODO: look for a better way to handle events since movement seems to be pretty slow
 	SDL_PollEvent(&game_event);
@@ -146,7 +175,7 @@ void ClientGame::handleEvents() {
 		// case F11 is pressed
 	case SDL_KEYDOWN:
 		if (game_event.key.keysym.sym == SDLK_F11) {
-			std::cout << windowed << std::endl;
+			spdlog::get("console")->debug(windowed);
 			toggleWindowMode(window, &windowed);
 		}
 	default:
@@ -162,6 +191,10 @@ void ClientGame::update() {
 	Collision::checkWaterCollisions(&players, clientMap);
 	Collision::checkPlattformCollisions(&players, clientMap);
 	clientMap->updateAnimations();
+}
+
+Manager *getManager() {
+	return &clientManager;
 }
 
 void ClientGame::render() {
@@ -262,10 +295,8 @@ void ClientGame::zoomIn() {
 	camera = {minX, minY, width, height};
 	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
 
-#define DEBUG
-#ifdef DEBUG
-	std::cout << "Camera: " << camera.x << " " << camera.y << " " << camera.w << " " << camera.h << std::endl;
-#endif
+  spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
 }
 
 } // namespace FishEngine
+

@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cereal/archives/json.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
 // #include "Components.hpp"
 #include <algorithm>
 #include <array>
@@ -53,6 +58,11 @@ class Component {
 	 */
 	virtual void draw() {}
 
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar();
+	}
+
 	virtual ~Component() {}
 };
 
@@ -73,7 +83,13 @@ class Entity {
 
 	void addGroup(Group group);
 
+
 	bool checkEmpty() { return components.empty(); }
+
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(active, components, componentArray, componentBitSet, groupBitSet);
+	}
 
 	/**
 	 * @brief: update all components which belong to a instance of an entity
@@ -157,6 +173,17 @@ class Manager {
 		}
 	}
 
+	template <class Archive>
+	void save(Archive &ar) const {
+		ar(entities, groupedEntities);
+	}
+
+	template <class Archive>
+	void load(Archive &ar) {
+		// TODO: maybe restore gouped Entities pointer correctly
+		ar(entities, groupedEntities);
+	}
+
 	void draw() {
 		for (auto &e : entities)
 			e->draw();
@@ -206,5 +233,17 @@ class Manager {
 		return *e;
 	}
 };
+
+// id synchronizaiton? maybe not needed if manager is always kept in synch, with cereal we can only update the changing
+// variables
+//
+// if i created the object it might not match with the id of the host should i just prepend my username to all ids, and
+// strip it when upacking? What if i get a whole new object? How do i match that?
+//
+// Other option: get all components and entities from server when joining -> all ids would auto match
+//
+//
+// protocol: array of messages; if update: - update
+//                              if new:    - generate Component, needed arguemnts given
 
 } // namespace FishEngine

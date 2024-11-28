@@ -2,18 +2,20 @@
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 
+#include "spdlog/spdlog.h"
+
 namespace FishEngine {
 
 constexpr float MAX_GRAVITY = 5.0;
 
 void GravityComponent::init() {
-	// std::cout << "GRAVITY COMPONENT INIT" << std::endl;
+	// spdlog::get("console")->debug( "GRAVITY COMPONENT INIT" );
 	if (!entity->hasComponent<MoveComponent>()) {
-		std::cout << "Gravity Component: Creating MoveComponent." << std::endl;
+		spdlog::get("console")->debug("Gravity Component: Creating MoveComponent.");
 		entity->addComponent<MoveComponent>();
 	}
 	if (!entity->hasComponent<TransformComponent>()) {
-		std::cout << "Gravity Component: Creating TransformComponent." << std::endl;
+		spdlog::get("console")->debug("Gravity Component: Creating TransformComponent.");
 		entity->addComponent<TransformComponent>();
 	}
 
@@ -24,9 +26,9 @@ void GravityComponent::init() {
 
 void GravityComponent::update() {
 	// if the entity is not a fish (no move component) or the fish is not in water, apply gravity
-	// std::cout << "GRAVITY COMPONENT UPDATE" << std::endl;
-	// std::cout << !entity->hasComponent<MoveComponent>() << std::endl;
-	// std::cout << !move->inWater << std::endl;
+	// spdlog::get("console")->debug( "GRAVITY COMPONENT UPDATE" );
+	// spdlog::get("console")->debug( !entity->hasComponent<MoveComponent>() );
+	// spdlog::get("console")->debug( !move->inWater );
 
 	if (!entity->hasComponent<MoveComponent>() || !move->inWater) {
 		float y = transform->velocity.getY();

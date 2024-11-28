@@ -2,10 +2,12 @@
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/MockServer.hpp"
 
+#include "spdlog/spdlog.h"
+
 namespace FishEngine {
 
 void ServerComponent::init() {
-	// std::cout << "SERVER COMPONENT INIT" << std::endl;
+	// spdlog::get("console")->debug( "SERVER COMPONENT INIT" );
 	transform = &entity->getComponent<TransformComponent>();
 }
 

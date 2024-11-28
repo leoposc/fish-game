@@ -1,5 +1,6 @@
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/ClientGame.hpp"
+#include "spdlog/spdlog.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -11,7 +12,7 @@ namespace FishEngine {
 void Map::loadMap(fs::path path) {
 
 	if (!fs::exists(path)) {
-		std::cout << "Map file does not exist!" << std::endl;
+		spdlog::get("stderr")->error("Map file does not exist!");
 		return;
 	}
 
@@ -21,9 +22,9 @@ void Map::loadMap(fs::path path) {
 	currentMap = map.get();
 
 	if (map->getStatus() == tson::ParseStatus::OK) {
-		std::cout << "Map loaded successfully!" << std::endl;
+		spdlog::get("console")->debug("Map loaded successfully!");
 	} else {
-		std::cout << "Map loading failed!" << std::endl;
+		spdlog::get("stderr")->error("Map loading failed!");
 		return;
 	}
 
@@ -62,7 +63,7 @@ void Map::drawLayer(tson::Layer &layer) {
 		break;
 	default:
 		break;
-		// std::cout << "Layer type not supported!" << std::endl;
+		// spdlog::get("console")->debug( "Layer type not supported!" );
 	}
 }
 
@@ -158,7 +159,7 @@ fs::path Map::getImagePath(tson::Tile &tile) {
 SDL_Texture *Map::loadTexture(const std::string &image) {
 	SDL_Texture *tmp = IMG_LoadTexture(ClientGame::renderer, image.c_str());
 	if (tmp == nullptr) {
-		std::cout << "Failed to load texture: " << image << std::endl;
+		spdlog::get("stderr")->error("Failed to load texture: {}", image);
 	}
 	return tmp;
 }

@@ -3,6 +3,7 @@
 #include "../include/fish_game/ECS/ProjectileComponent.hpp"
 #include "../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../include/fish_game/ECS/TransformComponent.hpp"
+#include "spdlog/spdlog.h"
 
 namespace FishEngine {
 
@@ -16,7 +17,7 @@ AssetManager::~AssetManager() {
 }
 
 void AssetManager::addTexture(std::string id, fs::path path) {
-	std::cout << "Loading texture from: " << path << std::endl;
+	spdlog::get("console")->debug("Loading texture from: {}", path.string());
 	textures[id] = TextureManager::loadTexture(path);
 }
 
