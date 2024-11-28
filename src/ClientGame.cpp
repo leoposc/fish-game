@@ -30,8 +30,32 @@ AssetManager *ClientGame::assets = new AssetManager(&clientManager);
 
 Map *clientMap;
 
-auto &weapon(clientManager.addEntity());
-auto &projectile(clientManager.addEntity());
+// ================== helper functions ==================
+
+void toggleWindowMode(SDL_Window *win, bool *windowed) {
+	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
+	// changes.
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	std::cout << "first: " << *windowed << std::endl;
+	*windowed = !*windowed;
+	std::cout << "second: " << *windowed << std::endl;
+	if (*windowed) {
+		int i = SDL_GetWindowDisplayIndex(win);
+		// screenWidth = 1280;
+		// screenHeight = 720;
+		SDL_SetWindowFullscreen(win, 0);
+		std::cout << "Windowed" << std::endl;
+	} else {
+		int i = SDL_GetWindowDisplayIndex(win);
+		SDL_Rect j;
+		SDL_GetDisplayBounds(i, &j);
+		// screenWidth = j.w;
+		// screenHeight = j.h;
+		SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		std::cout << "Fullscreen" << std::endl;
+	}
+	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
+}
 
 ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen) {
 	int flags = 0;
@@ -51,7 +75,6 @@ ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int hei
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		}
 
-		isRunning = true;
 	} else {
 		spdlog::get("stderr")->error("SDL could not initialize! SDL_Error:{}", SDL_GetError());
 		isRunning = false;
@@ -72,28 +95,39 @@ ClientGame::~ClientGame() {
 
 // todo: sync player positions with server/ fetch them from server
 // todo: sync weapon positions with server/ fetch them from server / spawn them periodically
-void ClientGame::init(int numPlayers) {
 
+void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
+	isRunning = true;
+	assert(clientManager.checkEmpty());
+	assert(numPlayers > 0);
+	assert(players.empty());
+
+	mapPath = mp;
+	std::cout << "start: " << players.size() << std::endl;
 	// ================== init clientMap and assets ==================
 	clientMap = new Map();
+
 	spdlog::get("console")->debug("{}/{}", fs::path("../../maps").string(), mapPath.string());
+
 	clientMap->loadMap(fs::path("../../maps") / mapPath);
 
 	// ================== init player ==================
 	auto &player(clientManager.addEntity());
 	auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
-	ClientComponentsGenerator::forPlayer(player, initPos.at(0).first, initPos.at(0).second);
+	ClientGenerator::forPlayer(player, initPos.at(0).first, initPos.at(0).second);
 	players.push_back(&player);
 
-	// ================== init enemies ==================
-	for (int i = 1; i < numPlayers; ++i) {
-		auto &opponent(clientManager.addEntity());
-		ClientComponentsGenerator::forEnemy(opponent, initPos.at(i).first, initPos.at(i).second);
-		players.push_back(&opponent);
-	}
+	if (combat) {
+		// ================== init enemies ==================
+		for (int i = 1; i < numPlayers; ++i) {
+			auto &opponent(clientManager.addEntity());
+			ClientGenerator::forEnemy(opponent, initPos.at(i).first, initPos.at(i).second);
+			players.push_back(&opponent);
+		}
 
-	// ================== init weapons ==================
-	spawnWeapons();
+		// ================== init weapons ==================
+		spawnWeapons();
+	}
 }
 
 void ClientGame::spawnWeapons() {
@@ -101,7 +135,7 @@ void ClientGame::spawnWeapons() {
 	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
 	for (auto &spawnpoint : *spawnpoints) {
 		auto &weapon(clientManager.addEntity());
-		ClientComponentsGenerator::forWeapon(weapon, spawnpoint.first, spawnpoint.second);
+		ClientGenerator::forWeapon(weapon, spawnpoint.first, spawnpoint.second);
 	}
 }
 
@@ -156,10 +190,71 @@ void ClientGame::update() {
 	clientManager.update();
 	Collision::checkWaterCollisions(&players, clientMap);
 	Collision::checkPlattformCollisions(&players, clientMap);
+	clientMap->updateAnimations();
 }
 
 Manager *getManager() {
 	return &clientManager;
+}
+
+void ClientGame::render() {
+	SDL_RenderClear(renderer);
+
+	clientMap->drawMap();
+	// clientManager.draw();
+
+	for (auto &t : clientManager.getGroup(groupLabels::groupPlayers)) {
+		t->draw();
+	}
+
+	for (auto &t : clientManager.getGroup(groupLabels::groupWeapons)) {
+		t->draw();
+	}
+
+	for (auto &t : clientManager.getGroup(groupLabels::groupProjectiles)) {
+		t->draw();
+	}
+
+	SDL_RenderPresent(renderer);
+}
+
+bool ClientGame::joinGame(std::string ip) {
+
+	// todo: connect to the server
+	return false;
+}
+
+bool ClientGame::hasStarted() {
+	mapPath = "map03.tmj";
+	return true;
+
+	// TODO: check if the game is started
+	// fetch the number of players from the server and map
+	// sth. like server->fetchState(struct with &mapPath, &numPlayers, &started);
+	// return started;
+}
+
+Uint8 ClientGame::updateMainMenu() {
+
+	if (Collision::checkExit(players.at(0), clientMap))
+		return 0;
+
+	if (Collision::checkStart(players.at(0), clientMap))
+		return 1;
+
+	return -1;
+}
+
+bool ClientGame::running() {
+	return isRunning;
+}
+
+void ClientGame::stop() {
+	clientManager.destroyEntities();
+	players.clear();
+	delete clientMap;
+	clientMap = nullptr;
+	isRunning = false;
 }
 
 // todo: does not work yet - prob pretty wrong
@@ -200,57 +295,8 @@ void ClientGame::zoomIn() {
 	camera = {minX, minY, width, height};
 	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
 
-	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
-}
-
-void ClientGame::render() {
-	SDL_RenderClear(renderer);
-
-	// zoomIn();
-	// SDL_RenderSetViewport(renderer, &camera);
-
-	clientMap->drawMap();
-	clientManager.draw();
-
-	for (auto &t : clientManager.getGroup(groupLabels::groupPlayers)) {
-		t->draw();
-	}
-
-	for (auto &t : clientManager.getGroup(groupLabels::groupWeapons)) {
-		t->draw();
-	}
-
-	for (auto &t : clientManager.getGroup(groupLabels::groupProjectiles)) {
-		t->draw();
-	}
-
-	// SDL_RenderSetViewport(renderer, nullptr);
-
-	SDL_RenderPresent(renderer);
-}
-
-bool ClientGame::joinGame(std::string ip) {
-
-	// todo: connect to the server
-	return false;
-}
-
-bool ClientGame::hasStarted() {
-	mapPath = "map03.tmj";
-	return true;
-
-	// TODO: check if the game is started
-	// fetch the number of players from the server and map
-	// sth. like server->fetchState(struct with &mapPath, &numPlayers, &started);
-	// return started;
-}
-
-bool ClientGame::running() {
-	return isRunning;
-}
-
-void ClientGame::stop() {
-	isRunning = false;
+  spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
 }
 
 } // namespace FishEngine
+

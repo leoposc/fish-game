@@ -11,6 +11,7 @@ namespace FishEngine {
 
 void EquipmentComponent::init() {
 	spdlog::get("console")->debug("EQUIPMENT COMPONENT INIT");
+
 	collider = &entity->getComponent<ColliderComponent>();
 }
 

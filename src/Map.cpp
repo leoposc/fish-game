@@ -28,6 +28,7 @@ void Map::loadMap(fs::path path) {
 		return;
 	}
 
+	loadBackground();
 	loadTilesetTextures();
 
 	// TODO load from config
@@ -44,17 +45,22 @@ void Map::drawMap() {
 fs::path Map::getTilePath(int id) {
 	// fetch the path to the tileset
 	// use the id to get the right tileset
-
 	fs::path path = map->getTileset("tileset")->getImagePath();
 	return path;
 }
 
 void Map::drawLayer(tson::Layer &layer) {
 	switch (layer.getType()) {
-	case tson::LayerType::TileLayer: {
+	case tson::LayerType::TileLayer:
 		drawTileLayer(layer);
 		break;
-	}
+	case tson::LayerType::ObjectGroup:
+		drawObjectLayer(layer);
+		break;
+
+	case tson::LayerType::ImageLayer:
+		drawImageLayer(layer);
+		break;
 	default:
 		break;
 		// spdlog::get("console")->debug( "Layer type not supported!" );
@@ -108,6 +114,42 @@ void Map::drawTileLayer(tson::Layer &layer) {
 	}
 }
 
+void Map::drawImageLayer(tson::Layer &layer) {
+	SDL_Texture *texture = nullptr;
+	fs::path imagePath = getImagePath(layer.getImage()).relative_path();
+	texture = getTexture(imagePath);
+
+	if (texture != nullptr) {
+		SDL_RenderCopy(ClientGame::renderer, texture, nullptr, nullptr);
+	} else {
+		std::cout << "Failed to load texture for image layer: " << imagePath << std::endl;
+	}
+}
+
+void Map::drawObjectLayer(tson::Layer &layer) {
+	for (auto &[pos, tileObject] : layer.getTileObjects()) {
+		tson::Rect rect = tileObject.getDrawingRect();
+		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
+		                  rect.width, rect.height};
+
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 255, 0, 255);
+		SDL_RenderDrawRect(ClientGame::renderer, &block);
+		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
+	}
+}
+
+void Map::updateAnimations() {
+	for (auto &[id, animation] : animationUpdateQueue) {
+		animation->update(30);
+	}
+}
+
+fs::path Map::getImagePath(std::string const &image) {
+	// expect the exe to be in the build/Release or build/Debug directory
+	fs::path fullPath = fs::path("../../maps") / image;
+	return fullPath;
+}
+
 fs::path Map::getImagePath(tson::Tile &tile) {
 	// expect the exe to be in the build/Release or build/Debug directory
 	fs::path fullPath = fs::path("../../maps") / tile.getTileset()->getImagePath().relative_path();
@@ -122,11 +164,28 @@ SDL_Texture *Map::loadTexture(const std::string &image) {
 	return tmp;
 }
 
+void Map::loadBackground() {
+	// load the background image
+	tson::Layer *background = currentMap->getLayer("backgroundPicture");
+	fs::path imagePath = getImagePath(background->getImage()).relative_path();
+	SDL_Texture *texture = loadTexture(imagePath.generic_string());
+	if (texture == nullptr) {
+		std::cout << "Failed to load background image!" << std::endl;
+	}
+	tilesetTextures[imagePath] = texture;
+}
+
 void Map::loadTilesetTextures() {
 	// loop through the tilesets and load the textures
 	for (auto &tileset : map->getTilesets()) {
+		if (tileset.getImagePath().empty()) {
+			continue;
+		}
 		fs::path tilesetPath = fs::path("../../maps") / tileset.getImagePath().relative_path();
 		SDL_Texture *texture = loadTexture(tilesetPath.generic_string());
+		if (texture == nullptr) {
+			continue;
+		}
 		tilesetTextures[tilesetPath] = texture;
 
 		// TODO: free the textures in the destructor
@@ -222,6 +281,21 @@ bool Map::isInWater(SDL_Rect *collider) {
 		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 255, 255);
 		SDL_RenderDrawRect(ClientGame::renderer, &block);
 		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
+	}
+	return false;
+}
+
+bool Map::checkLayer(SDL_Rect *collider, std::string layerName) {
+	tson::Layer *exit = currentMap->getLayer(layerName);
+
+	for (auto &[pos, tileObject] : exit->getTileObjects()) {
+		tson::Rect rect = tileObject.getDrawingRect();
+		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
+		                  rect.width, rect.height};
+
+		if (SDL_HasIntersection(collider, &block)) {
+			return true;
+		}
 	}
 	return false;
 }

@@ -22,6 +22,14 @@ void checkPlattformCollisions(std::vector<Entity *> *players, Map *serverMap) {
 	}
 }
 
+bool checkExit(Entity *player, Map *map) {
+	return map->checkLayer(&player->getComponent<ColliderComponent>().collider, "exit");
+}
+
+bool checkStart(Entity *player, Map *map) {
+	return map->checkLayer(&player->getComponent<ColliderComponent>().collider, "start");
+}
+
 } // namespace Collision
 
 } // namespace FishEngine

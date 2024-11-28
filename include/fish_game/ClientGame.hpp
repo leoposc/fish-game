@@ -20,7 +20,7 @@ class ClientGame {
 
 	void spawnWeapons();
 
-	void init(int numPlayers);
+	void init(fs::path mp, int numPlayers, bool combat);
 
 	void handleEvents();
 
@@ -33,6 +33,8 @@ class ClientGame {
 	bool running();
 
 	bool hasStarted();
+
+	uint8_t updateMainMenu();
 
 	void stop();
 

@@ -21,8 +21,8 @@ namespace FishEngine {
 
 SDL_Event ServerGame::game_event;
 
-Manager ServerManager;
-AssetManager *ServerGame::assets = new AssetManager(&ServerManager); // todo: need it?
+Manager serverManager;
+AssetManager *ServerGame::assets = new AssetManager(&serverManager); // todo: need it?
 
 Map *serverMap;
 
@@ -31,8 +31,13 @@ ServerGame::ServerGame() : isRunning(false) {}
 ServerGame::~ServerGame() {}
 
 void ServerGame::init(fs::path mapPath, int numPlayers) {
+	// assert(serverManager.checkEmpty());
+	// assert(serverMap == nullptr);
+	// assert(numPlayers > 0);
+	// assert(players.empty());
+
 	// ================== init serverMap and assets ==================
-	// mapPath = fs::path("../../maps") / mapPath;
+	isRunning = true;
 	serverMap = new Map();
 	serverMap->loadMap(fs::path("../../maps") / mapPath);
 
@@ -40,10 +45,10 @@ void ServerGame::init(fs::path mapPath, int numPlayers) {
 	// scaling not working correctly, RedFish.png also very high resolution
 
 	for (int i = 0; i < numPlayers; ++i) {
-		auto &player(ServerManager.addEntity());
-		ServerManager.addToGroup(&player, groupLabels::groupPlayers);
+		auto &player(serverManager.addEntity());
+		serverManager.addToGroup(&player, groupLabels::groupPlayers);
 		auto initPos = serverMap->getInitialPos().at(i);
-		ServerComponentsGenerator::forPlayer(player, initPos.first, initPos.second);
+		ServerGenerator::forPlayer(player, initPos.first, initPos.second);
 		players.push_back(&player);
 	}
 }
@@ -57,8 +62,8 @@ void ServerGame::handleEvents() {
 }
 
 void ServerGame::update() {
-	ServerManager.refresh();
-	ServerManager.update();
+	serverManager.refresh();
+	serverManager.update();
 	// FishEngine::Collision::test();
 	Collision::checkWaterCollisions(&players, serverMap);
 	Collision::checkPlattformCollisions(&players, serverMap);
@@ -69,6 +74,10 @@ bool ServerGame::running() {
 }
 
 void ServerGame::stop() {
+	serverManager.destroyEntities();
+	players.clear();
+	delete serverMap;
+	serverMap = nullptr;
 	isRunning = false;
 }
 

@@ -14,6 +14,10 @@ void checkWaterCollisions(std::vector<Entity *> *players, Map *map);
 
 void checkPlattformCollisions(std::vector<Entity *> *players, Map *map);
 
+bool checkExit(Entity *player, Map *map);
+
+bool checkStart(Entity *player, Map *map);
+
 } // namespace Collision
 
 } // namespace FishEngine

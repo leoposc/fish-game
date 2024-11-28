@@ -31,7 +31,9 @@ void ColliderComponent::update() {
 	if (ServerGame::checkCollisions(entity)) {
 		SDL_Rect *collider = &entity->getComponent<ColliderComponent>().collider;
 		transform->position = {static_cast<float>(collider->x), static_cast<float>(collider->y)};
+    
 		spdlog::get("console")->debug("ColliderComponent - collision detected");
+
 	}
 
 	collider.x = static_cast<int>(transform->position.getX());

@@ -38,23 +38,26 @@ sG *server = nullptr;
 
 FuncPtr mainMenu();
 FuncPtr hostLobby();
+FuncPtr joinLobby();
 
 FuncPtr combat() {
+	std::cout << "COMBAT STARTED" << std::endl;
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 
 	u_int32_t frameStart;
 	int frameTime;
 
+	client->init("map03.tmj", 2, true);
+	server->init("map03.tmj", 2);
+
+	std::cout << "Combat init done!" << std::endl;
+
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
 		client->handleEvents();
-		// server->handleEvents();
-
-		// server->update();
 		client->update();
-
 		client->render();
 
 		frameTime = SDL_GetTicks() - frameStart;
@@ -67,11 +70,15 @@ FuncPtr combat() {
 	return mainMenu();
 }
 
-FuncPtr hostLobby() {
-	std::cout << "Host Lobby - not implemented yet - back to mainMenu" << std::endl;
-
-	return mainMenu();
+// todo: implement joinLobby
+FuncPtr joinLobby() {
+	return hostLobby();
 }
+
+FuncPtr hostLobby() {
+
+	std::cout << "Welcome to Fish Game" << std::endl;
+
 
 class MyRecord {
   public:
@@ -97,8 +104,7 @@ FuncPtr joinLobby() {
 	// being able to swim a little around with the other players
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
-
-	u_int32_t frameStart;
+	uint32_t frameStart;
 	int frameTime;
 	// client->init("map03.tmj", 2);
 	// server->init("map03.tmj", 2);
@@ -132,28 +138,88 @@ FuncPtr joinLobby() {
 
 	server->init("map03.tmj", 2);
 
-	std::cout << "====================GAME STARTED==================" << std::endl;
-	return combat();
+	client->init("lobby.tmj", 1, false);
+	server->init("lobby.tmj", 1);
+
+	std::cout << "init done!" << std::endl;
+
+	while (client->running()) {
+		frameStart = SDL_GetTicks();
+
+		client->handleEvents();
+		client->update();
+		client->render();
+
+		switch (client->updateMainMenu()) {
+		case 0:
+			std::cout << "Leaving main menu..." << std::endl;
+
+			client->stop();
+			server->stop();
+			return mainMenu();
+			break;
+		case 1:
+			client->stop();
+			server->stop();
+			return combat();
+			break;
+
+		default:
+			break;
+		}
+
+		frameTime = SDL_GetTicks() - frameStart;
+		if (frameDelay > frameTime) {
+			SDL_Delay(frameDelay - frameTime);
+		}
+	}
+	return nullptr;
 }
 
 FuncPtr mainMenu() {
-	std::cout << "Main Menu - choose" << std::endl;
-	std::cout << "1. Host Lobby" << std::endl;
-	std::cout << "2. Join Lobby" << std::endl;
-	std::cout << "3. Quit" << std::endl;
-	std::cout << "Enter choice: " << std::endl;
-	std::cin.clear();
-	int choice;
-	std::cin >> choice;
-	switch (choice) {
-	case 1:
-		return hostLobby();
-		break;
-	case 2:
-		return joinLobby();
-		break;
-	default:
-		break;
+
+	std::cout << "Welcome to Fish Game" << std::endl;
+
+	const int FPS = 60;
+	const int frameDelay = 1000 / FPS;
+	uint32_t frameStart;
+	int frameTime;
+
+	client->init("mainMenu.tmj", 1, false);
+	server->init("mainMenu.tmj", 1);
+
+	while (client->running()) {
+		frameStart = SDL_GetTicks();
+
+		client->handleEvents();
+		client->update();
+		client->render();
+
+		switch (client->updateMainMenu()) {
+		case 0:
+			std::cout << "Leaving main menu..." << std::endl;
+			client->stop();
+			server->stop();
+			return nullptr;
+			break;
+		case 1:
+			client->stop();
+			server->stop();
+			return hostLobby();
+			break;
+		case 2:
+			client->stop();
+			server->stop();
+			return joinLobby();
+			break;
+		default:
+			break;
+		}
+
+		frameTime = SDL_GetTicks() - frameStart;
+		if (frameDelay > frameTime) {
+			SDL_Delay(frameDelay - frameTime);
+		}
 	}
 	return nullptr;
 }
@@ -166,7 +232,8 @@ int main(int argc, char *argv[]) {
 	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
 
-	mainMenu();
+	combat();
+	// mainMenu();
 
 	return 0;
 }

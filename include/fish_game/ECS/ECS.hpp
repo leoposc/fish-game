@@ -83,10 +83,14 @@ class Entity {
 
 	void addGroup(Group group);
 
+
+	bool checkEmpty() { return components.empty(); }
+
 	template <class Archive>
 	void serialize(Archive &ar) {
 		ar(active, components, componentArray, componentBitSet, groupBitSet);
 	}
+
 	/**
 	 * @brief: update all components which belong to a instance of an entity
 	 * @details: The order of updating components is important. It is defined by the order
@@ -183,6 +187,22 @@ class Manager {
 	void draw() {
 		for (auto &e : entities)
 			e->draw();
+	}
+
+	void destroyEntities() {
+		for (auto &e : entities)
+			e->destroy();
+		refresh();
+		assert(checkEmpty());
+	}
+
+	bool checkEmpty() {
+		for (auto &e : entities) {
+			if (!e->checkEmpty()) {
+				return false;
+			}
+		}
+		return entities.empty();
 	}
 
 	void refresh() {
