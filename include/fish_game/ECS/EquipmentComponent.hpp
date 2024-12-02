@@ -19,6 +19,11 @@ class EquipmentComponent : public Component {
 	ColliderComponent *collider = nullptr;
 
   public:
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(isEquipped);
+	}
+
 	EquipmentComponent() = default;
 	~EquipmentComponent() = default;
 

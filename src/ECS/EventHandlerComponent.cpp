@@ -86,7 +86,13 @@ void EventHandlerComponent::update()
 			break;
 		}
 	}
-	spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
+	// spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
 }
 
 } // namespace FishEngine
+
+#include <cereal/archives/json.hpp>
+#include <cereal/types/polymorphic.hpp>
+
+CEREAL_REGISTER_TYPE(FishEngine::EventHandlerComponent)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::EventHandlerComponent)

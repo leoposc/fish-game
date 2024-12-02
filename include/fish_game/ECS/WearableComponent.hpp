@@ -16,6 +16,11 @@ class WearableComponent : public Component {
 	bool isAttached = false;
 
   public:
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(isAttached); // todo: probably need to add a unique pointer
+	}
+
 	WearableComponent() = default;
 	~WearableComponent() = default;
 

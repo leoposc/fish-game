@@ -12,9 +12,9 @@
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
 
-#include "spdlog/spdlog.h"
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 namespace FishEngine {
 
@@ -97,6 +97,8 @@ ClientGame::~ClientGame() {
 // todo: sync weapon positions with server/ fetch them from server / spawn them periodically
 
 void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
+
+	// ================== init game ==================
 	isRunning = true;
 	assert(clientManager.checkEmpty());
 	assert(numPlayers > 0);
@@ -114,19 +116,26 @@ void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
 	// ================== init player ==================
 	auto &player(clientManager.addEntity());
 	auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
-	ClientGenerator::forPlayer(player, initPos.at(0).first, initPos.at(0).second);
+	ClientGenerator::forPlayer(player, initPos.at(0));
 	players.push_back(&player);
 
 	if (combat) {
 		// ================== init enemies ==================
 		for (int i = 1; i < numPlayers; ++i) {
 			auto &opponent(clientManager.addEntity());
-			ClientGenerator::forEnemy(opponent, initPos.at(i).first, initPos.at(i).second);
+			ClientGenerator::forEnemy(opponent, initPos.at(i));
 			players.push_back(&opponent);
 		}
 
 		// ================== init weapons ==================
 		spawnWeapons();
+	}
+	spdlog::get("console")->debug(players.size());
+	// serialization test
+	{
+		std::ofstream os("data2.json");
+		cereal::JSONOutputArchive archive(os);
+		archive(clientManager);
 	}
 }
 
@@ -135,33 +144,8 @@ void ClientGame::spawnWeapons() {
 	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
 	for (auto &spawnpoint : *spawnpoints) {
 		auto &weapon(clientManager.addEntity());
-		ClientGenerator::forWeapon(weapon, spawnpoint.first, spawnpoint.second);
+		ClientGenerator::forWeapon(weapon, spawnpoint);
 	}
-}
-
-void toggleWindowMode(SDL_Window *win, bool *windowed) {
-	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
-	// changes.
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-	spdlog::get("console")->debug("first: {}", *windowed);
-	*windowed = !*windowed;
-	spdlog::get("console")->debug("second: {}", *windowed);
-	if (*windowed) {
-		int i = SDL_GetWindowDisplayIndex(win);
-		// screenWidth = 1280;
-		// screenHeight = 720;
-		SDL_SetWindowFullscreen(win, 0);
-		spdlog::get("console")->debug("Windowed");
-	} else {
-		int i = SDL_GetWindowDisplayIndex(win);
-		SDL_Rect j;
-		SDL_GetDisplayBounds(i, &j);
-		// screenWidth = j.w;
-		// screenHeight = j.h;
-		SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		spdlog::get("console")->debug("Fullscreen");
-	}
-	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
 void ClientGame::handleEvents() {
@@ -193,7 +177,7 @@ void ClientGame::update() {
 	clientMap->updateAnimations();
 }
 
-Manager *getManager() {
+Manager *ClientGame::getManager() {
 	return &clientManager;
 }
 
@@ -295,8 +279,7 @@ void ClientGame::zoomIn() {
 	camera = {minX, minY, width, height};
 	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
 
-  spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
+	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
 }
 
 } // namespace FishEngine
-

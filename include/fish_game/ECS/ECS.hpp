@@ -1,15 +1,19 @@
 #pragma once
 
-#include <cereal/archives/json.hpp>
-#include <cereal/types/memory.hpp>
-#include <cereal/types/string.hpp>
-#include <cereal/types/unordered_map.hpp>
-#include <cereal/types/vector.hpp>
-// #include "Components.hpp"
+#include "../Vector2D.hpp"
+
+#include <SDL2/SDL.h>
 #include <algorithm>
 #include <array>
 #include <bitset>
 #include <cassert>
+#include <cereal/archives/json.hpp>
+#include <cereal/types/base_class.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -19,6 +23,16 @@ namespace FishEngine {
 class Entity;
 class Manager;
 class Component;
+class ColliderComponent;
+class WearableComponent;
+class EquipmentComponent;
+class EventHandlerComponent;
+class TransformComponent;
+
+// CEREAL_REGISTER_TYPE(ColliderComponent)
+// CEREAL_REGISTER_TYPE(WearableComponent)
+// CEREAL_REGISTER_TYPE(EquipmentComponent)
+// CEREAL_REGISTER_TYPE(EventHandlerComponent)
 
 using ComponentID = std::size_t;
 using Group = std::size_t;
@@ -44,6 +58,9 @@ class Component {
   public:
 	Entity *entity;
 
+	template <class Archive>
+	void serialize(Archive &ar) {}
+
 	virtual void init() {}
 	/**
 	 * @brief: update the component
@@ -57,11 +74,6 @@ class Component {
 	 * will be called. Meaning that nothing will happen.
 	 */
 	virtual void draw() {}
-
-	template <class Archive>
-	void serialize(Archive &ar) {
-		ar();
-	}
 
 	virtual ~Component() {}
 };
@@ -77,19 +89,34 @@ class Entity {
 	GroupBitSet groupBitSet;
 
   public:
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(active, getComponent<TransformComponent>(), getComponent<ColliderComponent>());
+
+		if (hasComponent<EventHandlerComponent>()) {
+			ar(getComponent<EventHandlerComponent>());
+		}
+		if (hasComponent<WearableComponent>()) {
+			ar(getComponent<WearableComponent>());
+		}
+		if (hasComponent<EquipmentComponent>()) {
+			ar(getComponent<EquipmentComponent>());
+		}
+	}
+
+	Entity() : manager(manager) {} //
 	Entity(Manager &man) : manager(man) {}
 
 	Manager *getManager() { return &manager; }
 
 	void addGroup(Group group);
 
-
 	bool checkEmpty() { return components.empty(); }
 
-	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(active, components, componentArray, componentBitSet, groupBitSet);
-	}
+	// template <class Archive>
+	// void serialize(Archive &ar) {
+	// 	ar(active, components, componentArray, componentBitSet, groupBitSet);
+	// }
 
 	/**
 	 * @brief: update all components which belong to a instance of an entity
@@ -166,22 +193,22 @@ class Manager {
 	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
 
   public:
+	template <class Archive>
+	void save(Archive &ar) const {
+		std::cout << "size of entites vector: " << entities.size() << std::endl;
+		ar(entities);
+	}
+
+	template <class Archive>
+	void load(Archive &ar) {
+		ar(entities);
+	}
+
 	void update() {
 		for (auto &e : entities) {
 			// std::cout << "ECS - Updating entities" << std::endl;
 			e->update();
 		}
-	}
-
-	template <class Archive>
-	void save(Archive &ar) const {
-		ar(entities, groupedEntities);
-	}
-
-	template <class Archive>
-	void load(Archive &ar) {
-		// TODO: maybe restore gouped Entities pointer correctly
-		ar(entities, groupedEntities);
 	}
 
 	void draw() {
@@ -234,6 +261,20 @@ class Manager {
 	}
 };
 
+} // namespace FishEngine
+
+// ================ CEREAL HELPER FUNCTIONS ================
+
+template <class Archive>
+void serialize(Archive &ar, SDL_Rect &rect) {
+	ar(CEREAL_NVP(rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
+}
+
+template <class Archive>
+void serialize(Archive &ar, FishEngine::Vector2D &vec) {
+	ar(CEREAL_NVP(vec.getX()), CEREAL_NVP(vec.getY()));
+}
+
 // id synchronizaiton? maybe not needed if manager is always kept in synch, with cereal we can only update the changing
 // variables
 //
@@ -245,5 +286,3 @@ class Manager {
 //
 // protocol: array of messages; if update: - update
 //                              if new:    - generate Component, needed arguemnts given
-
-} // namespace FishEngine

@@ -17,3 +17,9 @@ void ServerComponent::update() {
 }
 
 } // namespace FishEngine
+
+#include <cereal/archives/json.hpp>
+#include <cereal/types/polymorphic.hpp>
+
+CEREAL_REGISTER_TYPE(FishEngine::ServerComponent);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::ServerComponent);

@@ -13,6 +13,9 @@ class MoveComponent;
 class EventHandlerComponent : public Component {
 
   public:
+	template <class Archive>
+	void serialize(Archive &ar) {}
+
 	MoveComponent *move;
 	EquipmentComponent *equip;
 

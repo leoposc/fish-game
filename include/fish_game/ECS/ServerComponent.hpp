@@ -11,6 +11,9 @@ class ServerComponent : public Component {
 	TransformComponent *transform = nullptr;
 
   public:
+	template <class Archive>
+	void serialize(Archive &ar) {}
+
 	ServerComponent() = default;
 	~ServerComponent() = default;
 
