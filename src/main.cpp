@@ -1,4 +1,5 @@
 #include "../include/fish_game/ClientGame.hpp"
+#include "../include/fish_game/FontManager.hpp"
 #include "../include/fish_game/GameInputEvents.hpp"
 #include "../include/fish_game/NetworkClient.hpp"
 #include "../include/fish_game/NetworkHost.hpp"
@@ -7,6 +8,7 @@
 #include "spdlog/spdlog.h"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <arpa/inet.h>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/memory.hpp>
@@ -62,7 +64,7 @@ FuncPtr combat() {
 	int frameTime;
 
 	client->init("map03.tmj", 4, true);
-	server->init("map03.tmj", 4);
+	// server->init("map03.tmj", 4);
 
 	std::cout << "Combat init done!" << std::endl;
 
@@ -88,6 +90,13 @@ FuncPtr combat() {
 
 // todo: implement joinLobby
 FuncPtr joinLobby() {
+	std::string ip = client->joinGame();
+	if (ip.empty()) {
+		return mainMenu();
+	}
+	std::cout << "Joining lobby at " << ip << std::endl;
+	// todo: connect to host
+
 	return hostLobby();
 }
 
@@ -100,13 +109,18 @@ FuncPtr hostLobby() {
 	uint32_t frameStart;
 	int frameTime;
 
+	std::string ownIP = "127.0.0.1";
+
 	client->init("lobby.tmj", 1, false);
 	server->init("lobby.tmj", 1);
+	FishEngine::ClientGame::assets->loadFromRenderedText(ownIP, "../../assets/zd-bold.ttf", 24, {0, 0, 0, 255});
 
-	std::cout << "init done!" << std::endl;
+	// todo: start server - open socket
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
+
+		// todo: wait for players logic and sync with clients
 
 		client->handleEvents();
 		client->update();
@@ -148,13 +162,14 @@ FuncPtr mainMenu() {
 	int frameTime;
 
 	client->init("mainMenu.tmj", 1, false);
-	server->init("mainMenu.tmj", 1);
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
 		client->handleEvents();
+		std::cout << "Main menu init done!" << std::endl;
 		client->update();
+		std::cout << "Main menu init done!" << std::endl;
 		client->render();
 
 		switch (client->updateMainMenu()) {
@@ -194,7 +209,8 @@ int main(int argc, char *argv[]) {
 	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
 
-	combat();
+	joinLobby();
+	// combat();
 	// mainMenu();
 
 	return 0;
