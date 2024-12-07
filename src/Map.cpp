@@ -207,6 +207,7 @@ bool Map::checkPlattformCollisions(SDL_Rect *collider) {
 		if (SDL_HasIntersection(collider, &block)) {
 			SDL_Rect intersection;
 			if (SDL_IntersectRect(collider, &block, &intersection)) {
+				std::cout << "intersection: " << intersection.w << " " << intersection.h << std::endl;
 				if (intersection.w > intersection.h) {
 					if (collider->y < block.y) {
 						collider->y -= intersection.h;

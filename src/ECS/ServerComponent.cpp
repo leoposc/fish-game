@@ -1,8 +1,12 @@
 #include "../../include/fish_game/ECS/ServerComponent.hpp"
+#include "../../include/fish_game/Auxiliary.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/MockServer.hpp"
 
-#include "spdlog/spdlog.h"
+#include <cereal/archives/json.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <fstream>
+#include <spdlog/spdlog.h>
 
 namespace FishEngine {
 
@@ -16,10 +20,14 @@ void ServerComponent::update() {
 	MockServer::getInstance().enqueuePosition(transform->position);
 }
 
-} // namespace FishEngine
+void ServerComponent::getEvent() {
+	// get event from the server
+	std::ifstream is("event.json");
+	cereal::JSONInputArchive archive(is);
+	archive(event);
+}
 
-#include <cereal/archives/json.hpp>
-#include <cereal/types/polymorphic.hpp>
+} // namespace FishEngine
 
 CEREAL_REGISTER_TYPE(FishEngine::ServerComponent);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::ServerComponent);

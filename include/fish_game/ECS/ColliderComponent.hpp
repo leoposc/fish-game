@@ -1,6 +1,7 @@
 #pragma once
 
 // #include "Components.hpp"
+#include "../Auxiliary.hpp"
 #include "../ClientGame.hpp"
 #include "ECS.hpp"
 

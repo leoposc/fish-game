@@ -12,14 +12,14 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 	player.addComponent<MoveComponent>();
 	player.addComponent<GravityComponent>();
 	player.addComponent<EquipmentComponent>();
-	player.addComponent<EventHandlerComponent>();
+	player.addComponent<EventHandlerComponent>(false);
 	player.addGroup(ClientGame::groupLabels::groupPlayers);
 }
 
 void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos) {
 	enemy.addComponent<TransformComponent>(pos.first, pos.second, 45, 60, 1.0);
 	enemy.addComponent<SpriteComponent>("fish", false);
-	enemy.addComponent<ClientComponent>();
+	// enemy.addComponent<ClientComponent>();
 	enemy.addComponent<ColliderComponent>("enemy", pos.first, pos.second, 45, 60);
 	enemy.addComponent<MoveComponent>();
 	enemy.addComponent<GravityComponent>();
@@ -47,7 +47,7 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 	player.addComponent<MoveComponent>();
 	player.addComponent<GravityComponent>();
 	player.addComponent<EquipmentComponent>();
-	player.addComponent<EventHandlerComponent>();
+	player.addComponent<EventHandlerComponent>(true);
 	player.addComponent<ServerComponent>();
 	player.addGroup(ServerGame::groupLabels::groupPlayers);
 }

@@ -16,6 +16,7 @@
 #include <cereal/types/vector.hpp>
 #include <iostream>
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <vector>
 
 namespace FishEngine {
@@ -127,6 +128,7 @@ class Entity {
 	void update() {
 		for (auto &c : components) {
 			// std::cout << "ECS - Updating component" << std::endl;
+			spdlog::get("console")->debug("Component Type: {}", typeid(*c).name());
 			c->update();
 		}
 	}
@@ -265,15 +267,15 @@ class Manager {
 
 // ================ CEREAL HELPER FUNCTIONS ================
 
-template <class Archive>
-void serialize(Archive &ar, SDL_Rect &rect) {
-	ar(CEREAL_NVP(rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
-}
+// template <class Archive>
+// void serialize(Archive &ar, SDL_Rect &rect) {
+// 	ar(CEREAL_NVP(rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
+// }
 
-template <class Archive>
-void serialize(Archive &ar, FishEngine::Vector2D &vec) {
-	ar(CEREAL_NVP(vec.getX()), CEREAL_NVP(vec.getY()));
-}
+// template <class Archive>
+// void serialize(Archive &ar, FishEngine::Vector2D &vec) {
+// 	ar(CEREAL_NVP(vec.getX()), CEREAL_NVP(vec.getY()));
+// }
 
 // id synchronizaiton? maybe not needed if manager is always kept in synch, with cereal we can only update the changing
 // variables

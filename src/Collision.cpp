@@ -14,10 +14,14 @@ void checkWaterCollisions(std::vector<Entity *> *players, Map *map) {
 void checkPlattformCollisions(std::vector<Entity *> *players, Map *serverMap) {
 	for (auto &player : *players) {
 		if (serverMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider)) {
+			std::cout << "Collision" << std::endl;
 			// check if player is moving downwards
 			if (player->getComponent<TransformComponent>().velocity.getY() > 0) {
 				player->getComponent<TransformComponent>().velocity.setY(0);
 			}
+			SDL_Rect *collider = &player->getComponent<ColliderComponent>().collider;
+			player->getComponent<TransformComponent>().position = {static_cast<float>(collider->x),
+			                                                       static_cast<float>(collider->y)};
 		}
 	}
 }
