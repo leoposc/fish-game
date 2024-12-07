@@ -1,5 +1,6 @@
 #include "../include/fish_game/ClientGame.hpp"
 #include "../include/fish_game/AssetManager.hpp"
+#include "../include/fish_game/Auxiliary.hpp"
 #include "../include/fish_game/Collision.hpp"
 #include "../include/fish_game/ECS/ColliderComponent.hpp"
 #include "../include/fish_game/ECS/ComponentsGenerator.hpp"
@@ -7,14 +8,17 @@
 #include "../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../include/fish_game/ECS/TransformComponent.hpp"
 #include "../include/fish_game/ECS/WearableComponent.hpp"
+#include "../include/fish_game/FontManager.hpp"
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/MockServer.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
 
-#include "spdlog/spdlog.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 namespace FishEngine {
 
@@ -97,6 +101,8 @@ ClientGame::~ClientGame() {
 // todo: sync weapon positions with server/ fetch them from server / spawn them periodically
 
 void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
+
+	// ================== init game ==================
 	isRunning = true;
 	assert(clientManager.checkEmpty());
 	assert(numPlayers > 0);
@@ -114,58 +120,30 @@ void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
 	// ================== init player ==================
 	auto &player(clientManager.addEntity());
 	auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
-	ClientGenerator::forPlayer(player, initPos.at(0).first, initPos.at(0).second);
+	ClientGenerator::forPlayer(player, initPos.at(0));
 	players.push_back(&player);
 
 	if (combat) {
 		// ================== init enemies ==================
 		for (int i = 1; i < numPlayers; ++i) {
 			auto &opponent(clientManager.addEntity());
-			ClientGenerator::forEnemy(opponent, initPos.at(i).first, initPos.at(i).second);
+			ClientGenerator::forEnemy(opponent, initPos.at(i));
 			players.push_back(&opponent);
 		}
 
 		// ================== init weapons ==================
 		spawnWeapons();
 	}
-}
-
-void ClientGame::spawnWeapons() {
-	// ================== init weapons ==================
-	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
-	for (auto &spawnpoint : *spawnpoints) {
-		auto &weapon(clientManager.addEntity());
-		ClientGenerator::forWeapon(weapon, spawnpoint.first, spawnpoint.second);
+	spdlog::get("console")->debug(players.size());
+	// serialization test
+	{
+		std::ofstream os("data2.json");
+		cereal::JSONOutputArchive archive(os);
+		archive(clientManager);
 	}
-}
-
-void toggleWindowMode(SDL_Window *win, bool *windowed) {
-	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
-	// changes.
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-	spdlog::get("console")->debug("first: {}", *windowed);
-	*windowed = !*windowed;
-	spdlog::get("console")->debug("second: {}", *windowed);
-	if (*windowed) {
-		int i = SDL_GetWindowDisplayIndex(win);
-		// screenWidth = 1280;
-		// screenHeight = 720;
-		SDL_SetWindowFullscreen(win, 0);
-		spdlog::get("console")->debug("Windowed");
-	} else {
-		int i = SDL_GetWindowDisplayIndex(win);
-		SDL_Rect j;
-		SDL_GetDisplayBounds(i, &j);
-		// screenWidth = j.w;
-		// screenHeight = j.h;
-		SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		spdlog::get("console")->debug("Fullscreen");
-	}
-	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
 void ClientGame::handleEvents() {
-	// TODO: look for a better way to handle events since movement seems to be pretty slow
 	SDL_PollEvent(&game_event);
 
 	switch (game_event.type) {
@@ -182,7 +160,7 @@ void ClientGame::handleEvents() {
 		break;
 	}
 
-	MockServer::getInstance().enqueueEvent(game_event);
+	// MockServer::getInstance().enqueueEvent(game_event);
 }
 
 void ClientGame::update() {
@@ -191,10 +169,6 @@ void ClientGame::update() {
 	Collision::checkWaterCollisions(&players, clientMap);
 	Collision::checkPlattformCollisions(&players, clientMap);
 	clientMap->updateAnimations();
-}
-
-Manager *getManager() {
-	return &clientManager;
 }
 
 void ClientGame::render() {
@@ -215,23 +189,132 @@ void ClientGame::render() {
 		t->draw();
 	}
 
+	// assets->renderFonts();
+
 	SDL_RenderPresent(renderer);
 }
 
-bool ClientGame::joinGame(std::string ip) {
-
-	// todo: connect to the server
-	return false;
+void ClientGame::spawnWeapons() {
+	// ================== init weapons ==================
+	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
+	for (auto &spawnpoint : *spawnpoints) {
+		auto &weapon(clientManager.addEntity());
+		ClientGenerator::forWeapon(weapon, spawnpoint);
+	}
 }
 
-bool ClientGame::hasStarted() {
-	mapPath = "map03.tmj";
-	return true;
+Manager *ClientGame::getManager() {
+	return &clientManager;
+}
 
-	// TODO: check if the game is started
-	// fetch the number of players from the server and map
-	// sth. like server->fetchState(struct with &mapPath, &numPlayers, &started);
-	// return started;
+std::string ClientGame::joinGame() {
+
+	clientMap = new Map();
+	clientMap->loadMap(fs::path("../../maps/joinLobby.tmj"));
+
+	FontManager gInputTextTexture(renderer, "../../assets/zd-bold.ttf");
+	FontManager gPromptTextTexture(renderer, "../../assets/zd-bold.ttf", 26);
+
+	SDL_Color textColor = {0, 0, 0, 255};
+	SDL_Event event;
+	SDL_StartTextInput();
+
+	std::string inputText = "xxx.xxx.xxx.xxx";
+	gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
+	gPromptTextTexture.loadFromRenderedText("Enter IP Address", textColor);
+
+	bool modified = false;
+	bool running = true;
+	bool renderText = true;
+
+	while (running) {
+		while (SDL_PollEvent(&event) != 0) {
+			switch (event.type) {
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.sym) {
+				// return to main menu
+				case SDLK_ESCAPE:
+					inputText = "";
+					running = false;
+					break;
+					// delete the last character
+				case SDLK_BACKSPACE:
+					if (inputText.length() > 0) {
+						inputText.pop_back();
+						renderText = true;
+					}
+					break;
+				// handle comitting the input
+				case SDLK_RETURN:
+					// check if the input is a valid IPv4 address
+					// if not, show an error message
+					if (isValidIPv4(inputText)) {
+						running = false;
+					} else {
+						modified = false;
+						renderText = true;
+						inputText = "Invalid IP Address";
+						gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
+					}
+					break;
+				// handle copy
+				case SDLK_c:
+					if (SDL_GetModState() & KMOD_CTRL) {
+						SDL_SetClipboardText(inputText.c_str());
+					}
+					break;
+				// handle paste
+				case SDLK_v:
+					if (SDL_GetModState() & KMOD_CTRL) {
+						char *tmpText = SDL_GetClipboardText();
+						inputText = tmpText;
+						SDL_free(tmpText);
+
+						renderText = true;
+					}
+					break;
+				}
+				break;
+			case SDL_TEXTINPUT:
+				if (modified) {
+					inputText += event.text.text;
+				} else {
+					inputText = event.text.text;
+					modified = true;
+				}
+				renderText = true;
+				break;
+			}
+		}
+		if (renderText) {
+			if (inputText.length() == 0) {
+				inputText = " ";
+			}
+			renderText = false;
+			gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
+			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			SDL_RenderClear(renderer);
+
+			clientMap->drawMap();
+			gPromptTextTexture.render((SCREEN_WIDTH - gPromptTextTexture.getWidth()) / 2, SCREEN_HEIGHT / 3 + 30);
+			gInputTextTexture.render((SCREEN_WIDTH - gInputTextTexture.getWidth()) / 2,
+			                         SCREEN_HEIGHT / 3 + 30 + gPromptTextTexture.getHeight());
+
+			SDL_RenderPresent(renderer);
+		}
+	}
+
+	SDL_StopTextInput();
+	stop();
+	return inputText;
+}
+
+void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
+	int x = 0;
+	int y = 0;
+	SDL_Rect renderQuad = {(SCREEN_WIDTH - width) / 2, SCREEN_HEIGHT / 3, width, height};
+
+	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
 }
 
 Uint8 ClientGame::updateMainMenu() {
@@ -243,6 +326,17 @@ Uint8 ClientGame::updateMainMenu() {
 		return 1;
 
 	return -1;
+}
+
+bool ClientGame::hasStarted() {
+
+	mapPath = "map03.tmj";
+	return true;
+
+	// TODO: check if the game is started
+	// fetch the number of players from the server and map
+	// sth. like server->fetchState(struct with &mapPath, &numPlayers, &started);
+	// return started;
 }
 
 bool ClientGame::running() {
@@ -295,8 +389,7 @@ void ClientGame::zoomIn() {
 	camera = {minX, minY, width, height};
 	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
 
-  spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
+	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
 }
 
 } // namespace FishEngine
-

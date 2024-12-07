@@ -15,10 +15,16 @@ class EquipmentComponent : public Component {
 
   private:
 	bool isEquipped = false;
-	WearableComponent *wearable = nullptr;
+	std::unique_ptr<WearableComponent> wearable;
+	// WearableComponent *wearable = nullptr;
 	ColliderComponent *collider = nullptr;
 
   public:
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(isEquipped, wearable);
+	}
+
 	EquipmentComponent() = default;
 	~EquipmentComponent() = default;
 

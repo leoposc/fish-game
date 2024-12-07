@@ -11,43 +11,47 @@
 namespace FishEngine {
 
 class SpriteComponent : public Component {
-  TransformComponent *transform;
-  SDL_Texture *texture;
-  SDL_Rect srcRect, dstRect;
+	TransformComponent *transform;
+	SDL_Texture *texture;
+	SDL_Rect srcRect, dstRect;
 
-  bool animated = false;
-  int frames = 0;
-  int speed = 100; // ms
+	bool animated = false;
+	int frames = 0;
+	int speed = 100; // ms
 
-  std::string id;
+	std::string id;
 
-public:
-  int animationIndex = 0;
-  // std::map<const char *, Animation> animations;
+  public:
+	template <class Archive>
+	void serialize(Archive &ar) {}
 
-  SDL_RendererFlip spriteFlip = SDL_FLIP_NONE;
+	int animationIndex = 0;
+	// std::map<const char *, Animation> animations;
 
-  SpriteComponent() = default;
+	SDL_RendererFlip spriteFlip = SDL_FLIP_NONE;
 
-  SpriteComponent(std::string id);
+	SpriteComponent() = default;
+	// ~SpriteComponent() = default;
 
-  SpriteComponent(std::string id, bool isAnimated);
+	SpriteComponent(std::string id);
 
-  ~SpriteComponent();
+	SpriteComponent(std::string id, bool isAnimated);
 
-  void setTexture(std::string id);
+	~SpriteComponent();
 
-  void init() override;
+	void setTexture(std::string id);
 
-  void update() override;
+	void init() override;
 
-  void draw() override;
-  // TODO: implement animation with tiled/ tileson
-  //   void play(const char *animationName) {
-  //     frames = animations[animationName].frames;
-  //     speed = animations[animationName].speed;
-  //     animated = true;
-  //   }
+	void update() override;
+
+	void draw() override;
+	// TODO: implement animation with tiled/ tileson
+	//   void play(const char *animationName) {
+	//     frames = animations[animationName].frames;
+	//     speed = animations[animationName].speed;
+	//     animated = true;
+	//   }
 };
 
 } // namespace FishEngine

@@ -1,7 +1,10 @@
 #include "../../include/fish_game/ECS/EventHandlerComponent.hpp"
 #include "../../include/fish_game/ClientGame.hpp"
+#include "../../include/fish_game/ECS/ClientComponent.hpp"
 #include "../../include/fish_game/ECS/EquipmentComponent.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
+#include "../../include/fish_game/ECS/ServerComponent.hpp"
+
 #include "spdlog/spdlog.h"
 
 namespace FishEngine {
@@ -18,13 +21,21 @@ void EventHandlerComponent::init() {
 	} else {
 		equip = &entity->getComponent<EquipmentComponent>();
 	}
+
+	if (isServer) {
+		serverComponent = &entity->getComponent<ServerComponent>();
+		event_ptr = serverComponent->getEventPtr();
+	} else {
+		clientComponent = &entity->getComponent<ClientComponent>();
+		event_ptr = &ClientGame::game_event;
+	}
 }
 
 void EventHandlerComponent::update()
 
 {
-	if (ClientGame::game_event.type == SDL_KEYDOWN) {
-		switch (ClientGame::game_event.key.keysym.sym) {
+	if (event_ptr->type == SDL_KEYDOWN) {
+		switch (event_ptr->key.keysym.sym) {
 		// upwards
 		case SDLK_w:
 			move->up();
@@ -54,11 +65,16 @@ void EventHandlerComponent::update()
 			equip->shoot();
 			break;
 		}
+
+		// send the event to the server
+		if (!isServer) {
+			clientComponent->sendEvent(ClientGame::game_event);
+		}
 	}
 
 	// stop the player
-	if (ClientGame::game_event.type == SDL_KEYUP) {
-		switch (ClientGame::game_event.key.keysym.sym) {
+	if (event_ptr->type == SDL_KEYUP) {
+		switch (event_ptr->key.keysym.sym) {
 		case SDLK_ESCAPE:
 			// TODO: add a pause menu
 			// ClientGame::stop();
@@ -85,8 +101,21 @@ void EventHandlerComponent::update()
 			// sprite->play("idle");
 			break;
 		}
+
+		// send the event to the server
+		if (!isServer) {
+			clientComponent->sendEvent(ClientGame::game_event);
+		}
 	}
-	spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
+	// spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
+
+	//
 }
 
 } // namespace FishEngine
+
+#include <cereal/archives/json.hpp>
+#include <cereal/types/polymorphic.hpp>
+
+CEREAL_REGISTER_TYPE(FishEngine::EventHandlerComponent)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::EventHandlerComponent)

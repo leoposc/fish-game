@@ -16,6 +16,7 @@
 
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 namespace FishEngine {
 
@@ -43,14 +44,15 @@ void ServerGame::init(fs::path mapPath, int numPlayers) {
 
 	// =================== init player===========================
 	// scaling not working correctly, RedFish.png also very high resolution
+	auto initPos = serverMap->getPlayerSpawnpoints(numPlayers);
 
 	for (int i = 0; i < numPlayers; ++i) {
 		auto &player(serverManager.addEntity());
 		serverManager.addToGroup(&player, groupLabels::groupPlayers);
-		auto initPos = serverMap->getInitialPos().at(i);
-		ServerGenerator::forPlayer(player, initPos.first, initPos.second);
+		ServerGenerator::forPlayer(player, initPos.at(i));
 		players.push_back(&player);
 	}
+	spdlog::get("console")->debug("ServerGame - init done");
 }
 
 void ServerGame::handleEvents() {

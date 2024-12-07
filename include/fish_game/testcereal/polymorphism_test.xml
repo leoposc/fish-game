@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cereal>
+	<value0 size="dynamic">
+		<value0>
+			<polymorphic_id>2147483649</polymorphic_id>
+			<polymorphic_name>test::DerivedClassOne</polymorphic_name>
+			<ptr_wrapper>
+				<valid>1</valid>
+				<data/>
+			</ptr_wrapper>
+		</value0>
+		<value1>
+			<polymorphic_id>2147483650</polymorphic_id>
+			<polymorphic_name>DerivedClassTwo</polymorphic_name>
+			<ptr_wrapper>
+				<valid>1</valid>
+				<data>
+					<value0>0</value0>
+				</data>
+			</ptr_wrapper>
+		</value1>
+	</value0>
+</cereal>
+

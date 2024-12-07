@@ -16,21 +16,21 @@ namespace FishEngine {
 
 namespace ClientGenerator {
 
-void forPlayer(Entity &player, std::uint16_t x, std::uint16_t y);
+void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
-void forEnemy(Entity &enemy, std::uint16_t x, std::uint16_t y);
+void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
-void forWeapon(Entity &weapon, std::uint16_t x, std::uint16_t y);
+void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
-void forProjectile(Entity &projectile, std::uint16_t x, std::uint16_t);
+void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
 } // namespace ClientGenerator
 
 namespace ServerGenerator {
 
-void forPlayer(Entity &player, std::uint16_t x, std::uint16_t y);
+void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
-void forProjectile(Entity &projectile, std::uint16_t x, std::uint16_t);
+void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
 } // namespace ServerGenerator
 

@@ -12,7 +12,11 @@ class GravityComponent : public Component {
 	MoveComponent *move = nullptr;
 
   public:
-	GravityComponent() {}
+	template <class Archive>
+	void serialize(Archive &ar) {}
+
+	GravityComponent() = default;
+	~GravityComponent() = default;
 
 	void init() override;
 

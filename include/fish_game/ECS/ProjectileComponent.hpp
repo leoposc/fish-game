@@ -12,6 +12,14 @@ namespace FishEngine {
 
 class ProjectileComponent : public Component {
   public:
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(range, speed, distance, velocity);
+	}
+
+	ProjectileComponent() = default;
+	~ProjectileComponent() = default;
+
 	ProjectileComponent(int rng, int sp, Vector2D vel);
 
 	void init() override;

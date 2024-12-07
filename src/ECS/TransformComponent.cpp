@@ -3,6 +3,9 @@
 #include "../../include/fish_game/MockServer.hpp"
 #include "spdlog/spdlog.h"
 
+#include <cereal/types/memory.hpp>
+#include <cereal/types/polymorphic.hpp>
+
 // #include "ECS.hpp"
 
 namespace FishEngine {
@@ -18,3 +21,8 @@ void TransformComponent::update() {
 }
 
 } // namespace FishEngine
+
+#include <cereal/archives/json.hpp>
+
+CEREAL_REGISTER_TYPE(FishEngine::TransformComponent);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::TransformComponent);

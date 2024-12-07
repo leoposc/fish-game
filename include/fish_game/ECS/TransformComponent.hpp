@@ -3,23 +3,17 @@
 #include "../Vector2D.hpp"
 #include "ECS.hpp"
 
+#include <cereal/types/polymorphic.hpp>
+
 namespace FishEngine {
 
 class TransformComponent : public Component {
 
   public:
-	Vector2D velocity{0, 0};
-	Vector2D position{0, 0};
-
-	int speed = 3;
-
-	// TODO: read from file/ tileson
-	int height = 16;
-	int width = 16;
-
-	float scale = 1;
-
-	bool blocked = false;
+	template <class Archive>
+	void serialize(Archive &ar) {
+		ar(speed);
+	}
 
 	TransformComponent() : position(0, 0) {}
 
@@ -43,7 +37,25 @@ class TransformComponent : public Component {
 
 	void update() override;
 
-	void gravity();
+	Vector2D velocity{0, 0};
+	Vector2D position{0, 0};
+
+	int speed = 3;
+
+	// TODO: read from file/ tileson
+	int height = 16;
+	int width = 16;
+
+	float scale = 1;
+
+	bool blocked = false;
 };
 
 } // namespace FishEngine
+
+// #include <cereal/archives/json.hpp>
+
+// // CEREAL_REGISTER_TYPE(FishEngine::TransformComponent);
+// CEREAL_REGISTER_TYPE(FishEngine::Component);
+// CEREAL_REGISTER_TYPE_WITH_NAME(FishEngine::TransformComponent, "TransformComponent");
+// CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::TransformComponent);
