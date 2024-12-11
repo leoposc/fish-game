@@ -52,10 +52,3 @@ class TransformComponent : public Component {
 };
 
 } // namespace FishEngine
-
-// #include <cereal/archives/json.hpp>
-
-// // CEREAL_REGISTER_TYPE(FishEngine::TransformComponent);
-// CEREAL_REGISTER_TYPE(FishEngine::Component);
-// CEREAL_REGISTER_TYPE_WITH_NAME(FishEngine::TransformComponent, "TransformComponent");
-// CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::TransformComponent);

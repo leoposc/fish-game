@@ -90,11 +90,13 @@ FuncPtr combat() {
 
 // todo: implement joinLobby
 FuncPtr joinLobby() {
-	std::string ip = client->joinGame();
+	std::string ip = client->joinInterface();
 	if (ip.empty()) {
 		return mainMenu();
 	}
 	std::cout << "Joining lobby at " << ip << std::endl;
+	client->sendJoinRequest(ip);
+
 	// todo: connect to host
 
 	return hostLobby();
@@ -161,43 +163,48 @@ FuncPtr mainMenu() {
 	uint32_t frameStart;
 	int frameTime;
 
-	client->init("mainMenu.tmj", 1, false);
+	client->init("mainMenu.tmj", 0, false);
+	server->init("mainMenu.tmj", 0);
 
-	while (client->running()) {
-		frameStart = SDL_GetTicks();
+	client->sendJoinRequest("ip");
+	server->acceptJoinRequest("ip");
 
-		client->handleEvents();
-		std::cout << "Main menu init done!" << std::endl;
-		client->update();
-		std::cout << "Main menu init done!" << std::endl;
-		client->render();
+	server->sendGameState();
+	client->receiveGameState();
 
-		switch (client->updateMainMenu()) {
-		case 0:
-			std::cout << "Leaving main menu..." << std::endl;
-			client->stop();
-			server->stop();
-			return nullptr;
-			break;
-		case 1:
-			client->stop();
-			server->stop();
-			return hostLobby();
-			break;
-		case 2:
-			client->stop();
-			server->stop();
-			return joinLobby();
-			break;
-		default:
-			break;
-		}
+	// while (client->running()) {
+	// 	frameStart = SDL_GetTicks();
 
-		frameTime = SDL_GetTicks() - frameStart;
-		if (frameDelay > frameTime) {
-			SDL_Delay(frameDelay - frameTime);
-		}
-	}
+	// 	client->handleEvents();
+	// 	client->update();
+	// 	client->render();
+
+	// 	switch (client->updateMainMenu()) {
+	// 	case 0:
+	// 		std::cout << "Leaving main menu..." << std::endl;
+	// 		client->stop();
+	// 		server->stop();
+	// 		return nullptr;
+	// 		break;
+	// 	case 1:
+	// 		client->stop();
+	// 		server->stop();
+	// 		return hostLobby();
+	// 		break;
+	// 	case 2:
+	// 		client->stop();
+	// 		server->stop();
+	// 		return joinLobby();
+	// 		break;
+	// 	default:
+	// 		break;
+	// 	}
+
+	// 	frameTime = SDL_GetTicks() - frameStart;
+	// 	if (frameDelay > frameTime) {
+	// 		SDL_Delay(frameDelay - frameTime);
+	// 	}
+	// }
 	return nullptr;
 }
 
@@ -209,9 +216,9 @@ int main(int argc, char *argv[]) {
 	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
 
-	joinLobby();
+	// joinLobby();
 	// combat();
-	// mainMenu();
+	mainMenu();
 
 	return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Vector2D.hpp"
+#include "../include/cereal/types/bitset.hpp" // apparently not inside the cereal conan package
 
 #include <SDL2/SDL.h>
 #include <algorithm>
@@ -9,11 +10,13 @@
 #include <cassert>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/base_class.hpp>
+#include <cereal/types/map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
+
 #include <iostream>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -37,6 +40,11 @@ class TransformComponent;
 
 using ComponentID = std::size_t;
 using Group = std::size_t;
+
+inline uint8_t generateEntityID() {
+	static uint8_t id = 0;
+	return id++;
+}
 
 inline ComponentID generateComponentID() {
 	static ComponentID lastID = 0u;
@@ -81,9 +89,9 @@ class Component {
 
 class Entity {
 	Manager &manager;
-
+	int16_t id;
 	bool active = true;
-	std::vector<std::unique_ptr<Component>> components;
+	std::vector<std::shared_ptr<Component>> components;
 
 	ComponentArray componentArray;
 	ComponentBitSet componentBitSet;
@@ -91,24 +99,68 @@ class Entity {
 
   public:
 	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(active, getComponent<TransformComponent>(), getComponent<ColliderComponent>());
-
-		if (hasComponent<EventHandlerComponent>()) {
-			ar(getComponent<EventHandlerComponent>());
-		}
-		if (hasComponent<WearableComponent>()) {
-			ar(getComponent<WearableComponent>());
-		}
-		if (hasComponent<EquipmentComponent>()) {
-			ar(getComponent<EquipmentComponent>());
-		}
+	void save(Archive &ar) const {
+		ar(CEREAL_NVP(id), CEREAL_NVP(active), CEREAL_NVP(componentBitSet), CEREAL_NVP(groupBitSet));
 	}
+
+	template <class Archive>
+	void load(Archive &ar) {
+		ar(CEREAL_NVP(id), CEREAL_NVP(active), CEREAL_NVP(componentBitSet), CEREAL_NVP(groupBitSet));
+	}
+
+	// template <class Archive>
+	// void save(Archive &ar) const {
+	// 	ar(id, active, groupBitSet);
+	// 	std::cout << "ECS - Serializing entity - groupbitset " << groupBitSet << std::endl;
+	// 	ar(getComponent<TransformComponent>(), getComponent<ColliderComponent>());
+
+	// 	if (hasComponent<EventHandlerComponent>()) {
+	// 		ar(getComponent<EventHandlerComponent>());
+	// 	}
+	// 	if (hasComponent<WearableComponent>()) {
+	// 		ar(getComponent<WearableComponent>());
+	// 	}
+	// 	if (hasComponent<EquipmentComponent>()) {
+	// 		ar(getComponent<EquipmentComponent>());
+	// 	}
+	// }
+
+	// template <class Archive>
+	// void load(Archive &ar) {
+	// 	ar(id, active, groupBitSet);
+	// 	while (true) {
+	// 		std::string componentName;
+	// 		ar(componentName);
+	// 		if (componentName.empty()) {
+	// 			break;
+	// 		}
+	// 		if (componentName == typeid(TransformComponent).name()) {
+	// 			addComponent<TransformComponent>();
+	// 			ar(getComponent<TransformComponent>());
+	// 		} else if (componentName == typeid(ColliderComponent).name()) {
+	// 			addComponent<ColliderComponent>();
+	// 			ar(getComponent<ColliderComponent>());
+	// 		} else if (componentName == typeid(EventHandlerComponent).name()) {
+	// 			addComponent<EventHandlerComponent>();
+	// 			ar(getComponent<EventHandlerComponent>());
+	// 		} else if (componentName == typeid(WearableComponent).name()) {
+	// 			addComponent<WearableComponent>();
+	// 			ar(getComponent<WearableComponent>());
+	// 		} else if (componentName == typeid(EquipmentComponent).name()) {
+	// 			addComponent<EquipmentComponent>();
+	// 			ar(getComponent<EquipmentComponent>());
+	// 		}
+	// 	}
+	// }
 
 	Entity() : manager(manager) {} //
 	Entity(Manager &man) : manager(man) {}
 
 	Manager *getManager() { return &manager; }
+
+	void setID(int16_t p_id) { id = p_id; }
+
+	uint8_t getID() { return id; }
 
 	void addGroup(Group group);
 
@@ -128,7 +180,7 @@ class Entity {
 	void update() {
 		for (auto &c : components) {
 			// std::cout << "ECS - Updating component" << std::endl;
-			spdlog::get("console")->debug("Component Type: {}", typeid(*c).name());
+			// spdlog::get("console")->debug("Component Type: {}", typeid(*c).name());
 			c->update();
 		}
 	}
@@ -188,46 +240,88 @@ class Entity {
 		auto ptr(componentArray[getComponentTypeID<T>()]);
 		return *static_cast<T *>(ptr);
 	}
+
+	// get a smart pointer to a component
+	template <typename T>
+	std::shared_ptr<T> getComponentSmartPtr() const {
+		assert(hasComponent<T>());
+		for (const auto &component : components) {
+			// true if the component pointer is of type T
+			if (std::dynamic_pointer_cast<T>(component)) {
+				std::cout << component.use_count() << std::endl;
+				return std::dynamic_pointer_cast<T>(component);
+			}
+		}
+		return nullptr;
+	}
 };
 
 class Manager {
-	std::vector<std::unique_ptr<Entity>> entities;
+	std::map<uint8_t, std::unique_ptr<Entity>> entities;
 	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
 
   public:
 	template <class Archive>
 	void save(Archive &ar) const {
-		std::cout << "size of entites vector: " << entities.size() << std::endl;
 		ar(entities);
 	}
 
 	template <class Archive>
 	void load(Archive &ar) {
+		std::map<uint8_t, std::unique_ptr<Entity>> s_entities;
+		std::cout << "Loading entities" << std::endl;
 		ar(entities);
+		std::cout << "Entities loaded" << std::endl;
+		std::cout << "Entities size: " << s_entities.size() << std::endl;
+		// for (const auto &entry : s_entities) {
+		// 	uint8_t id = entry.first;
+		// 	auto &entity = entry.second;
+		// 	std::cout << "Entity type: " << typeid(*entity).name() << std::endl;
+
+		// 	if (entityExists(id)) {
+		// 		ar(entities[id]);
+		// 	} else {
+		// 		std::cout << "Entity with id " << static_cast<int>(id) << " does not exist" << std::endl;
+		// 	}
+		// }
+
+		// uint8_t id;
+		// Entity entity;
+		// ar(id, entity);
+
+		// if (entityExists(id)) {
+		// 	ar(id, entities[id]);
+		// } else {
+		// 	std::cout << "Entity with id " << id << " does not exist" << std::endl;
+		// }
 	}
+
+	std::map<uint8_t, std::unique_ptr<Entity>> &getEntities() { return entities; }
+
+	bool entityExists(uint8_t id) { return entities.find(id) != entities.end(); }
 
 	void update() {
 		for (auto &e : entities) {
 			// std::cout << "ECS - Updating entities" << std::endl;
-			e->update();
+			e.second->update();
 		}
 	}
 
 	void draw() {
 		for (auto &e : entities)
-			e->draw();
+			e.second->draw();
 	}
 
 	void destroyEntities() {
 		for (auto &e : entities)
-			e->destroy();
+			e.second->destroy();
 		refresh();
 		assert(checkEmpty());
 	}
 
 	bool checkEmpty() {
 		for (auto &e : entities) {
-			if (!e->checkEmpty()) {
+			if (!e.second->checkEmpty()) {
 				return false;
 			}
 		}
@@ -235,29 +329,34 @@ class Manager {
 	}
 
 	void refresh() {
-		for (auto i(0u); i < maxGroups; i++) {
-			auto &v(groupedEntities[i]);
-			v.erase(std::remove_if(std::begin(v), std::end(v),
-			                       [i](Entity *entity) { return !entity->isActive() || !entity->hasGroup(i); }),
-			        std::end(v));
-		}
+		// for (auto i(0u); i < maxGroups; i++) {
+		// 	auto &v(groupedEntities[i]);
+		// 	v.erase(std::remove_if(std::begin(v), std::end(v),
+		// 	                       [i](Entity *entity) { return !entity->isActive() || !entity->hasGroup(i); }),
+		// 	        std::end(v));
+		// }
 
-		entities.erase(std::remove_if(std::begin(entities), std::end(entities),
-		                              [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive(); }),
-		               std::end(entities));
+		// entities.erase(std::remove_if(std::begin(entities), std::end(entities),
+		//                               [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive(); }),
+		//                std::end(entities));
 	}
 
+	// void addToGroup(Entity *entity, Group group) {}
 	void addToGroup(Entity *entity, Group group) { groupedEntities[group].emplace_back(entity); }
 
 	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 
+	// Entity &addEntity() { return this->addEntity(std::numeric_limits<uint8_t>::max()); }
+
 	Entity &addEntity() {
 		// std::cout << "Adding entity" << std::endl;
 		Entity *e = new Entity(*this);
+		// e->setID(p_id);
 		// std::cout << "Entity created" << std::endl;
 		std::unique_ptr<Entity> uPtr(e);
 		// std::cout << "Unique pointer created" << std::endl;
-		entities.emplace_back(std::move(uPtr));
+		uint8_t id = generateEntityID();
+		entities.emplace(id, std::move(uPtr));
 		// std::cout << "Entity moved" << std::endl;
 		return *e;
 	}
@@ -269,7 +368,7 @@ class Manager {
 
 // template <class Archive>
 // void serialize(Archive &ar, SDL_Rect &rect) {
-// 	ar(CEREAL_NVP(rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
+// 	ar((rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
 // }
 
 // template <class Archive>

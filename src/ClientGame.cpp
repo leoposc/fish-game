@@ -105,7 +105,7 @@ void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
 	// ================== init game ==================
 	isRunning = true;
 	assert(clientManager.checkEmpty());
-	assert(numPlayers > 0);
+	// assert(numPlayers > 0);
 	assert(players.empty());
 
 	mapPath = mp;
@@ -118,22 +118,22 @@ void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
 	clientMap->loadMap(fs::path("../../maps") / mapPath);
 
 	// ================== init player ==================
-	auto &player(clientManager.addEntity());
-	auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
-	ClientGenerator::forPlayer(player, initPos.at(0));
-	players.push_back(&player);
+	// auto &player(clientManager.addEntity());
+	// auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
+	// ClientGenerator::forPlayer(player, initPos.at(0));
+	// players.push_back(&player);
 
-	if (combat) {
-		// ================== init enemies ==================
-		for (int i = 1; i < numPlayers; ++i) {
-			auto &opponent(clientManager.addEntity());
-			ClientGenerator::forEnemy(opponent, initPos.at(i));
-			players.push_back(&opponent);
-		}
+	// if (combat) {
+	// 	// ================== init enemies ==================
+	// 	for (int i = 1; i < numPlayers; ++i) {
+	// 		auto &opponent(clientManager.addEntity());
+	// 		ClientGenerator::forEnemy(opponent, initPos.at(i));
+	// 		players.push_back(&opponent);
+	// 	}
 
-		// ================== init weapons ==================
-		spawnWeapons();
-	}
+	// 	// ================== init weapons ==================
+	// 	spawnWeapons();
+	// }
 	spdlog::get("console")->debug(players.size());
 	// serialization test
 	{
@@ -207,7 +207,7 @@ Manager *ClientGame::getManager() {
 	return &clientManager;
 }
 
-std::string ClientGame::joinGame() {
+std::string ClientGame::joinInterface() {
 
 	clientMap = new Map();
 	clientMap->loadMap(fs::path("../../maps/joinLobby.tmj"));
@@ -307,6 +307,48 @@ std::string ClientGame::joinGame() {
 	SDL_StopTextInput();
 	stop();
 	return inputText;
+}
+
+void ClientGame::sendJoinRequest(std::string ip) {
+
+	// send request and wait for response
+
+	// playerID =
+	// init the own player entity
+	auto &ownPlayer(clientManager.addEntity());
+	auto initPos = clientMap->getPlayerSpawnpoints(1);
+	ClientGenerator::forPlayer(ownPlayer, initPos.at(0));
+	players.push_back(&ownPlayer);
+}
+
+void ClientGame::receiveGameState() {
+	Manager tmpManager;
+
+	// deserialization
+	std::ifstream is("gameState.json");
+	cereal::JSONInputArchive archive(is);
+	archive(clientManager);
+
+	// check if new entities were added
+	// for (auto &entity : tmpManager.getEntities()) {
+	// 	if (!clientManager.entityExists(entity->getID())) {
+	// 		clientManager.addEntity(entity->getID());
+
+	// 		// check which group the entity belongs to
+	// 		if (entity->hasGroup(groupLabels::groupPlayers)) {
+	// 			ClientGenerator::forPlayer(*entity, clientMap->getPlayerSpawnpoints(1).at(0));
+	// 			players.push_back(entity.get());
+	// 		}
+	// 		if (entity->hasGroup(groupLabels::groupProjectiles)) {
+	// 			// ClientGenerator::forProjectile(*entity, clientMap->loadWeaponSpawnpoints()->at(0));
+	// 		}
+	// 		// if (entity->hasGroup(groupLabels::groupWeapons)) {
+	// 		// 	ClientGenerator::forWeapon(*entity, clientMap->loadWeaponSpawnpoints()->at(0));
+	// 		// }
+	// 	}
+	// }
+
+	archive(clientManager);
 }
 
 void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {

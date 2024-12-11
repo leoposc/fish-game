@@ -4,8 +4,6 @@
 #include <cereal/archives/json.hpp>
 #include <string>
 
-bool isValidIPv4(std::string ip);
-
 template <class Archive>
 void serialize(Archive &ar, SDL_Event &event) {
 	// ar(event);
@@ -16,6 +14,8 @@ template <class Archive>
 void serialize(Archive &ar, SDL_Rect &rect) {
 	ar(CEREAL_NVP(rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
 }
+
+bool isValidIPv4(std::string ip);
 
 // template <class Archive>
 // void serialize(Archive &ar, FishEngine::Vector2D &vec) {

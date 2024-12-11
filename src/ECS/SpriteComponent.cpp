@@ -44,7 +44,7 @@ void SpriteComponent::init() {
 }
 
 void SpriteComponent::update() {
-	spdlog::get("console")->debug("SpriteComponent: updating {}", id);
+	// spdlog::get("console")->debug("SpriteComponent: updating {}", id);
 	// if (id == "pistol") {
 	// 	spdlog::get("console")->debug( "SpriteComponent: updating " << id );
 	// }

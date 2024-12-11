@@ -12,6 +12,9 @@
 #include "TransformComponent.hpp"
 #include "WearableComponent.hpp"
 
+#include <cstdint>
+#include <utility>
+
 namespace FishEngine {
 
 namespace ClientGenerator {

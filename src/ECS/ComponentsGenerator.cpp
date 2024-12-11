@@ -1,4 +1,4 @@
-#include "../../include/fish_game/ECS/ComponentsGenerator.hpp"
+#include "../include/fish_game/ECS/ComponentsGenerator.hpp"
 
 namespace FishEngine {
 
@@ -46,9 +46,9 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 45, 60);
 	player.addComponent<MoveComponent>();
 	player.addComponent<GravityComponent>();
+	player.addComponent<ServerComponent>();
 	player.addComponent<EquipmentComponent>();
 	player.addComponent<EventHandlerComponent>(true);
-	player.addComponent<ServerComponent>();
 	player.addGroup(ServerGame::groupLabels::groupPlayers);
 }
 

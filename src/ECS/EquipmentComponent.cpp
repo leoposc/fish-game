@@ -41,7 +41,11 @@ void EquipmentComponent::processCommand() {
 
 void EquipmentComponent::equip(Entity *entity) {
 	isEquipped = true;
-	wearable = &entity->getComponent<WearableComponent>();
+	std::cout << wearable.use_count() << std::endl;
+	wearable = entity->getComponentSmartPtr<WearableComponent>();
+	std::cout << wearable.use_count() << std::endl;
+	// std::cout << wearable.use_count() << std::endl;
+	// wearable = &entity->getComponent<WearableComponent>();
 	assert(wearable != nullptr);
 	wearable->attach(this->entity);
 }

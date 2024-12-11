@@ -19,7 +19,6 @@ void ClientComponent::init() {
 
 void ClientComponent::update() {
 	Vector2D newPos;
-
 	if (MockServer::getInstance().pollPosition(newPos)) {
 		transform->position = newPos;
 	}
@@ -27,11 +26,10 @@ void ClientComponent::update() {
 
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
-	{
-		std::ofstream os("event.json");
-		cereal::JSONOutputArchive archive(os);
-		archive(event);
-	}
+	uint8_t id = entity->getID();
+	std::ofstream os("event.json");
+	cereal::JSONOutputArchive archive(os);
+	archive(id, event);
 }
 
 } // namespace FishEngine

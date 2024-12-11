@@ -32,7 +32,11 @@ class ClientGame {
 
 	uint8_t updateMainMenu();
 
-	std::string joinGame();
+	std::string joinInterface();
+
+	void sendJoinRequest(std::string ip);
+
+	void receiveGameState();
 
 	bool hasStarted();
 
@@ -59,6 +63,8 @@ class ClientGame {
 	};
 
   private:
+	uint8_t playerID;
+
 	fs::path mapPath;
 	int numPlayers;
 	bool isRunning;
@@ -68,6 +74,7 @@ class ClientGame {
 	bool windowed = true;
 
 	std::vector<Entity *> players;
+	Entity *ownPlayer;
 };
 
 } // namespace FishEngine
