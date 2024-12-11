@@ -99,8 +99,20 @@ class Entity {
 
   public:
 	template <class Archive>
-	void save(Archive &ar) const {
-		ar(CEREAL_NVP(id), CEREAL_NVP(active), CEREAL_NVP(componentBitSet), CEREAL_NVP(groupBitSet));
+	void serialize(Archive &ar) {
+		ar(entityIDs);
+
+		ar(active, getComponent<TransformComponent>(), getComponent<ColliderComponent>());
+
+		if (hasComponent<EventHandlerComponent>()) {
+			ar(getComponent<EventHandlerComponent>());
+		}
+		if (hasComponent<WearableComponent>()) {
+			ar(getComponent<WearableComponent>());
+		}
+		if (hasComponent<EquipmentComponent>()) {
+			ar(getComponent<EquipmentComponent>());
+		}
 	}
 
 	template <class Archive>
@@ -259,6 +271,7 @@ class Entity {
 class Manager {
 	std::map<uint8_t, std::unique_ptr<Entity>> entities;
 	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
+	std::map<uint8_t, std::unique_ptr<Entity>> entityIDs;
 
   public:
 	template <class Archive>
@@ -270,6 +283,7 @@ class Manager {
 	void load(Archive &ar) {
 		std::map<uint8_t, std::unique_ptr<Entity>> s_entities;
 		std::cout << "Loading entities" << std::endl;
+
 		ar(entities);
 		std::cout << "Entities loaded" << std::endl;
 		std::cout << "Entities size: " << s_entities.size() << std::endl;
@@ -299,6 +313,7 @@ class Manager {
 	std::map<uint8_t, std::unique_ptr<Entity>> &getEntities() { return entities; }
 
 	bool entityExists(uint8_t id) { return entities.find(id) != entities.end(); }
+	Entity &getEntity(uint8_t id) const { return entityIDs.find(id); }
 
 	void update() {
 		for (auto &e : entities) {

@@ -359,6 +359,67 @@ void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
 	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
 }
 
+void sendGameState() {
+	std::ofstream os("gameState.json");
+	cereal::JSONOutputArchive ar(os);
+
+	// inform client about the number of the entities
+	ar(entityIDs.size());
+
+	// inform the client about the current entities
+	ar(entityIDs);
+
+	// save the current state of the entities
+	for (auto &pair : entityIDs) {
+		ar(clientManager.getEntity(pair.first));
+	}
+}
+
+void recvGameState() {
+	std::map<uint8_t, ClientGame::groupLabels> tmpEntityIDs;
+
+	//
+	std::ifstream is("gameState.json");
+	cereal::JSONOutputArchive ar(is);
+
+	ar(tmpEntityIDs);
+
+	// check if the entities are already loaded
+	for (auto &pair : tmpEntityIDs) {
+		spdlog::get("console")->debug("Entity ID: {} Group: {}", pair.first, pair.second);
+		// check if the id is in clientManager. If not, create the entity
+		if (entityIDs.count(pair.first)) {
+			// entity already in clientManager
+			spdlog::get("console")->info("Entity already in clientManager");
+		} else {
+			// create the entity
+			auto &entity(clientManager.addEntity());
+
+			// create the entity with the correct components
+			switch (pair.second) {
+			case ClientGame::groupLabels::groupPlayers:
+				ClientGenerator::forPlayer(entity, {0, 0});
+				break;
+			case ClientGame::groupLabels::groupWeapons:
+				ClientGenerator::forWeapon(entity, {0, 0});
+				break;
+			case ClientGame::groupLabels::groupProjectiles:
+				ClientGenerator::forProjectile(entity, {0, 0});
+				break;
+			}
+
+			// add the entity to the clientManager
+			entityIDs.insert(pair);
+			entity.addGroup(pair.second);
+		}
+
+		// update the values of the entity
+		ar(clientManager.getEntity(pair.first));
+	}
+
+	// check if the file is created
+}
+
 Uint8 ClientGame::updateMainMenu() {
 
 	if (Collision::checkExit(players.at(0), clientMap))

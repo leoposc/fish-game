@@ -75,6 +75,7 @@ class ClientGame {
 
 	std::vector<Entity *> players;
 	Entity *ownPlayer;
+	std::map<uint8_t, ClientGame::groupLabels> entityIDs;
 };
 
 } // namespace FishEngine
