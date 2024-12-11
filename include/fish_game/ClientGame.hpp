@@ -68,6 +68,7 @@ class ClientGame {
 	bool windowed = true;
 
 	std::vector<Entity *> players;
+	std::map<uint8_t, ClientGame::groupLabels> entityIDs;
 };
 
 } // namespace FishEngine

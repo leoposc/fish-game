@@ -58,8 +58,11 @@ void MoveComponent::right() {
 	}
 }
 
-void MoveComponent::stop() {
+void MoveComponent::stopX() {
 	transform->velocity.setX(0);
+}
+
+void MoveComponent::stopY() {
 	transform->velocity.setY(0);
 }
 

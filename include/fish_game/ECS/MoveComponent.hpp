@@ -32,7 +32,9 @@ class MoveComponent : public Component {
 
 	void right();
 
-	void stop();
+	void stopX();
+
+	void stopY();
 };
 
 } // namespace FishEngine
