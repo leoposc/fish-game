@@ -52,7 +52,7 @@ void ColliderComponent::draw() {
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::ColliderComponent);

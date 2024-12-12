@@ -3,7 +3,7 @@
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/MockServer.hpp"
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <fstream>
 

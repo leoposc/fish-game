@@ -63,12 +63,14 @@ void MoveComponent::stopX() {
 }
 
 void MoveComponent::stopY() {
-	transform->velocity.setY(0);
+	if (inWater) {
+		transform->velocity.setY(0);
+	}
 }
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::MoveComponent);

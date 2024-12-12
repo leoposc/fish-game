@@ -22,9 +22,6 @@ class SpriteComponent : public Component {
 	std::string id;
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {}
-
 	int animationIndex = 0;
 	// std::map<const char *, Animation> animations;
 

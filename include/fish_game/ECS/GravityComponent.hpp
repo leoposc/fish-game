@@ -12,9 +12,6 @@ class GravityComponent : public Component {
 	MoveComponent *move = nullptr;
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {}
-
 	GravityComponent() = default;
 	~GravityComponent() = default;
 

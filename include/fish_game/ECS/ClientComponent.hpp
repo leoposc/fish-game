@@ -11,10 +11,10 @@ class ClientComponent : public Component {
 	TransformComponent *transform = nullptr;
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {
-		// ar(transform);
-	}
+	// template <class Archive>
+	// void serialize(Archive &ar) {
+	// 	// ar(transform);
+	// }
 
 	ClientComponent() = default;
 	virtual ~ClientComponent() = default;

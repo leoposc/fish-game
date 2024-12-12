@@ -26,6 +26,8 @@ class ClientGame {
 
 	void render();
 
+	void createOwnPlayer();
+
 	void spawnWeapons();
 
 	void showIP(SDL_Texture *mTexture, int width, int height);
@@ -62,8 +64,10 @@ class ClientGame {
 		groupWeapons
 	};
 
+	uint8_t ownPlayerID;
+
   private:
-	uint8_t playerID;
+	Entity *ownPlayer;
 
 	fs::path mapPath;
 	int numPlayers;
@@ -73,9 +77,8 @@ class ClientGame {
 	SDL_Window *window;
 	bool windowed = true;
 
-	std::vector<Entity *> players;
-	Entity *ownPlayer;
-	std::map<uint8_t, ClientGame::groupLabels> entityIDs;
+	std::unordered_map<uint8_t, Entity *> players;
+	std::map<uint8_t, ClientGame::groupLabels> entityGroups;
 };
 
 } // namespace FishEngine

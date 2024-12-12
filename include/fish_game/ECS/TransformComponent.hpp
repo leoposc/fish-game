@@ -12,7 +12,7 @@ class TransformComponent : public Component {
   public:
 	template <class Archive>
 	void serialize(Archive &ar) {
-		ar(speed);
+		ar(speed, position, velocity);
 	}
 
 	TransformComponent() : position(0, 0) {}

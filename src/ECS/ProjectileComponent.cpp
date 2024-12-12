@@ -21,12 +21,6 @@ void ProjectileComponent::update() {
 	if (distance > range) {
 		spdlog::get("console")->debug("Projectile out of range");
 		entity->destroy();
-	} else if (transform->position.getX() > ClientGame::camera.x + ClientGame::camera.w
-	           || transform->position.getX() < ClientGame::camera.x
-	           || transform->position.getY() > ClientGame::camera.y + ClientGame::camera.h
-	           || transform->position.getY() < ClientGame::camera.y) {
-		spdlog::get("console")->debug("Projectile out of bounds");
-		entity->destroy();
 	}
 }
 

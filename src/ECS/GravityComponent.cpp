@@ -20,17 +20,11 @@ void GravityComponent::init() {
 	}
 
 	transform = &entity->getComponent<TransformComponent>();
-
-	move = &entity->getComponent<MoveComponent>();
 }
 
 void GravityComponent::update() {
 	// if the entity is not a fish (no move component) or the fish is not in water, apply gravity
-	// spdlog::get("console")->debug( "GRAVITY COMPONENT UPDATE" );
-	// spdlog::get("console")->debug( !entity->hasComponent<MoveComponent>() );
-	// spdlog::get("console")->debug( !move->inWater );
-
-	if (!entity->hasComponent<MoveComponent>() || !move->inWater) {
+	if (!entity->hasComponent<MoveComponent>() || !(entity->getComponent<MoveComponent>().inWater)) {
 		float y = transform->velocity.getY();
 		transform->velocity.setY(y < MAX_GRAVITY ? y + 0.1 : MAX_GRAVITY);
 	}
@@ -38,7 +32,7 @@ void GravityComponent::update() {
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::GravityComponent);

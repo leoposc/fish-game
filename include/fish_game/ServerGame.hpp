@@ -30,7 +30,9 @@ class ServerGame {
 
 	void update();
 
-	void acceptJoinRequest(std ::string ip);
+	uint8_t createPlayer(const std::string &ip);
+
+	uint8_t acceptJoinRequest(const std ::string &ip);
 
 	void updatePlayerEvent();
 
@@ -59,10 +61,11 @@ class ServerGame {
 	bool isRunning;
 	SDL_Window *window;
 
-	std::vector<Entity *> players;
+	// std::vector<Entity *> players;
 
-	std::vector<std::pair<std::string, std::uint8_t>> playerIDs;
-	std::map<uint8_t, Entity *> playerEntities;
+	std::unordered_map<uint8_t, std::string> playerIPs;
+	std::unordered_map<uint8_t, Entity *> players;
+	std::map<uint8_t, groupLabels> entityGroups;
 };
 
 } // namespace FishEngine

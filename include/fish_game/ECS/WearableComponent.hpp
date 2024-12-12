@@ -13,12 +13,12 @@ class WearableComponent : public Component {
 	TransformComponent *transform = nullptr;
 
 	Entity *attachedEntity = nullptr;
-	bool isAttached = false;
+	bool attached = false;
 
   public:
 	template <class Archive>
 	void serialize(Archive &ar) {
-		ar(isAttached); // todo: probably need to add a unique pointer
+		ar(attached); // todo: probably need to add a unique pointer
 	}
 
 	WearableComponent() = default;
@@ -29,6 +29,8 @@ class WearableComponent : public Component {
 	void update() override;
 
 	void attach(Entity *entity);
+
+	bool isAttached() { return attached; }
 
 	void detach();
 

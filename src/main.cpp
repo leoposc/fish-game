@@ -41,20 +41,6 @@ FuncPtr mainMenu();
 FuncPtr hostLobby();
 FuncPtr joinLobby();
 
-class MyRecord {
-  public:
-	uint8_t x, y;
-	float z;
-
-	MyRecord() = default;
-	MyRecord(uint8_t x, uint8_t y, float z) : x(x), y(y), z(z) {}
-
-	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(x, y, z);
-	}
-};
-
 FuncPtr combat() {
 	std::cout << "COMBAT STARTED" << std::endl;
 	const int FPS = 60;
@@ -64,7 +50,19 @@ FuncPtr combat() {
 	int frameTime;
 
 	client->init("map03.tmj", 4, true);
-	// server->init("map03.tmj", 4);
+	server->init("map03.tmj", 4);
+
+	client->sendJoinRequest("ip");
+	uint8_t id = server->acceptJoinRequest("ip");
+	std::cout << "Player ID: " << (int)id << std::endl;
+	client->ownPlayerID = id;
+
+	for (int i = 0; i < 4; i++) {
+		std::cout << server->createPlayer("") << std::endl;
+	}
+
+	server->sendGameState();
+	client->receiveGameState();
 
 	std::cout << "Combat init done!" << std::endl;
 
@@ -115,14 +113,22 @@ FuncPtr hostLobby() {
 
 	client->init("lobby.tmj", 1, false);
 	server->init("lobby.tmj", 1);
-	FishEngine::ClientGame::assets->loadFromRenderedText(ownIP, "../../assets/zd-bold.ttf", 24, {0, 0, 0, 255});
+
+	client->createOwnPlayer();
+
+	// client->sendJoinRequest("ip");
+	// server->acceptJoinRequest("ip");
+
+	// server->sendGameState();
+	// client->receiveGameState();
 
 	// todo: start server - open socket
+	// FishEngine::ClientGame::assets->loadFromRenderedText(ownIP, "../../assets/zd-bold.ttf", 24, {0, 0, 0, 255});
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
-		// todo: wait for players logic and sync with clients
+		// 	// todo: wait for players logic and sync with clients
 
 		client->handleEvents();
 		client->update();
@@ -151,6 +157,9 @@ FuncPtr hostLobby() {
 			SDL_Delay(frameDelay - frameTime);
 		}
 	}
+
+	client->stop();
+	server->stop();
 	return nullptr;
 }
 
@@ -164,47 +173,41 @@ FuncPtr mainMenu() {
 	int frameTime;
 
 	client->init("mainMenu.tmj", 0, false);
-	server->init("mainMenu.tmj", 0);
+	client->createOwnPlayer();
 
-	client->sendJoinRequest("ip");
-	server->acceptJoinRequest("ip");
+	while (client->running()) {
+		frameStart = SDL_GetTicks();
 
-	server->sendGameState();
-	client->receiveGameState();
+		client->handleEvents();
+		client->update();
+		client->render();
 
-	// while (client->running()) {
-	// 	frameStart = SDL_GetTicks();
+		switch (client->updateMainMenu()) {
+		case 0:
+			std::cout << "Leaving main menu..." << std::endl;
+			client->stop();
+			server->stop();
+			return nullptr;
+			break;
+		case 1:
+			client->stop();
+			server->stop();
+			return hostLobby();
+			break;
+		case 2:
+			client->stop();
+			server->stop();
+			return joinLobby();
+			break;
+		default:
+			break;
+		}
 
-	// 	client->handleEvents();
-	// 	client->update();
-	// 	client->render();
-
-	// 	switch (client->updateMainMenu()) {
-	// 	case 0:
-	// 		std::cout << "Leaving main menu..." << std::endl;
-	// 		client->stop();
-	// 		server->stop();
-	// 		return nullptr;
-	// 		break;
-	// 	case 1:
-	// 		client->stop();
-	// 		server->stop();
-	// 		return hostLobby();
-	// 		break;
-	// 	case 2:
-	// 		client->stop();
-	// 		server->stop();
-	// 		return joinLobby();
-	// 		break;
-	// 	default:
-	// 		break;
-	// 	}
-
-	// 	frameTime = SDL_GetTicks() - frameStart;
-	// 	if (frameDelay > frameTime) {
-	// 		SDL_Delay(frameDelay - frameTime);
-	// 	}
-	// }
+		frameTime = SDL_GetTicks() - frameStart;
+		if (frameDelay > frameTime) {
+			SDL_Delay(frameDelay - frameTime);
+		}
+	}
 	return nullptr;
 }
 
@@ -216,9 +219,11 @@ int main(int argc, char *argv[]) {
 	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
 
+	// hostLobby();
 	// joinLobby();
-	// combat();
-	mainMenu();
+	combat();
+	// mainMenu();
+	std::cout << "Exiting..." << std::endl;
 
 	return 0;
 }

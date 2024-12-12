@@ -17,6 +17,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <cereal/archives/binary.hpp>
+#include <fstream>
 #include <iostream>
 #include <spdlog/spdlog.h>
 
@@ -132,15 +134,8 @@ void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
 	// 	}
 
 	// 	// ================== init weapons ==================
-	// 	spawnWeapons();
+	spawnWeapons();
 	// }
-	spdlog::get("console")->debug(players.size());
-	// serialization test
-	{
-		std::ofstream os("data2.json");
-		cereal::JSONOutputArchive archive(os);
-		archive(clientManager);
-	}
 }
 
 void ClientGame::handleEvents() {
@@ -194,12 +189,43 @@ void ClientGame::render() {
 	SDL_RenderPresent(renderer);
 }
 
+void ClientGame::createOwnPlayer() {
+	ownPlayer = &clientManager.addEntity();
+	auto initPos = clientMap->getPlayerSpawnpoints(1).at(0);
+	ClientGenerator::forPlayer(*ownPlayer, initPos);
+	players.insert(std::make_pair(ownPlayer->getID(), ownPlayer));
+	ownPlayerID = ownPlayer->getID();
+}
+
+void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
+                     const std::vector<Entity *> &existingWeapons) {
+
+	// check for collision with existing weapons
+	for (auto &weapon : existingWeapons) {
+
+		auto &colliderA = weapon->getComponent<ColliderComponent>().collider;
+		SDL_Rect colliderB = {spawnpoint.first, spawnpoint.second, 16, 16};
+
+		// stop if there is a collision
+		if (Collision::checkCollision(colliderA, colliderB)) {
+			return;
+		}
+	}
+
+	// spawn the weapon
+	auto &weapon(clientManager.addEntity());
+	ClientGenerator::forWeapon(weapon, spawnpoint);
+}
+
 void ClientGame::spawnWeapons() {
 	// ================== init weapons ==================
 	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
+
+	// do no spawn weapons when existing weapon was not picked up
+	auto &existingWeapons(clientManager.getGroup(groupLabels::groupWeapons));
+
 	for (auto &spawnpoint : *spawnpoints) {
-		auto &weapon(clientManager.addEntity());
-		ClientGenerator::forWeapon(weapon, spawnpoint);
+		spawnWeaponsAux(spawnpoint, existingWeapons);
 	}
 }
 
@@ -314,91 +340,44 @@ void ClientGame::sendJoinRequest(std::string ip) {
 	// send request and wait for response
 
 	// playerID =
-	// init the own player entity
-	auto &ownPlayer(clientManager.addEntity());
-	auto initPos = clientMap->getPlayerSpawnpoints(1);
-	ClientGenerator::forPlayer(ownPlayer, initPos.at(0));
-	players.push_back(&ownPlayer);
 }
 
 void ClientGame::receiveGameState() {
-	Manager tmpManager;
 
-	// deserialization
-	std::ifstream is("gameState.json");
-	cereal::JSONInputArchive archive(is);
-	archive(clientManager);
+	std::ifstream is("gameState.bin", std::ios::binary);
+	cereal::BinaryInputArchive ar(is);
 
-	// check if new entities were added
-	// for (auto &entity : tmpManager.getEntities()) {
-	// 	if (!clientManager.entityExists(entity->getID())) {
-	// 		clientManager.addEntity(entity->getID());
-
-	// 		// check which group the entity belongs to
-	// 		if (entity->hasGroup(groupLabels::groupPlayers)) {
-	// 			ClientGenerator::forPlayer(*entity, clientMap->getPlayerSpawnpoints(1).at(0));
-	// 			players.push_back(entity.get());
-	// 		}
-	// 		if (entity->hasGroup(groupLabels::groupProjectiles)) {
-	// 			// ClientGenerator::forProjectile(*entity, clientMap->loadWeaponSpawnpoints()->at(0));
-	// 		}
-	// 		// if (entity->hasGroup(groupLabels::groupWeapons)) {
-	// 		// 	ClientGenerator::forWeapon(*entity, clientMap->loadWeaponSpawnpoints()->at(0));
-	// 		// }
-	// 	}
-	// }
-
-	archive(clientManager);
-}
-
-void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
-	int x = 0;
-	int y = 0;
-	SDL_Rect renderQuad = {(SCREEN_WIDTH - width) / 2, SCREEN_HEIGHT / 3, width, height};
-
-	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
-}
-
-void sendGameState() {
-	std::ofstream os("gameState.json");
-	cereal::JSONOutputArchive ar(os);
-
-	// inform client about the number of the entities
-	ar(entityIDs.size());
-
-	// inform the client about the current entities
-	ar(entityIDs);
-
-	// save the current state of the entities
-	for (auto &pair : entityIDs) {
-		ar(clientManager.getEntity(pair.first));
-	}
-}
-
-void recvGameState() {
-	std::map<uint8_t, ClientGame::groupLabels> tmpEntityIDs;
-
-	//
-	std::ifstream is("gameState.json");
-	cereal::JSONOutputArchive ar(is);
-
-	ar(tmpEntityIDs);
+	// fetch the number of the entities
+	size_t numEntities;
+	ar(numEntities);
 
 	// check if the entities are already loaded
-	for (auto &pair : tmpEntityIDs) {
-		spdlog::get("console")->debug("Entity ID: {} Group: {}", pair.first, pair.second);
-		// check if the id is in clientManager. If not, create the entity
-		if (entityIDs.count(pair.first)) {
-			// entity already in clientManager
+	for (size_t i = 0; i < numEntities; ++i) {
+		// read entity meta data from stream
+		uint8_t id;
+		ClientGame::groupLabels group;
+		ar(id, group);
+
+		if (entityGroups.count(id)) {
+			// case: entity already in clientManager
 			spdlog::get("console")->info("Entity already in clientManager");
+
+			// update the values of the entity
+			ar(clientManager.getEntity(id));
+
 		} else {
 			// create the entity
-			auto &entity(clientManager.addEntity());
+			auto &entity(clientManager.addEntity(id));
 
 			// create the entity with the correct components
-			switch (pair.second) {
+			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
-				ClientGenerator::forPlayer(entity, {0, 0});
+				if (id == ownPlayerID) {
+					ClientGenerator::forPlayer(entity, {0, 0});
+				} else {
+					ClientGenerator::forEnemy(entity, {0, 0});
+				}
+				players.insert(std::make_pair(entity.getID(), &entity));
 				break;
 			case ClientGame::groupLabels::groupWeapons:
 				ClientGenerator::forWeapon(entity, {0, 0});
@@ -409,23 +388,28 @@ void recvGameState() {
 			}
 
 			// add the entity to the clientManager
-			entityIDs.insert(pair);
-			entity.addGroup(pair.second);
+			entityGroups.insert(std::make_pair(id, group));
 		}
 
 		// update the values of the entity
-		ar(clientManager.getEntity(pair.first));
+		ar(clientManager.getEntity(id));
 	}
-
-	// check if the file is created
 }
 
-Uint8 ClientGame::updateMainMenu() {
+void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
+	int x = 0;
+	int y = 0;
+	SDL_Rect renderQuad = {(SCREEN_WIDTH - width) / 2, SCREEN_HEIGHT / 3, width, height};
 
-	if (Collision::checkExit(players.at(0), clientMap))
+	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
+}
+
+uint8_t ClientGame::updateMainMenu() {
+
+	if (Collision::checkExit(ownPlayer, clientMap))
 		return 0;
 
-	if (Collision::checkStart(players.at(0), clientMap))
+	if (Collision::checkStart(ownPlayer, clientMap))
 		return 1;
 
 	return -1;

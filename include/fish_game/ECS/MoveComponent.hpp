@@ -12,9 +12,6 @@ class MoveComponent : public Component {
 	bool canJump = false;
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {}
-
 	bool inWater = false;
 
 	MoveComponent() = default;

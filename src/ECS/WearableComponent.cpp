@@ -1,5 +1,6 @@
 #include "../../include/fish_game/ECS/WearableComponent.hpp"
 #include "../../include/fish_game/ECS/ColliderComponent.hpp"
+#include "../../include/fish_game/ECS/ComponentsGenerator.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/ProjectileComponent.hpp"
 #include "../../include/fish_game/ECS/SpriteComponent.hpp"
@@ -17,26 +18,38 @@ void WearableComponent::init() {
 }
 
 void WearableComponent::update() {
-	if (isAttached) {
+	if (attached) {
 		// copy the values of the attached entity to the entity
 		transform->position = attachedEntity->getComponent<TransformComponent>().position;
+	} else {
+		transform->velocity -= transform->velocity * 0.1;
 	}
 }
 
 void WearableComponent::attach(Entity *entity) {
 	spdlog::get("console")->debug("WearableComponent - attach");
 	attachedEntity = entity;
-	isAttached = true;
+	attached = true;
 }
 
 void WearableComponent::detach() {
 	spdlog::get("console")->debug("WearableComponent - detach");
+
+	// transfer the velocity of the attached entity to the entity
+	transform->velocity = attachedEntity->getComponent<TransformComponent>().velocity;
+
+	// reset
 	attachedEntity = nullptr;
-	isAttached = false;
+	attached = false;
 }
 
 void WearableComponent::shoot() {
+	static int i = 50;
 	spdlog::get("console")->debug("WearableComponent - shoot");
+	Manager &manager = *entity->getManager();
+	Entity &projectile(manager.addEntity(i++));
+	std::pair<std::uint16_t, std::uint16_t> pos(transform->position.getX(), transform->position.getY());
+	ClientGenerator::forProjectile(projectile, pos);
 }
 
 } // namespace FishEngine

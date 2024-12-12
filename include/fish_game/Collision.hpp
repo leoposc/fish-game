@@ -10,9 +10,11 @@ namespace FishEngine {
 
 namespace Collision {
 
-void checkWaterCollisions(std::vector<Entity *> *players, Map *map);
+bool checkCollision(const SDL_Rect &colliderA, const SDL_Rect &colliderB);
 
-void checkPlattformCollisions(std::vector<Entity *> *players, Map *map);
+void checkWaterCollisions(std::unordered_map<uint8_t, Entity *> *players, Map *map);
+
+void checkPlattformCollisions(std::unordered_map<uint8_t, Entity *> *players, Map *map);
 
 bool checkExit(Entity *player, Map *map);
 
