@@ -27,7 +27,7 @@ void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos)
 
 void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
-void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos);
+void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos, bool faceRight);
 
 } // namespace ClientGenerator
 
@@ -35,7 +35,7 @@ namespace ServerGenerator {
 
 void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
-void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos);
+void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos, bool faceRight);
 
 } // namespace ServerGenerator
 

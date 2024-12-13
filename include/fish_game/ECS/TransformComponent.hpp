@@ -48,6 +48,7 @@ class TransformComponent : public Component {
 
 	float scale = 1;
 
+	bool faceRight = false;
 	bool blocked = false;
 };
 

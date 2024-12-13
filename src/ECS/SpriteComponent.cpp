@@ -44,10 +44,8 @@ void SpriteComponent::init() {
 }
 
 void SpriteComponent::update() {
-	// spdlog::get("console")->debug("SpriteComponent: updating {}", id);
-	// if (id == "pistol") {
-	// 	spdlog::get("console")->debug( "SpriteComponent: updating " << id );
-	// }
+	spriteFlip = transform->faceRight ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+
 	dstRect.x = (int)transform->getX();
 	dstRect.y = (int)transform->getY();
 	dstRect.w = transform->width;

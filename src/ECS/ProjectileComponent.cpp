@@ -12,7 +12,8 @@ ProjectileComponent::ProjectileComponent(int rng, int sp, Vector2D vel) : range(
 void ProjectileComponent::init() {
 	// spdlog::get("console")->debug("PROJECTILE COMPONENT INIT" );
 	transform = &entity->getComponent<TransformComponent>();
-	transform->velocity = velocity;
+	spdlog::get("console")->debug("ProjectileComponent - init {}", (transform->faceRight ? 1.0 : -1.0));
+	transform->velocity = velocity * (transform->faceRight ? 1.0 : -1.0);
 }
 
 void ProjectileComponent::update() {

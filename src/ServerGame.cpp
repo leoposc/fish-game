@@ -66,8 +66,8 @@ void ServerGame::update() {
 	serverManager.refresh();
 	serverManager.update();
 	// FishEngine::Collision::test();
-	Collision::checkWaterCollisions(&players, serverMap);
-	Collision::checkPlattformCollisions(&players, serverMap);
+	Collision::isInWater(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
+	Collision::checkCollisions(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 }
 
 uint8_t ServerGame::createPlayer(const std::string &ip) {
@@ -133,10 +133,17 @@ void ServerGame::sendGameState() {
 	ar(players.size());
 
 	for (auto &[id, group] : entityGroups) {
+		spdlog::get("console")->debug("ServerGame - sendGameState: serialize entity with id: {}", id);
+
 		// inform the client about the current entities
 		ar(id, group);
+
+		// if projectile, send the direction
+		if (group == groupLabels::groupProjectiles) {
+			ar(serverManager.getEntity(id).getComponent<TransformComponent>().faceRight);
+		}
+
 		// serialize components of the entity
-		spdlog::get("console")->debug("ServerGame - sendGameState: serialize entity with id: {}", id);
 		ar(serverManager.getEntity(id));
 	}
 
@@ -160,8 +167,8 @@ void ServerGame::stop() {
 	isRunning = false;
 }
 
-bool ServerGame::checkCollisions(Entity *player) {
-	return serverMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider);
+bool ServerGame::checkCollisions(Entity *e) {
+	return serverMap->checkCollisions(&e->getComponent<ColliderComponent>().collider);
 }
 
 } // namespace FishEngine

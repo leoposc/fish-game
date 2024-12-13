@@ -21,8 +21,10 @@ void WearableComponent::update() {
 	if (attached) {
 		// copy the values of the attached entity to the entity
 		transform->position = attachedEntity->getComponent<TransformComponent>().position;
+		transform->velocity = attachedEntity->getComponent<TransformComponent>().velocity;
+		transform->faceRight = attachedEntity->getComponent<TransformComponent>().faceRight;
 	} else {
-		transform->velocity -= transform->velocity * 0.1;
+		transform->velocity -= transform->velocity * 0.000001;
 	}
 }
 
@@ -49,7 +51,7 @@ void WearableComponent::shoot() {
 	Manager &manager = *entity->getManager();
 	Entity &projectile(manager.addEntity(i++));
 	std::pair<std::uint16_t, std::uint16_t> pos(transform->position.getX(), transform->position.getY());
-	ClientGenerator::forProjectile(projectile, pos);
+	ClientGenerator::forProjectile(projectile, pos, transform->faceRight);
 }
 
 } // namespace FishEngine

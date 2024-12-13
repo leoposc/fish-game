@@ -43,6 +43,9 @@ void MoveComponent::down() {
 }
 
 void MoveComponent::left() {
+	// face left
+	transform->faceRight = false;
+
 	if (inWater) {
 		transform->velocity.setX(-4);
 	} else {
@@ -51,6 +54,9 @@ void MoveComponent::left() {
 }
 
 void MoveComponent::right() {
+	// face right
+	transform->faceRight = true;
+
 	if (inWater) {
 		transform->velocity.setX(4);
 	} else {

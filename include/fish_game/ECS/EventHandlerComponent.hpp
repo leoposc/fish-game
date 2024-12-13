@@ -11,8 +11,11 @@ class MoveComponent;
 class EquipmentComponent;
 class ClientComponent;
 class ServerComponent;
+class HealthComponent;
 
 class EventHandlerComponent : public Component {
+	HealthComponent *health = nullptr;
+
 	bool isServer = false;
 
 	SDL_Event *event_ptr;

@@ -1,23 +1,17 @@
 #include "../include/fish_game/Collision.hpp"
+#include "../include/fish_game/ECS/HealthComponent.hpp"
 
 namespace FishEngine {
 
 namespace Collision {
 
-bool checkCollision(const SDL_Rect &colliderA, const SDL_Rect &colliderB) {
+bool checkCollisions(const SDL_Rect &colliderA, const SDL_Rect &colliderB) {
 	return SDL_HasIntersection(&colliderA, &colliderB);
 }
 
-void checkWaterCollisions(std::unordered_map<uint8_t, Entity *> *players, Map *map) {
-	for (auto &[id, player] : *players) {
-		player->getComponent<MoveComponent>().inWater =
-		    map->isInWater(&player->getComponent<ColliderComponent>().collider);
-	}
-}
-
-void checkPlattformCollisions(std::unordered_map<uint8_t, Entity *> *players, Map *serverMap) {
-	for (auto &[id, player] : *players) {
-		if (serverMap->checkPlattformCollisions(&player->getComponent<ColliderComponent>().collider)) {
+void checkCollisions(std::vector<Entity *> *players, Map *serverMap) {
+	for (auto &player : *players) {
+		if (serverMap->checkCollisions(&player->getComponent<ColliderComponent>().collider)) {
 
 			// check if player is moving downwards
 			if (player->getComponent<TransformComponent>().velocity.getY() > 0) {
@@ -27,6 +21,25 @@ void checkPlattformCollisions(std::unordered_map<uint8_t, Entity *> *players, Ma
 			player->getComponent<TransformComponent>().position = {static_cast<float>(collider->x),
 			                                                       static_cast<float>(collider->y)};
 		}
+	}
+}
+
+void checkCollisions(std::vector<Entity *> *players, std::vector<Entity *> *projectiles) {
+	for (auto &player : *players) {
+		for (auto &projectile : *projectiles) {
+			if (checkCollisions(player->getComponent<ColliderComponent>().collider,
+			                    projectile->getComponent<ColliderComponent>().collider)) {
+				player->getComponent<HealthComponent>().takeDamage();
+				projectile->destroy();
+			}
+		}
+	}
+}
+
+void isInWater(std::vector<Entity *> *players, Map *map) {
+	for (auto &player : *players) {
+		player->getComponent<MoveComponent>().inWater =
+		    map->isInWater(&player->getComponent<ColliderComponent>().collider);
 	}
 }
 

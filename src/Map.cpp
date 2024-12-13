@@ -196,7 +196,7 @@ SDL_Texture *Map::getTexture(fs::path path) {
 	return tilesetTextures[path];
 }
 
-bool Map::checkPlattformCollisions(SDL_Rect *collider) {
+bool Map::checkCollisions(SDL_Rect *collider) {
 	tson::Layer *plattforms = currentMap->getLayer("plattforms");
 
 	for (auto &[pos, tileObject] : plattforms->getTileObjects()) {

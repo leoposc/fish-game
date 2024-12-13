@@ -161,8 +161,10 @@ void ClientGame::handleEvents() {
 void ClientGame::update() {
 	clientManager.refresh();
 	clientManager.update();
-	Collision::checkWaterCollisions(&players, clientMap);
-	Collision::checkPlattformCollisions(&players, clientMap);
+	Collision::isInWater(&clientManager.getGroup(groupLabels::groupPlayers), clientMap);
+	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupColliders), clientMap);
+	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupPlayers),
+	                           &clientManager.getGroup(groupLabels::groupProjectiles));
 	clientMap->updateAnimations();
 }
 
@@ -207,7 +209,7 @@ void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
 		SDL_Rect colliderB = {spawnpoint.first, spawnpoint.second, 16, 16};
 
 		// stop if there is a collision
-		if (Collision::checkCollision(colliderA, colliderB)) {
+		if (Collision::checkCollisions(colliderA, colliderB)) {
 			return;
 		}
 	}
@@ -383,7 +385,9 @@ void ClientGame::receiveGameState() {
 				ClientGenerator::forWeapon(entity, {0, 0});
 				break;
 			case ClientGame::groupLabels::groupProjectiles:
-				ClientGenerator::forProjectile(entity, {0, 0});
+				bool faceRight;
+				ar(faceRight);
+				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
 				break;
 			}
 
