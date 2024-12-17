@@ -43,6 +43,9 @@ void MoveComponent::down() {
 }
 
 void MoveComponent::left() {
+	// face left
+	transform->faceRight = false;
+
 	if (inWater) {
 		transform->velocity.setX(-4);
 	} else {
@@ -51,6 +54,9 @@ void MoveComponent::left() {
 }
 
 void MoveComponent::right() {
+	// face right
+	transform->faceRight = true;
+
 	if (inWater) {
 		transform->velocity.setX(4);
 	} else {
@@ -58,14 +64,19 @@ void MoveComponent::right() {
 	}
 }
 
-void MoveComponent::stop() {
+void MoveComponent::stopX() {
 	transform->velocity.setX(0);
-	transform->velocity.setY(0);
+}
+
+void MoveComponent::stopY() {
+	if (inWater) {
+		transform->velocity.setY(0);
+	}
 }
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::MoveComponent);

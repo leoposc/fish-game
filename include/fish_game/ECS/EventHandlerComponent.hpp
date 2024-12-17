@@ -2,15 +2,23 @@
 
 #include "../ServerGame.hpp"
 #include "ECS.hpp"
-#include "EquipmentComponent.hpp"
 
 #include <SDL2/SDL.h>
 
 namespace FishEngine {
 
 class MoveComponent;
+class EquipmentComponent;
+class ClientComponent;
+class ServerComponent;
+class HealthComponent;
 
 class EventHandlerComponent : public Component {
+	HealthComponent *health = nullptr;
+
+	bool isServer = false;
+
+	SDL_Event *event_ptr;
 
   public:
 	template <class Archive>
@@ -18,12 +26,24 @@ class EventHandlerComponent : public Component {
 
 	MoveComponent *move;
 	EquipmentComponent *equip;
+	ClientComponent *clientComponent = nullptr;
+	ServerComponent *serverComponent = nullptr;
 
 	EventHandlerComponent() = default;
 	~EventHandlerComponent() = default;
 
+	EventHandlerComponent(bool isServer) : isServer(isServer){};
+
+	/**
+	 * @brief: initialize pointer to the move, equipment and client/server component
+	 */
 	void init() override;
 
+	/**
+	 * @brief: update the component
+	 * @depends: on ClientComponent, since it sends the event to the server if initialized
+	 * as a client
+	 */
 	void update() override;
 };
 

@@ -45,7 +45,7 @@ class Map {
 	/**
 	 * @brief: idea: pass colllider components to the map and check for collision
 	 */
-	bool checkPlattformCollisions(SDL_Rect *collider);
+	bool checkCollisions(SDL_Rect *collider);
 
 	/**
 	 * @brief: checks if the player is on the specifies layer

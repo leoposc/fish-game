@@ -12,9 +12,6 @@ class MoveComponent : public Component {
 	bool canJump = false;
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {}
-
 	bool inWater = false;
 
 	MoveComponent() = default;
@@ -32,7 +29,9 @@ class MoveComponent : public Component {
 
 	void right();
 
-	void stop();
+	void stopX();
+
+	void stopY();
 };
 
 } // namespace FishEngine

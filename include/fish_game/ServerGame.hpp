@@ -5,6 +5,7 @@
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
+#include <string>
 #include <vector>
 
 // class AssetManager;
@@ -29,6 +30,16 @@ class ServerGame {
 
 	void update();
 
+	uint8_t createPlayer(const std::string &ip);
+
+	uint8_t acceptJoinRequest(const std ::string &ip);
+
+	void updatePlayerEvent();
+
+	void startGame();
+
+	void sendGameState();
+
 	bool running();
 
 	void stop();
@@ -45,10 +56,16 @@ class ServerGame {
   private:
 	// fs::path mapPath;
 	// bool started;
+
+	int numPlayers = 0;
 	bool isRunning;
 	SDL_Window *window;
 
-	std::vector<Entity *> players;
+	// std::vector<Entity *> players;
+
+	std::unordered_map<uint8_t, std::string> playerIPs;
+	std::unordered_map<uint8_t, Entity *> players;
+	std::map<uint8_t, groupLabels> entityGroups;
 };
 
 } // namespace FishEngine

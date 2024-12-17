@@ -1,6 +1,7 @@
 #pragma once
 
 // #include "Components.hpp"
+#include "../Auxiliary.hpp"
 #include "../ClientGame.hpp"
 #include "ECS.hpp"
 
@@ -15,10 +16,10 @@ class ColliderComponent : public Component {
 	Vector2D lastPosition{0, 0};
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(collider);
-	}
+	// template <class Archive>
+	// void serialize(Archive &ar) {
+	// 	ar(collider);
+	// }
 
 	std::string tag;
 

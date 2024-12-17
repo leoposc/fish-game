@@ -1,7 +1,11 @@
 #include "../../include/fish_game/ECS/EventHandlerComponent.hpp"
 #include "../../include/fish_game/ClientGame.hpp"
+#include "../../include/fish_game/ECS/ClientComponent.hpp"
 #include "../../include/fish_game/ECS/EquipmentComponent.hpp"
+#include "../../include/fish_game/ECS/HealthComponent.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
+#include "../../include/fish_game/ECS/ServerComponent.hpp"
+
 #include "spdlog/spdlog.h"
 
 namespace FishEngine {
@@ -18,80 +22,91 @@ void EventHandlerComponent::init() {
 	} else {
 		equip = &entity->getComponent<EquipmentComponent>();
 	}
+
+	if (isServer) {
+		serverComponent = &entity->getComponent<ServerComponent>();
+		event_ptr = serverComponent->getEventPtr();
+	} else {
+		clientComponent = &entity->getComponent<ClientComponent>();
+		event_ptr = &ClientGame::game_event;
+	}
+
+	health = &entity->getComponent<HealthComponent>();
 }
 
 void EventHandlerComponent::update()
 
 {
-	if (ClientGame::game_event.type == SDL_KEYDOWN) {
-		switch (ClientGame::game_event.key.keysym.sym) {
-		// upwards
-		case SDLK_w:
-			move->up();
-			// sprite->play("swim");
-			break;
-		// downwards
-		case SDLK_s:
-			move->down();
-			// sprite->play("swim");
-			break;
-		// left
-		case SDLK_a:
-			move->left();
-			// sprite->play("swim");
-			break;
-		// right
-		case SDLK_d:
-			move->right();
-			// sprite->play("swim");
-			break;
-		// equip/ unequip
-		case SDLK_j:
-			spdlog::get("console")->debug("J pressed");
-			equip->processCommand();
-			break;
-		case SDLK_k:
-			equip->shoot();
-			break;
-		}
-	}
+	if (health->isAlive()) {
+		if (event_ptr->type == SDL_KEYDOWN) {
 
-	// stop the player
-	if (ClientGame::game_event.type == SDL_KEYUP) {
-		switch (ClientGame::game_event.key.keysym.sym) {
-		case SDLK_ESCAPE:
-			// TODO: add a pause menu
-			// ClientGame::stop();
-			break;
-			// upwards
-		case SDLK_w:
-			move->stop();
-			// sprite->play("idle");
-			break;
-		// downwards
-		case SDLK_s:
-			move->stop();
-			// sprite->play("idle");
-			break;
-		// left
-		case SDLK_a:
-			move->stop();
-			// sprite->play("idle");
-			// sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
-			break;
-		// right
-		case SDLK_d:
-			move->stop();
-			// sprite->play("idle");
-			break;
+			if (event_ptr->key.keysym.sym == SDLK_w) {
+				// upwards
+				move->up();
+				// sprite->play("swim");
+			} else if (event_ptr->key.keysym.sym == SDLK_s) {
+				// downwards
+				move->down();
+				// sprite->play("swim");
+			}
+			if (event_ptr->key.keysym.sym == SDLK_d) {
+				// right
+				move->right();
+				// sprite->play("swim");
+			} else if (event_ptr->key.keysym.sym == SDLK_a) {
+				// left
+				move->left();
+				// sprite->play("swim");
+			}
+			if (event_ptr->key.keysym.sym == SDLK_j) {
+				// equip/ unequip
+				spdlog::get("console")->debug("J pressed");
+				equip->processCommand();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_k) {
+				// shoot
+				equip->shoot();
+			}
+
+			// send the event to the server
+			if (!isServer) {
+				clientComponent->sendEvent(ClientGame::game_event);
+			}
 		}
+
+		// stop the player
+		if (event_ptr->type == SDL_KEYUP) {
+			if (event_ptr->key.keysym.sym == SDLK_w) {
+				// upwards
+				move->stopY();
+				// sprite->play("swim");
+			} else if (event_ptr->key.keysym.sym == SDLK_s) {
+				// downwards
+				move->stopY();
+				// sprite->play("swim");
+			}
+			if (event_ptr->key.keysym.sym == SDLK_d) {
+				// right
+				move->stopX();
+				// sprite->play("swim");
+			} else if (event_ptr->key.keysym.sym == SDLK_a) {
+				// left
+				move->stopX();
+				// sprite->play("swim");
+			}
+
+			// send the event to the server
+			if (!isServer) {
+				clientComponent->sendEvent(ClientGame::game_event);
+			}
+		}
+		// spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
 	}
-	// spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
 }
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::EventHandlerComponent)

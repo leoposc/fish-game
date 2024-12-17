@@ -18,29 +18,37 @@ class ClientGame {
 
 	SDL_Event getEvent() { return game_event; }
 
-	void spawnWeapons();
-
 	void init(fs::path mp, int numPlayers, bool combat);
 
 	void handleEvents();
 
 	void update();
 
-	void zoomIn();
-
 	void render();
 
-	bool running();
+	void createOwnPlayer();
 
-	bool hasStarted();
+	void spawnWeapons();
+
+	void showIP(SDL_Texture *mTexture, int width, int height);
 
 	uint8_t updateMainMenu();
 
+	std::string joinInterface();
+
+	void sendJoinRequest(std::string ip);
+
+	void receiveGameState();
+
+	bool hasStarted();
+
+	bool running();
+
 	void stop();
 
-	Manager *getManager();
+	void zoomIn();
 
-	bool joinGame(std::string ip);
+	Manager *getManager();
 
 	static SDL_Renderer *renderer;
 	static SDL_Event game_event;
@@ -56,7 +64,11 @@ class ClientGame {
 		groupWeapons
 	};
 
+	uint8_t ownPlayerID;
+
   private:
+	Entity *ownPlayer;
+
 	fs::path mapPath;
 	int numPlayers;
 	bool isRunning;
@@ -65,7 +77,8 @@ class ClientGame {
 	SDL_Window *window;
 	bool windowed = true;
 
-	std::vector<Entity *> players;
+	std::unordered_map<uint8_t, Entity *> players;
+	std::map<uint8_t, ClientGame::groupLabels> entityGroups;
 };
 
 } // namespace FishEngine

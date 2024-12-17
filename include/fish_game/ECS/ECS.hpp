@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Vector2D.hpp"
+#include "../include/cereal/types/bitset.hpp" // apparently not inside the cereal conan package
 
 #include <SDL2/SDL.h>
 #include <algorithm>
@@ -9,13 +10,16 @@
 #include <cassert>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/base_class.hpp>
+#include <cereal/types/map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
+
 #include <iostream>
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <vector>
 
 namespace FishEngine {
@@ -29,13 +33,13 @@ class EquipmentComponent;
 class EventHandlerComponent;
 class TransformComponent;
 
-// CEREAL_REGISTER_TYPE(ColliderComponent)
-// CEREAL_REGISTER_TYPE(WearableComponent)
-// CEREAL_REGISTER_TYPE(EquipmentComponent)
-// CEREAL_REGISTER_TYPE(EventHandlerComponent)
-
 using ComponentID = std::size_t;
 using Group = std::size_t;
+
+inline uint8_t generateEntityID() {
+	static uint8_t id = 0;
+	return id++;
+}
 
 inline ComponentID generateComponentID() {
 	static ComponentID lastID = 0u;
@@ -80,28 +84,35 @@ class Component {
 
 class Entity {
 	Manager &manager;
-
+	int8_t id;
 	bool active = true;
-	std::vector<std::unique_ptr<Component>> components;
+	std::vector<std::shared_ptr<Component>> components;
 
 	ComponentArray componentArray;
 	ComponentBitSet componentBitSet;
 	GroupBitSet groupBitSet;
 
   public:
+	// template <class Archive>
+	// void serialize(Archive &ar) {
+	// 	ar(entityIDs);
+
+	// 	ar(active, getComponent<TransformComponent>(), getComponent<ColliderComponent>());
+
+	// 	if (hasComponent<EventHandlerComponent>()) {
+	// 		ar(getComponent<EventHandlerComponent>());
+	// 	}
+	// 	if (hasComponent<WearableComponent>()) {
+	// 		ar(getComponent<WearableComponent>());
+	// 	}
+	// 	if (hasComponent<EquipmentComponent>()) {
+	// 		ar(getComponent<EquipmentComponent>());
+	// 	}
+	// }
+
 	template <class Archive>
 	void serialize(Archive &ar) {
-		ar(active, getComponent<TransformComponent>(), getComponent<ColliderComponent>());
-
-		if (hasComponent<EventHandlerComponent>()) {
-			ar(getComponent<EventHandlerComponent>());
-		}
-		if (hasComponent<WearableComponent>()) {
-			ar(getComponent<WearableComponent>());
-		}
-		if (hasComponent<EquipmentComponent>()) {
-			ar(getComponent<EquipmentComponent>());
-		}
+		ar(CEREAL_NVP(id), CEREAL_NVP(active), getComponent<TransformComponent>());
 	}
 
 	Entity() : manager(manager) {} //
@@ -109,14 +120,13 @@ class Entity {
 
 	Manager *getManager() { return &manager; }
 
+	uint8_t getID() { return id; }
+
+	void setID(uint8_t p_id) { id = p_id; }
+
 	void addGroup(Group group);
 
 	bool checkEmpty() { return components.empty(); }
-
-	// template <class Archive>
-	// void serialize(Archive &ar) {
-	// 	ar(active, components, componentArray, componentBitSet, groupBitSet);
-	// }
 
 	/**
 	 * @brief: update all components which belong to a instance of an entity
@@ -126,7 +136,7 @@ class Entity {
 	 */
 	void update() {
 		for (auto &c : components) {
-			// std::cout << "ECS - Updating component" << std::endl;
+			// spdlog::get("console")->debug("Component Type: {}", typeid(*c).name());
 			c->update();
 		}
 	}
@@ -143,6 +153,7 @@ class Entity {
 	}
 
 	bool isActive() const { return active; }
+
 	void destroy() { active = false; }
 
 	template <typename T>
@@ -186,46 +197,60 @@ class Entity {
 		auto ptr(componentArray[getComponentTypeID<T>()]);
 		return *static_cast<T *>(ptr);
 	}
+
+	// get a smart pointer to a component
+	template <typename T>
+	std::shared_ptr<T> getComponentSmartPtr() const {
+		assert(hasComponent<T>());
+		for (const auto &component : components) {
+			// true if the component pointer is of type T
+			if (std::dynamic_pointer_cast<T>(component)) {
+				std::cout << component.use_count() << std::endl;
+				return std::dynamic_pointer_cast<T>(component);
+			}
+		}
+		return nullptr;
+	}
 };
 
 class Manager {
-	std::vector<std::unique_ptr<Entity>> entities;
+	std::map<uint8_t, std::unique_ptr<Entity>> entities;
 	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
+	// std::map<uint8_t, std::unique_ptr<Entity>> entityIDs;
 
   public:
-	template <class Archive>
-	void save(Archive &ar) const {
-		std::cout << "size of entites vector: " << entities.size() << std::endl;
-		ar(entities);
-	}
+	std::map<uint8_t, std::unique_ptr<Entity>> &getEntities() { return entities; }
 
-	template <class Archive>
-	void load(Archive &ar) {
-		ar(entities);
+	bool entityExists(uint8_t id) { return entities.find(id) != entities.end(); }
+
+	Entity &getEntity(uint8_t id) const {
+		auto it = entities.find(id);
+		assert(it != entities.end());
+		return *it->second;
 	}
 
 	void update() {
 		for (auto &e : entities) {
 			// std::cout << "ECS - Updating entities" << std::endl;
-			e->update();
+			e.second->update();
 		}
 	}
 
 	void draw() {
 		for (auto &e : entities)
-			e->draw();
+			e.second->draw();
 	}
 
 	void destroyEntities() {
 		for (auto &e : entities)
-			e->destroy();
+			e.second->destroy();
 		refresh();
 		assert(checkEmpty());
 	}
 
 	bool checkEmpty() {
 		for (auto &e : entities) {
-			if (!e->checkEmpty()) {
+			if (!e.second->checkEmpty()) {
 				return false;
 			}
 		}
@@ -240,22 +265,37 @@ class Manager {
 			        std::end(v));
 		}
 
-		entities.erase(std::remove_if(std::begin(entities), std::end(entities),
-		                              [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive(); }),
-		               std::end(entities));
+		// entities.erase(std::remove_if(std::begin(entities), std::end(entities),
+		//                               [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive(); }),
+		//                std::end(entities));
+
+		for (auto it = entities.begin(); it != entities.end();) {
+			if (!it->second->isActive()) {
+				it = entities.erase(it);
+			} else {
+				++it;
+			}
+		}
 	}
 
+	// void addToGroup(Entity *entity, Group group) {}
 	void addToGroup(Entity *entity, Group group) { groupedEntities[group].emplace_back(entity); }
 
 	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 
 	Entity &addEntity() {
+		return this->addEntity(generateEntityID());
+		std::cout << "Entity added. size now: " << entities.size() << std::endl;
+	}
+
+	Entity &addEntity(uint8_t id) {
 		// std::cout << "Adding entity" << std::endl;
 		Entity *e = new Entity(*this);
+		e->setID(id);
 		// std::cout << "Entity created" << std::endl;
 		std::unique_ptr<Entity> uPtr(e);
 		// std::cout << "Unique pointer created" << std::endl;
-		entities.emplace_back(std::move(uPtr));
+		entities.emplace(id, std::move(uPtr));
 		// std::cout << "Entity moved" << std::endl;
 		return *e;
 	}
@@ -265,15 +305,15 @@ class Manager {
 
 // ================ CEREAL HELPER FUNCTIONS ================
 
-template <class Archive>
-void serialize(Archive &ar, SDL_Rect &rect) {
-	ar(CEREAL_NVP(rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
-}
+// template <class Archive>
+// void serialize(Archive &ar, SDL_Rect &rect) {
+// 	ar((rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
+// }
 
-template <class Archive>
-void serialize(Archive &ar, FishEngine::Vector2D &vec) {
-	ar(CEREAL_NVP(vec.getX()), CEREAL_NVP(vec.getY()));
-}
+// template <class Archive>
+// void serialize(Archive &ar, FishEngine::Vector2D &vec) {
+// 	ar(CEREAL_NVP(vec.getX()), CEREAL_NVP(vec.getY()));
+// }
 
 // id synchronizaiton? maybe not needed if manager is always kept in synch, with cereal we can only update the changing
 // variables
