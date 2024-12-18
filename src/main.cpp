@@ -54,7 +54,6 @@ FuncPtr combat() {
 
 	client->sendJoinRequest("127.0.0.1", "test user in combat");
 
-	// TODO: get player id in a different way -> over client only
 	uint8_t id = server->acceptJoinRequest("ip");
 	std::cout << "Player ID: " << (int)id << std::endl;
 	client->ownPlayerID = id;

@@ -8,6 +8,7 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <tuple>
 #include <vector>
 
 #define JOIN_PREFIX "JOIN:"
@@ -22,6 +23,7 @@ class NetworkClient {
 
 	void setEvent(const InputEvent::Event event);
 	std::string getUpdate();
+	bool hasUpdate();
 
   private:
 	// data variables
@@ -56,8 +58,9 @@ class NetworkClient {
 	std::mutex mutex;
 	std::queue<InputEvent::Event> sendQueue;
 
-	std::vector<std::string> newUsers;
+	std::vector<std::tuple<std::string, int>> newUsers;
 	std::string gameState;
+	bool hasUpdateVal = false;
 
 	void handleReceive();
 

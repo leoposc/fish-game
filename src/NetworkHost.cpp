@@ -1,6 +1,7 @@
 #include "../include/fish_game/NetworkHost.hpp"
 #include "spdlog/spdlog.h"
 #include <iostream>
+#include <string>
 #include <tuple>
 
 NetworkHost::NetworkHost() : stopThread(false), socket(SocketManager(8080, true)) {
@@ -32,10 +33,11 @@ void NetworkHost::updateState(const std::string &updatedState) {
 	this->socket.sendMessage(UPDATE_PREFIX + updatedState);
 }
 
-void NetworkHost::notifyJoin(std::string username) {
-	// generate username/id
-
-	this->socket.sendMessage(JOIN_PREFIX + username);
+void NetworkHost::notifyJoin(std::string username, int client_id) {
+	this->socket.sendMessage(JOIN_PREFIX + std::to_string(client_id) + "%" + username);
+	for (const auto &client : clients) {
+		spdlog::get("console")->debug("SERVER: Client ID: {}, Client Name: {}", client.first, client.second);
+	}
 }
 
 void NetworkHost::threadFunction() {
@@ -54,11 +56,11 @@ void NetworkHost::threadFunction() {
 			}
 			if (clients.find(message.client_id) == clients.end()) {
 				// first time -> register user
-				this->notifyJoin(message.message);
-				spdlog::get("console")->debug("Player " + message.message + " joined the game");
+				spdlog::get("console")->debug("SERVER: Player " + message.message + " joined the game");
 				clients.insert(std::make_pair(message.client_id, message.message));
+				this->notifyJoin(message.message, message.client_id);
 			} else {
-				spdlog::get("console")->debug("received");
+				spdlog::get("console")->debug("SERVER: received event");
 				this->elementQueue.push(
 				    std::make_tuple(clients[message.client_id], InputEvent::deserialize(message.message)));
 			}

@@ -32,7 +32,7 @@ class NetworkHost {
 
   private:
 	// TODO: implement:
-	void notifyJoin(std::string username);
+	void notifyJoin(std::string username, int client_id);
 
 	void threadFunction();
 

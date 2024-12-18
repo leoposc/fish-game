@@ -1,6 +1,7 @@
 #include "../include/fish_game/NetworkClient.hpp"
 #include "spdlog/spdlog.h"
 #include <string>
+#include <tuple>
 
 NetworkClient::NetworkClient() : socket(SocketManager(8080, false)), sendQueue(std::queue<InputEvent::Event>()) {}
 
@@ -19,16 +20,17 @@ void NetworkClient::run() {
 	this->socket.sendMessage(this->username);
 	while (true) {
 		if (!this->sendQueue.empty()) {
-			spdlog::get("console")->debug("mutex hello? dafuq\n");
 			this->socket.sendMessage(InputEvent::serialize(this->sendQueue.front()));
 			this->sendQueue.pop();
 		}
 
+		// TODO:move this into the client gameloop to avoid race conditions
 		this->handleReceive();
 	}
 }
 
 std::string NetworkClient::getUpdate() {
+	this->hasUpdateVal = false;
 	return this->gameState;
 }
 
@@ -40,16 +42,20 @@ void NetworkClient::handleReceive() {
 	}
 
 	size_t pos = raw_message.find(':');
-	std::string prefix = (pos != std::string::npos) ? raw_message.substr(0, pos + 1) : raw_message;
-	std::string message = (pos != std::string::npos) ? raw_message.substr(pos + 1) : "";
-
-	spdlog::get("console")->debug("PREFIX:" + prefix);
+	std::string prefix = raw_message.substr(0, pos + 1);
+	std::string message = raw_message.substr(pos + 1);
 
 	if (prefix == JOIN_PREFIX) {
-		this->newUsers.push_back(message);
+		size_t pos = raw_message.find(':');
+
+		int id = atoi(raw_message.substr(0, pos).c_str());
+		std::string username = raw_message.substr(pos + 1);
 		spdlog::get("console")->debug("CLIENT: Player " + message + " joined the game");
+		this->newUsers.push_back(std::make_tuple(message, id));
 	}
 	if (prefix == UPDATE_PREFIX) {
+		spdlog::get("console")->debug("CLIENT: Got updated gameState");
+		this->hasUpdateVal = true;
 		this->gameState = message;
 	}
 }
@@ -57,4 +63,8 @@ void NetworkClient::handleReceive() {
 void NetworkClient::setEvent(const InputEvent::Event event) {
 	std::lock_guard<std::mutex> lock(this->mutex);
 	this->sendQueue.push(event);
+}
+
+bool NetworkClient::hasUpdate() {
+	return this->hasUpdateVal;
 }
