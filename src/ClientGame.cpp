@@ -337,9 +337,10 @@ std::string ClientGame::joinInterface() {
 	return inputText;
 }
 
-void ClientGame::sendJoinRequest(std::string ip) {
+void ClientGame::sendJoinRequest(std::string ip, std::string username) {
 
 	// send request and wait for response
+	this->networkClient.init(ip, username);
 
 	// playerID =
 }

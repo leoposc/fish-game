@@ -15,6 +15,11 @@
 #include <utility>
 #include <vector>
 
+#define JOIN_PREFIX "JOIN:"
+#define UPDATE_PREFIX "UPDATE:"
+
+typedef void (*FuncPtr)();
+
 class NetworkHost {
   public:
 	NetworkHost();
@@ -26,11 +31,16 @@ class NetworkHost {
 	std::vector<std::string> getClients();
 
   private:
+	// TODO: implement:
+	void notifyJoin(std::string username);
+
 	void threadFunction();
 
 	// data variables
 	std::string state;
 	std::queue<std::tuple<std::string, InputEvent::Event>> elementQueue;
+
+	// the int is the id, it comes from the socket id
 	std::map<int, std::string> clients;
 
 	// functionality variables
@@ -39,6 +49,10 @@ class NetworkHost {
 	std::mutex mtx;
 	bool stopThread;
 	SocketManager socket;
+
+	// TODO: - send that player joined the game
+	//       - method to send new state to all clients (string) (Semi done with updateState)
+	//       - define prefixes to define what function was send: "JOINED:" for join followed by object string
 };
 
 #endif // NETWORK_HOST

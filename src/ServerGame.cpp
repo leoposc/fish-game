@@ -85,6 +85,7 @@ uint8_t ServerGame::createPlayer(const std::string &ip) {
 	return player.getID();
 }
 
+// NOT really needed, is inside of network host
 uint8_t ServerGame::acceptJoinRequest(const std::string &ip) {
 
 	// Create player entity
@@ -149,9 +150,7 @@ void ServerGame::sendGameState() {
 
 	// send the state to the client
 	// TODO
-	for (const auto &[id, ip] : playerIPs) {
-		// send the state to the client
-	}
+	// updateState() from networkHost
 }
 
 bool ServerGame::running() {

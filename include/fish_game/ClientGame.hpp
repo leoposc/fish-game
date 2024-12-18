@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetManager.hpp"
+#include "fish_game/NetworkClient.hpp"
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
@@ -36,7 +37,7 @@ class ClientGame {
 
 	std::string joinInterface();
 
-	void sendJoinRequest(std::string ip);
+	void sendJoinRequest(std::string ip, std::string username);
 
 	void receiveGameState();
 
@@ -54,6 +55,8 @@ class ClientGame {
 	static SDL_Event game_event;
 	static SDL_Rect camera;
 	static AssetManager *assets;
+
+	NetworkClient networkClient;
 
 	enum groupLabels : std::size_t {
 		groupMap,

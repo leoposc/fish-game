@@ -29,7 +29,13 @@ std::optional<InputEvent::Event> NetworkHost::getAction() {
 void NetworkHost::updateState(const std::string &updatedState) {
 	std::lock_guard<std::mutex> lock(mtx);
 	this->state = updatedState;
-	this->socket.sendMessage(updatedState);
+	this->socket.sendMessage(UPDATE_PREFIX + updatedState);
+}
+
+void NetworkHost::notifyJoin(std::string username) {
+	// generate username/id
+
+	this->socket.sendMessage(JOIN_PREFIX + username);
 }
 
 void NetworkHost::threadFunction() {
@@ -48,7 +54,8 @@ void NetworkHost::threadFunction() {
 			}
 			if (clients.find(message.client_id) == clients.end()) {
 				// first time -> register user
-				spdlog::get("console")->debug("in register branch\n");
+				this->notifyJoin(message.message);
+				spdlog::get("console")->debug("Player " + message.message + " joined the game");
 				clients.insert(std::make_pair(message.client_id, message.message));
 			} else {
 				spdlog::get("console")->debug("received");

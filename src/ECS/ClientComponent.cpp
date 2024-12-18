@@ -7,6 +7,7 @@
 #include <cereal/types/polymorphic.hpp>
 #include <fstream>
 
+#include "fish_game/NetworkHost.hpp"
 #include "spdlog/spdlog.h"
 
 namespace FishEngine {
@@ -30,6 +31,8 @@ void ClientComponent::sendEvent(SDL_Event &event) {
 	std::ofstream os("event.json");
 	cereal::JSONOutputArchive archive(os);
 	archive(id, event);
+	// TODO: somehting like this:
+	// this->networkClient.send(string);
 }
 
 } // namespace FishEngine
