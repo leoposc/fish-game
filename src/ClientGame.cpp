@@ -87,7 +87,8 @@ ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int hei
 	}
 
 	// load assets
-	assets->addTexture("fish", "../../assets/RedFishSmall.png");
+	// assets->addTexture("fish", "../../assets/RedFishSmall.png");
+	assets->addTexture("fish", "../../assets/spritesheets/image77-7.png");
 	assets->addTexture("pistol", "../../assets/PistolSmall.png");
 	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
 }
@@ -159,13 +160,25 @@ void ClientGame::handleEvents() {
 }
 
 void ClientGame::update() {
+	// delete dead entities
 	clientManager.refresh();
+
+	// update the entities
 	clientManager.update();
+
+	// check for collisions
 	Collision::isInWater(&clientManager.getGroup(groupLabels::groupPlayers), clientMap);
 	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupColliders), clientMap);
 	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupPlayers),
 	                           &clientManager.getGroup(groupLabels::groupProjectiles));
+
+	// animate the map
 	clientMap->updateAnimations();
+
+	// check if game is over TODO: just handle it in the server
+	if (clientManager.getGroup(groupLabels::groupPlayers).empty()) {
+		stop();
+	}
 }
 
 void ClientGame::render() {

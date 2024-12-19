@@ -44,6 +44,13 @@ void SpriteComponent::init() {
 }
 
 void SpriteComponent::update() {
+
+	if (animated) {
+		currentFrame = (SDL_GetTicks() / speed) % frames;
+		srcRect.x = currentFrame * srcRect.w;
+	}
+	srcRect.y = animationIndex * transform->height;
+
 	spriteFlip = transform->faceRight ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
 	dstRect.x = (int)transform->getX();
@@ -54,6 +61,12 @@ void SpriteComponent::update() {
 
 void SpriteComponent::draw() {
 	TextureManager::draw(texture, srcRect, dstRect, spriteFlip);
+}
+
+void SpriteComponent::play(const char *animationName) {
+	animationIndex = animations[animationName].index;
+	frames = animations[animationName].frames;
+	speed = animations[animationName].speed;
 }
 
 } // namespace FishEngine

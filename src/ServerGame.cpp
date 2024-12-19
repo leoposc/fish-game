@@ -63,11 +63,22 @@ void ServerGame::handleEvents() {
 }
 
 void ServerGame::update() {
+	// delete dead entities
 	serverManager.refresh();
+
+	// update the entities
 	serverManager.update();
-	// FishEngine::Collision::test();
+
+	// check collisions
 	Collision::isInWater(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 	Collision::checkCollisions(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
+
+	// check for exit
+	if (serverManager.getGroup(ClientGame::groupLabels::groupPlayers).empty()) {
+		stop();
+
+		// send end signal to clients TODO
+	}
 }
 
 uint8_t ServerGame::createPlayer(const std::string &ip) {

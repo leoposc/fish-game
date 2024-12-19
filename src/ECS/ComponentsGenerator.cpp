@@ -5,8 +5,8 @@ namespace FishEngine {
 namespace ClientGenerator {
 
 void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos) {
-	player.addComponent<TransformComponent>(pos.first, pos.second, 45, 60, 1.0);
-	player.addComponent<SpriteComponent>("fish", false);
+	player.addComponent<TransformComponent>(pos.first, pos.second, 45, 60, 1);
+	player.addComponent<SpriteComponent>("fish", true);
 	player.addComponent<ClientComponent>();
 	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 45, 60);
 	player.addComponent<MoveComponent>();

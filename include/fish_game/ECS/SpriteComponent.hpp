@@ -10,6 +10,14 @@
 
 namespace FishEngine {
 
+struct Animation {
+	int index;
+	int frames;
+	int speed;
+
+	Animation(int i, int f, int s) : index(i), frames(f), speed(s) {}
+};
+
 class SpriteComponent : public Component {
 	TransformComponent *transform;
 	SDL_Texture *texture;
@@ -18,8 +26,17 @@ class SpriteComponent : public Component {
 	bool animated = false;
 	int frames = 0;
 	int speed = 100; // ms
+	int currentFrame = 0;
 
 	std::string id;
+
+	// animation meta data
+	const Animation fishSwim = Animation(0, 12, 100);
+	const Animation fishIdle = Animation(1, 12, 100);
+	const Animation fishDead = Animation(2, 1, 10000);
+
+	std::map<std::string, Animation> animations = {
+	    {"fishSwim", fishSwim}, {"fishIdle", fishIdle}, {"fishDead", fishDead}};
 
   public:
 	int animationIndex = 0;
@@ -43,12 +60,8 @@ class SpriteComponent : public Component {
 	void update() override;
 
 	void draw() override;
-	// TODO: implement animation with tiled/ tileson
-	//   void play(const char *animationName) {
-	//     frames = animations[animationName].frames;
-	//     speed = animations[animationName].speed;
-	//     animated = true;
-	//   }
+
+	void play(const char *animName);
 };
 
 } // namespace FishEngine
