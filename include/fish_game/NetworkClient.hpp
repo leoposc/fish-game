@@ -8,15 +8,22 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <tuple>
 #include <vector>
+
+#define JOIN_PREFIX "JOIN:"
+#define UPDATE_PREFIX "UPDATE:"
 
 class NetworkClient {
   public:
-	NetworkClient(const std::string hostIP, const std::string username);
+	NetworkClient();
 	~NetworkClient();
+
+	void init(const std::string hostIP, const std::string username);
 
 	void setEvent(const InputEvent::Event event);
 	std::string getUpdate();
+	bool hasUpdate();
 
   private:
 	// data variables
@@ -50,6 +57,12 @@ class NetworkClient {
 	std::thread workerThread;
 	std::mutex mutex;
 	std::queue<InputEvent::Event> sendQueue;
+
+	std::vector<std::tuple<std::string, int>> newUsers;
+	std::string gameState;
+	bool hasUpdateVal = false;
+
+	void handleReceive();
 
 	void run();
 };

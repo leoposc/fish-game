@@ -49,10 +49,11 @@ FuncPtr combat() {
 	u_int32_t frameStart;
 	int frameTime;
 
-	client->init("map03.tmj", 4, true);
 	server->init("map03.tmj", 4);
+	client->init("map03.tmj", 4, true);
 
-	client->sendJoinRequest("ip");
+	client->sendJoinRequest("127.0.0.1", "test user in combat");
+
 	uint8_t id = server->acceptJoinRequest("ip");
 	std::cout << "Player ID: " << (int)id << std::endl;
 	client->ownPlayerID = id;
@@ -93,7 +94,7 @@ FuncPtr joinLobby() {
 		return mainMenu();
 	}
 	std::cout << "Joining lobby at " << ip << std::endl;
-	client->sendJoinRequest(ip);
+	client->sendJoinRequest(ip, "test user");
 
 	// todo: connect to host
 
@@ -216,8 +217,8 @@ int main(int argc, char *argv[]) {
 	auto console = spdlog::stdout_color_mt("console");
 	auto err_logger = spdlog::stderr_color_mt("stderr");
 
-	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
+	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 
 	// hostLobby();
 	// joinLobby();

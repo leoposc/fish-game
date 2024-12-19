@@ -2,6 +2,7 @@
 
 // #include "ECS/Components.hpp"
 #include "AssetManager.hpp"
+#include "fish_game/NetworkHost.hpp"
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
@@ -62,6 +63,8 @@ class ServerGame {
 	SDL_Window *window;
 
 	// std::vector<Entity *> players;
+
+	NetworkHost networkHost;
 
 	std::unordered_map<uint8_t, std::string> playerIPs;
 	std::unordered_map<uint8_t, Entity *> players;

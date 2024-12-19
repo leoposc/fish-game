@@ -96,13 +96,15 @@ uint8_t ServerGame::createPlayer(const std::string &ip) {
 	return player.getID();
 }
 
+// NOT really needed, is inside of network host
 uint8_t ServerGame::acceptJoinRequest(const std::string &ip) {
 
 	// Create player entity
 	uint8_t id = createPlayer(ip);
 
 	// send playerID to client
-	// TODO
+	// TODO: poll if new player joined, if a player joined create playerid here and create mapping between socket_id and
+	// this id
 
 	return id;
 }
@@ -137,7 +139,7 @@ void ServerGame::startGame() {
 
 void ServerGame::sendGameState() {
 
-	std::ofstream os("gameState.bin", std::ios::binary);
+	std::ostringstream os;
 	cereal::BinaryOutputArchive ar(os);
 
 	// inform client about the number of the entities
@@ -157,12 +159,12 @@ void ServerGame::sendGameState() {
 		// serialize components of the entity
 		ar(serverManager.getEntity(id));
 	}
+	std::string serializedData = os.str();
 
 	// send the state to the client
 	// TODO
-	for (const auto &[id, ip] : playerIPs) {
-		// send the state to the client
-	}
+	// updateState() from networkHost
+	this->networkHost.updateState(os.str());
 }
 
 bool ServerGame::running() {

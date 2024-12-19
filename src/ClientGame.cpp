@@ -350,16 +350,23 @@ std::string ClientGame::joinInterface() {
 	return inputText;
 }
 
-void ClientGame::sendJoinRequest(std::string ip) {
-
+void ClientGame::sendJoinRequest(std::string ip, std::string username) {
 	// send request and wait for response
+	this->networkClient.init(ip, username);
 
 	// playerID =
 }
 
 void ClientGame::receiveGameState() {
 
-	std::ifstream is("gameState.bin", std::ios::binary);
+	if (this->networkClient.hasUpdate()) {
+		return;
+	}
+
+	spdlog::get("console")->info("RECIVED UPDATE");
+
+	std::string serializedData = this->networkClient.getUpdate();
+	std::istringstream is(serializedData);
 	cereal::BinaryInputArchive ar(is);
 
 	// fetch the number of the entities
