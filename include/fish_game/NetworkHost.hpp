@@ -4,6 +4,7 @@
 
 #include "./GameInputEvents.hpp"
 #include "./SocketManager.hpp"
+#include "cereal/external/base64.hpp"
 #include <condition_variable>
 #include <iostream>
 #include <map>

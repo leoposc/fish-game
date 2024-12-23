@@ -1,4 +1,5 @@
 #include "../include/fish_game/NetworkClient.hpp"
+#include "cereal/external/base64.hpp"
 #include "spdlog/spdlog.h"
 #include <string>
 #include <tuple>
@@ -31,7 +32,9 @@ void NetworkClient::run() {
 
 std::string NetworkClient::getUpdate() {
 	this->hasUpdateVal = false;
-	return this->gameState;
+	auto updatedGamestate = cereal::base64::decode(this->gameState);
+	spdlog::get("console")->debug("NetworkClient: Got new gamestate: " + updatedGamestate);
+	return updatedGamestate;
 }
 
 void NetworkClient::handleReceive() {

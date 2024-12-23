@@ -353,6 +353,7 @@ void ClientGame::receiveGameState() {
 	spdlog::get("console")->info("RECIVED UPDATE");
 
 	std::string serializedData = this->networkClient.getUpdate();
+	spdlog::get("console")->info("ClientGame: Got serializedGamestate: " + serializedData);
 	std::istringstream is(serializedData);
 	cereal::BinaryInputArchive ar(is);
 

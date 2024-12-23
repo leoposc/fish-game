@@ -151,9 +151,10 @@ void ServerGame::sendGameState() {
 	std::string serializedData = os.str();
 
 	// send the state to the client
-	// TODO
-	// updateState() from networkHost
-	this->networkHost.updateState(os.str());
+
+	auto serializedString = os.str();
+	spdlog::get("console")->debug("SeverGame: Serialized string: " + serializedString);
+	this->networkHost.updateState(serializedString);
 }
 
 bool ServerGame::running() {

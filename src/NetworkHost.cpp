@@ -1,4 +1,5 @@
 #include "../include/fish_game/NetworkHost.hpp"
+#include "cereal/external/base64.hpp"
 #include "spdlog/spdlog.h"
 #include <iostream>
 #include <string>
@@ -29,8 +30,10 @@ std::optional<InputEvent::Event> NetworkHost::getAction() {
 
 void NetworkHost::updateState(const std::string &updatedState) {
 	std::lock_guard<std::mutex> lock(mtx);
-	this->state = updatedState;
-	this->socket.sendMessage(UPDATE_PREFIX + updatedState);
+	std::string encodedState =
+	    cereal::base64::encode(reinterpret_cast<const unsigned char *>(updatedState.c_str()), updatedState.length());
+	this->state = encodedState;
+	this->socket.sendMessage(UPDATE_PREFIX + this->state);
 }
 
 void NetworkHost::notifyJoin(std::string username, int client_id) {
