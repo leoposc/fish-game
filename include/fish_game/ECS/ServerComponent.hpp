@@ -21,7 +21,7 @@ class ServerComponent : public Component {
 	void update() override;
 
 	/**
-	 * @brief: returns a pointer to the event, whic is used
+	 * @brief: returns a pointer to the event, which is used
 	 * by the EventHandlerComponent to get the event
 	 */
 	SDL_Event *getEventPtr() { return &event; }

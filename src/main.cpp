@@ -55,7 +55,7 @@ FuncPtr combat() {
 
 	client->sendJoinRequest("127.0.0.1", "test user in combat");
 
-	uint8_t id = server->acceptJoinRequest();
+	uint8_t id = server->handleJoinRequests();
 	std::cout << "Player ID: " << (int)id << std::endl;
 	client->ownPlayerID = id;
 
@@ -73,7 +73,9 @@ FuncPtr combat() {
 		frameStart = SDL_GetTicks();
 
 		client->handleEvents();
+
 		client->update();
+		server->update();
 		client->render();
 
 		frameTime = SDL_GetTicks() - frameStart;
@@ -125,13 +127,14 @@ FuncPtr hostLobby(bool isHost) {
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
+		// client->receiveGameState();
 		client->handleEvents();
 		client->update();
 		client->render();
-		client->receiveGameState();
 
 		if (isHost) {
-			server->acceptJoinRequest();
+			server->handleJoinRequests();
+			server->updatePlayerEvent();
 			server->sendGameState();
 		}
 

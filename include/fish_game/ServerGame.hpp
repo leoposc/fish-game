@@ -35,7 +35,7 @@ class ServerGame {
 
 	uint8_t createPlayer();
 
-	uint8_t acceptJoinRequest();
+	uint8_t handleJoinRequests();
 
 	void updatePlayerEvent();
 

@@ -123,7 +123,7 @@ void SocketManager::run(int client_socket) {
 		std::lock_guard<std::mutex> lock(mtx);
 		if (valread < 0) {
 			spdlog::get("console")->debug("Problem while reading");
-			exit(EXIT_FAILURE);
+			// exit(EXIT_FAILURE);
 		} else if (valread == 0) {
 			spdlog::get("console")->debug("Client disconnected");
 			spdlog::get("console")->debug("All messages:");

@@ -382,7 +382,7 @@ void ClientGame::receiveGameState() {
 			spdlog::get("console")->info("Entity already in clientManager");
 
 			// update the values of the entity
-			ar(clientManager.getEntity(id));
+			// ar(clientManager.getEntity(id));
 
 		} else {
 			// create the entity

@@ -67,7 +67,6 @@ void ServerGame::handleEvents() {
 void ServerGame::update() {
 	serverManager.refresh();
 	serverManager.update();
-	// FishEngine::Collision::test();
 	Collision::isInWater(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 	Collision::checkCollisions(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 }
@@ -87,7 +86,7 @@ uint8_t ServerGame::createPlayer() {
 }
 
 // NOT really needed, is inside of network host
-uint8_t ServerGame::acceptJoinRequest() {
+uint8_t ServerGame::handleJoinRequests() {
 
 	static std::vector<std::string> old_clients;
 	// send playerID to client
@@ -113,8 +112,17 @@ void ServerGame::updatePlayerEvent() {
 	// unpack the event from the frame
 	SDL_Event event;
 	uint8_t id;
-	std::ifstream is("event.json");
-	cereal::JSONInputArchive archive(is);
+	std::optional<std::string> action = this->networkHost.getAction();
+	if (!action.has_value()) {
+		std::cout << "No action available" << std::endl;
+		return;
+	}
+
+	std::string unpackedAction = action.value();
+	std::cout << "Action: " << unpackedAction << std::endl;
+
+	std::istringstream is;
+	cereal::BinaryInputArchive archive(is);
 	archive(id, event);
 
 	// update the event inside the component of the player entity
