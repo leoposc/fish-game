@@ -6,6 +6,7 @@
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/ServerComponent.hpp"
 
+#include "fish_game/ServerGame.hpp"
 #include "spdlog/spdlog.h"
 
 namespace FishEngine {
@@ -47,6 +48,10 @@ void EventHandlerComponent::update()
 			} else if (event_ptr->key.keysym.sym == SDLK_s) {
 				// downwards
 				move->down();
+				// sprite->play("swim");
+			} else if (event_ptr->key.keysym.sym == SDLK_p) {
+				// downwards
+				FishEngine::ServerGame::getInstance().networkHost.printEventQueue();
 				// sprite->play("swim");
 			}
 			if (event_ptr->key.keysym.sym == SDLK_d) {

@@ -20,8 +20,10 @@ namespace FishEngine {
 class ServerGame {
 
   public:
-	ServerGame();
-	~ServerGame();
+	static ServerGame &getInstance() {
+		static ServerGame instance; // Guaranteed to be destroyed and instantiated on first use
+		return instance;
+	}
 
 	SDL_Event getEvent() { return game_event; }
 
@@ -31,9 +33,9 @@ class ServerGame {
 
 	void update();
 
-	uint8_t createPlayer(const std::string &ip);
+	uint8_t createPlayer();
 
-	uint8_t acceptJoinRequest(const std ::string &ip);
+	uint8_t acceptJoinRequest();
 
 	void updatePlayerEvent();
 
@@ -54,7 +56,14 @@ class ServerGame {
 
 	enum groupLabels : std::size_t { groupMap, groupPlayers, groupEnemies, groupColliders, groupProjectiles };
 
+	NetworkHost networkHost;
+
   private:
+	ServerGame();
+	~ServerGame();
+	ServerGame(const ServerGame &) = delete;
+	ServerGame &operator=(const ServerGame &) = delete;
+
 	// fs::path mapPath;
 	// bool started;
 
@@ -63,8 +72,6 @@ class ServerGame {
 	SDL_Window *window;
 
 	// std::vector<Entity *> players;
-
-	NetworkHost networkHost;
 
 	std::unordered_map<uint8_t, std::string> playerIPs;
 	std::unordered_map<uint8_t, Entity *> players;

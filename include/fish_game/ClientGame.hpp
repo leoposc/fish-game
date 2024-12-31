@@ -13,9 +13,10 @@ namespace FishEngine {
 class ClientGame {
 
   public:
-	ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen);
-
-	~ClientGame();
+	static ClientGame &getInstance() {
+		static ClientGame instance; // Guaranteed to be destroyed and instantiated on first use
+		return instance;
+	}
 
 	SDL_Event getEvent() { return game_event; }
 
@@ -70,6 +71,14 @@ class ClientGame {
 	uint8_t ownPlayerID;
 
   private:
+	// Singelton
+	ClientGame();
+	ClientGame(const ClientGame &) = delete;
+	ClientGame &operator=(const ClientGame &) = delete;
+	~ClientGame();
+
+	bool initialized;
+
 	Entity *ownPlayer;
 
 	fs::path mapPath;
@@ -82,6 +91,12 @@ class ClientGame {
 
 	std::unordered_map<uint8_t, Entity *> players;
 	std::map<uint8_t, ClientGame::groupLabels> entityGroups;
+	const char *title;
+	int xpos;
+	int ypos;
+	int width;
+	int height;
+	bool fullscreen;
 };
 
 } // namespace FishEngine

@@ -63,7 +63,9 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
-ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen) {
+ClientGame::ClientGame()
+    : title("Fish Game Client"), xpos(SDL_WINDOWPOS_CENTERED), ypos(SDL_WINDOWPOS_CENTERED), width(1280), height(720),
+      fullscreen(false) {
 	int flags = 0;
 	if (fullscreen) {
 		flags = SDL_WINDOW_FULLSCREEN;
@@ -223,11 +225,14 @@ void ClientGame::spawnWeapons() {
 	// ================== init weapons ==================
 	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
 
-	// do no spawn weapons when existing weapon was not picked up
-	auto &existingWeapons(clientManager.getGroup(groupLabels::groupWeapons));
+	if (spawnpoints != nullptr) {
 
-	for (auto &spawnpoint : *spawnpoints) {
-		spawnWeaponsAux(spawnpoint, existingWeapons);
+		// do no spawn weapons when existing weapon was not picked up
+		auto &existingWeapons(clientManager.getGroup(groupLabels::groupWeapons));
+
+		for (auto &spawnpoint : *spawnpoints) {
+			spawnWeaponsAux(spawnpoint, existingWeapons);
+		}
 	}
 }
 
@@ -239,13 +244,16 @@ std::string ClientGame::joinInterface() {
 
 	clientMap = new Map();
 	clientMap->loadMap(fs::path("../../maps/joinLobby.tmj"));
+	spdlog::get("console")->info("Map loaded");
 
 	FontManager gInputTextTexture(renderer, "../../assets/zd-bold.ttf");
 	FontManager gPromptTextTexture(renderer, "../../assets/zd-bold.ttf", 26);
+	spdlog::get("console")->info("loaded textures");
 
 	SDL_Color textColor = {0, 0, 0, 255};
 	SDL_Event event;
 	SDL_StartTextInput();
+	spdlog::get("console")->info("started input");
 
 	std::string inputText = "xxx.xxx.xxx.xxx";
 	gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
@@ -338,22 +346,23 @@ std::string ClientGame::joinInterface() {
 }
 
 void ClientGame::sendJoinRequest(std::string ip, std::string username) {
-	// send request and wait for response
 	this->networkClient.init(ip, username);
-
-	// playerID =
 }
 
 void ClientGame::receiveGameState() {
 
-	if (this->networkClient.hasUpdate()) {
+	if (!this->networkClient.hasUpdate()) {
+		spdlog::get("console")->info("skipped, no update received");
 		return;
 	}
 
-	spdlog::get("console")->info("RECIVED UPDATE");
-
 	std::string serializedData = this->networkClient.getUpdate();
-	spdlog::get("console")->info("ClientGame: Got serializedGamestate: " + serializedData);
+	if (serializedData.empty()) {
+		spdlog::get("console")->info("skipped, empty");
+		return;
+	}
+
+	spdlog::get("console")->info("got update, updating...");
 	std::istringstream is(serializedData);
 	cereal::BinaryInputArchive ar(is);
 

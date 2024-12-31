@@ -21,7 +21,7 @@ class NetworkClient {
 
 	void init(const std::string hostIP, const std::string username);
 
-	void setEvent(const InputEvent::Event event);
+	void sendEvent(const std::string event);
 	std::string getUpdate();
 	bool hasUpdate();
 
@@ -56,7 +56,7 @@ class NetworkClient {
 	SocketManager socket;
 	std::thread workerThread;
 	std::mutex mutex;
-	std::queue<InputEvent::Event> sendQueue;
+	std::queue<std::string> sendQueue;
 
 	std::vector<std::tuple<std::string, int>> newUsers;
 	std::string gameState;

@@ -4,7 +4,6 @@
 
 #include "./GameInputEvents.hpp"
 #include "./SocketManager.hpp"
-#include "cereal/external/base64.hpp"
 #include <condition_variable>
 #include <iostream>
 #include <map>
@@ -26,20 +25,22 @@ class NetworkHost {
 	NetworkHost();
 	~NetworkHost();
 
-	std::optional<InputEvent::Event> getAction();
+	std::optional<std::string> getAction();
 	void updateState(const std::string &updatedState);
 
 	std::vector<std::string> getClients();
 
+	void printEventQueue();
+
   private:
-	// TODO: implement:
 	void notifyJoin(std::string username, int client_id);
 
 	void threadFunction();
 
 	// data variables
 	std::string state;
-	std::queue<std::tuple<std::string, InputEvent::Event>> elementQueue;
+	std::queue<std::tuple<std::string, std::string>>
+	    elementQueue; // first element is the username/id second the actual event
 
 	// the int is the id, it comes from the socket id
 	std::map<int, std::string> clients;

@@ -4,11 +4,13 @@
 #include <string>
 #include <tuple>
 
-NetworkClient::NetworkClient() : socket(SocketManager(8080, false)), sendQueue(std::queue<InputEvent::Event>()) {}
+NetworkClient::NetworkClient() : socket(SocketManager()), sendQueue(std::queue<std::string>()) {}
 
 void NetworkClient::init(const std::string hostIP, const std::string username) {
 	this->hostIP = hostIP;
 	this->username = username;
+	// TODO: pass ip
+	this->socket.init(8080, false);
 
 	this->workerThread = std::thread(&NetworkClient::run, this);
 }
@@ -21,7 +23,9 @@ void NetworkClient::run() {
 	this->socket.sendMessage(this->username);
 	while (true) {
 		if (!this->sendQueue.empty()) {
-			this->socket.sendMessage(InputEvent::serialize(this->sendQueue.front()));
+			auto sendEvent = this->sendQueue.front();
+			this->socket.sendMessage(
+			    cereal::base64::encode(reinterpret_cast<const unsigned char *>(sendEvent.c_str()), sendEvent.length()));
 			this->sendQueue.pop();
 		}
 
@@ -31,6 +35,7 @@ void NetworkClient::run() {
 }
 
 std::string NetworkClient::getUpdate() {
+	std::lock_guard<std::mutex> lock(this->mutex);
 	this->hasUpdateVal = false;
 	auto updatedGamestate = cereal::base64::decode(this->gameState);
 	spdlog::get("console")->debug("NetworkClient: Got new gamestate: " + updatedGamestate);
@@ -38,15 +43,16 @@ std::string NetworkClient::getUpdate() {
 }
 
 void NetworkClient::handleReceive() {
+	std::lock_guard<std::mutex> lock(this->mutex);
 	std::string raw_message = this->socket.popMessage().message;
-
-	if (raw_message == "") {
-		return;
-	}
 
 	size_t pos = raw_message.find(':');
 	std::string prefix = raw_message.substr(0, pos + 1);
 	std::string message = raw_message.substr(pos + 1);
+
+	if (message == "") {
+		return;
+	}
 
 	if (prefix == JOIN_PREFIX) {
 		size_t pos = raw_message.find(':');
@@ -57,17 +63,19 @@ void NetworkClient::handleReceive() {
 		this->newUsers.push_back(std::make_tuple(message, id));
 	}
 	if (prefix == UPDATE_PREFIX) {
-		spdlog::get("console")->debug("CLIENT: Got updated gameState");
-		this->hasUpdateVal = true;
+		spdlog::get("console")->debug("CLIENT: Got updated gameState" + message);
 		this->gameState = message;
+		this->hasUpdateVal = true;
+		spdlog::get("console")->debug("SET hasupdateVal to true");
 	}
 }
 
-void NetworkClient::setEvent(const InputEvent::Event event) {
+void NetworkClient::sendEvent(const std::string event) {
 	std::lock_guard<std::mutex> lock(this->mutex);
 	this->sendQueue.push(event);
 }
 
 bool NetworkClient::hasUpdate() {
+	std::lock_guard<std::mutex> lock(this->mutex);
 	return this->hasUpdateVal;
 }

@@ -13,6 +13,7 @@
 #include "../include/fish_game/ECS/WearableComponent.hpp"
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/MockServer.hpp"
+#include "../include/fish_game/NetworkHost.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
 
@@ -21,6 +22,7 @@
 #include <fstream>
 #include <iostream>
 #include <spdlog/spdlog.h>
+#include <vector>
 
 namespace FishEngine {
 
@@ -48,14 +50,14 @@ void ServerGame::init(fs::path mapPath, int p_numPlayers) {
 
 	// =================== init player===========================
 	for (size_t i = 0; i < p_numPlayers; i++) {
-		this->createPlayer("");
+		this->createPlayer();
 	}
 
 	spdlog::get("console")->debug("ServerGame - init done");
 }
 
 void ServerGame::handleEvents() {
-	if (MockServer::getInstance().pollEvent(ServerGame::game_event)) {
+	if (MockServer::getInstance().pollEvent()) {
 		if (game_event.type == SDL_QUIT) {
 			isRunning = false;
 		}
@@ -70,7 +72,7 @@ void ServerGame::update() {
 	Collision::checkCollisions(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 }
 
-uint8_t ServerGame::createPlayer(const std::string &ip) {
+uint8_t ServerGame::createPlayer() {
 	// update server state
 	numPlayers++;
 
@@ -79,23 +81,32 @@ uint8_t ServerGame::createPlayer(const std::string &ip) {
 	ServerGenerator::forPlayer(player, serverMap->getPlayerSpawnpoints(numPlayers).at(numPlayers - 1));
 
 	players.insert(std::make_pair(player.getID(), &player));
-	playerIPs.insert(std::make_pair(player.getID(), ip));
 	entityGroups.insert(std::make_pair(player.getID(), groupLabels::groupPlayers));
 
 	return player.getID();
 }
 
 // NOT really needed, is inside of network host
-uint8_t ServerGame::acceptJoinRequest(const std::string &ip) {
+uint8_t ServerGame::acceptJoinRequest() {
 
-	// Create player entity
-	uint8_t id = createPlayer(ip);
-
+	static std::vector<std::string> old_clients;
 	// send playerID to client
 	// TODO: poll if new player joined, if a player joined create playerid here and create mapping between socket_id and
 	// this id
+	auto clients = this->networkHost.getClients();
+	if (old_clients.size() != clients.size()) {
+		std::cout << "NEW CLIENT DETECTED" << std::endl;
+		for (const auto &client : clients) {
+			std::cout << client << std::endl;
+		}
 
-	return id;
+		// TODO: create new player
+		createPlayer();
+
+		old_clients = clients;
+	}
+
+	return 0;
 }
 
 void ServerGame::updatePlayerEvent() {
@@ -148,9 +159,6 @@ void ServerGame::sendGameState() {
 		// serialize components of the entity
 		ar(serverManager.getEntity(id));
 	}
-	std::string serializedData = os.str();
-
-	// send the state to the client
 
 	auto serializedString = os.str();
 	spdlog::get("console")->debug("SeverGame: Serialized string: " + serializedString);

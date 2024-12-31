@@ -2,13 +2,16 @@
 
 #include "spdlog/spdlog.h"
 
-SocketManager::SocketManager(int port, bool host) : addrlen(sizeof(address)) {
+SocketManager::SocketManager() : addrlen(sizeof(address)) {
+	spdlog::get("console")->debug("SocketManager initialized");
+}
+
+void SocketManager::init(int port, bool host) {
 	if (host) {
 		setupServer(port);
 	} else {
 		setupClient(port);
 	}
-	spdlog::get("console")->debug("SocketManager initialized");
 }
 
 SocketManager::~SocketManager() {

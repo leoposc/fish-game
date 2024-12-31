@@ -7,6 +7,7 @@
 #include <cereal/types/polymorphic.hpp>
 #include <fstream>
 
+#include "fish_game/ClientGame.hpp"
 #include "fish_game/NetworkHost.hpp"
 #include "spdlog/spdlog.h"
 
@@ -28,11 +29,14 @@ void ClientComponent::update() {
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
 	uint8_t id = entity->getID();
-	std::ofstream os("event.json");
-	cereal::JSONOutputArchive archive(os);
+	std::ostringstream os;
+	cereal::BinaryOutputArchive archive(os);
 	archive(id, event);
-	// TODO: somehting like this:
-	// this->networkClient.send(string);
+
+	auto serializedString = os.str();
+
+	auto networkClient = &FishEngine::ClientGame::getInstance().networkClient;
+	networkClient->sendEvent(serializedString);
 }
 
 } // namespace FishEngine
