@@ -127,14 +127,14 @@ FuncPtr hostLobby(bool isHost) {
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
-		// client->receiveGameState();
+		client->receiveGameState();
 		client->handleEvents();
 		client->update();
 		client->render();
 
 		if (isHost) {
 			server->handleJoinRequests();
-			server->updatePlayerEvent();
+			/* server->updatePlayerEvent(); */
 			server->sendGameState();
 		}
 

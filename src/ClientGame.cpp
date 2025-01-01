@@ -369,6 +369,7 @@ void ClientGame::receiveGameState() {
 	// fetch the number of the entities
 	size_t numEntities;
 	ar(numEntities);
+	std::cout << "size: " << static_cast<int>(numEntities) << std::endl;
 
 	// check if the entities are already loaded
 	for (size_t i = 0; i < numEntities; ++i) {
@@ -376,6 +377,7 @@ void ClientGame::receiveGameState() {
 		uint8_t id;
 		ClientGame::groupLabels group;
 		ar(id, group);
+		std::cout << "ID: " << static_cast<int>(id) << std::endl;
 
 		if (entityGroups.count(id)) {
 			// case: entity already in clientManager
@@ -383,10 +385,19 @@ void ClientGame::receiveGameState() {
 
 			// update the values of the entity
 			// ar(clientManager.getEntity(id));
-
 		} else {
 			// create the entity
-			auto &entity(clientManager.addEntity(id));
+			spdlog::get("console")->info("printing id");
+			std::cout << "ID: " << static_cast<int>(id) << std::endl;
+			auto &entity = clientManager.addEntity(id);
+			std::cout << "Entity added back in outer funciton. Address: " << &entity << std::endl;
+			entity.print();
+
+			spdlog::get("console")->info("printing manager");
+			clientManager.print();
+			this->getManager()->print();
+			spdlog::get("console")->info("printing new entity");
+			entity.print();
 
 			// create the entity with the correct components
 			switch (group) {

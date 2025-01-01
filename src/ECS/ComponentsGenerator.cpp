@@ -14,6 +14,7 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 	player.addComponent<EquipmentComponent>();
 	player.addComponent<HealthComponent>();
 	player.addComponent<EventHandlerComponent>(false);
+	player.print();
 	player.addGroup(ClientGame::groupLabels::groupPlayers);
 	player.addGroup(ClientGame::groupLabels::groupColliders);
 }
