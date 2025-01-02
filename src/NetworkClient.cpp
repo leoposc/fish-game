@@ -60,6 +60,8 @@ void NetworkClient::handleReceive() {
 		std::string username = raw_message.substr(pos + 1);
 		spdlog::get("console")->debug("CLIENT: Player " + message + " joined the game");
 		this->newUsers.push_back(std::make_tuple(message, id));
+		std::queue<std::string> empty;
+		std::swap(this->sendQueue, empty);
 	}
 	if (prefix == UPDATE_PREFIX) {
 		spdlog::get("console")->debug("CLIENT: Got updated gameState" + message);

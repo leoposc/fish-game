@@ -122,8 +122,10 @@ void ServerGame::updatePlayerEvent() {
 	std::istringstream is(unpackedAction);
 	cereal::BinaryInputArchive archive(is);
 	archive(id, event);
+	std::cout << "ID: " << static_cast<int>(id) << std::endl;
 
 	// update the event inside the component of the player entity
+	serverManager.print();
 	ServerComponent serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
 	serCom.setEvent(event);
 }

@@ -28,7 +28,9 @@ void ClientComponent::update() {
 
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
-	uint8_t id = entity->getID();
+	// TODO: Id is 0? Should start at 1, there is no entity with id of 0
+	uint8_t id = ClientGame::getInstance().ownPlayerID;
+	std::cout << "ID before sending Event: " << static_cast<int>(id) << std::endl;
 	std::ostringstream os;
 	cereal::BinaryOutputArchive archive(os);
 	archive(id, event);
