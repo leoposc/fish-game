@@ -116,12 +116,10 @@ FuncPtr hostLobby(bool isHost) {
 	if (isHost) {
 		server = &FishEngine::ServerGame::getInstance();
 		server->init("lobby.tmj", 1);
+		client->networkClient.init("127.0.0.1", "host player");
 	}
 
-	std::string ownIP = "127.0.0.1";
-
 	client->init("lobby.tmj", 1, false);
-
 	client->createOwnPlayer();
 
 	while (client->running()) {

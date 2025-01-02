@@ -397,10 +397,9 @@ void ClientGame::receiveGameState() {
 			// create the entity with the correct components
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
-				// TODO: restore connection to own player -> change if somehow
-				// In join the only entities are players, therefore the join order can simply tell the clients what id
-				// they are
-				if (id == ownPlayerID) {
+
+				if (!connected && id == numEntities) {
+					this->ownPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0});
 				} else {
 					ClientGenerator::forEnemy(entity, {0, 0});
@@ -423,6 +422,7 @@ void ClientGame::receiveGameState() {
 
 		// update the values of the entity
 		ar(clientManager.getEntity(id));
+		this->connected = true;
 	}
 }
 

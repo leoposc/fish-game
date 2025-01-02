@@ -29,6 +29,7 @@ class NetworkClient {
 	// data variables
 	std::string hostIP;
 	std::string username;
+	int player_id;
 
 	// what should the network host have?
 	// Needs all players, so it should also have all the elements -> first time transfer of everything?

@@ -85,6 +85,7 @@ class ClientGame {
 	int numPlayers;
 	bool isRunning;
 	bool started;
+	bool connected = false;
 
 	SDL_Window *window;
 	bool windowed = true;
