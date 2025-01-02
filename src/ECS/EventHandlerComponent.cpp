@@ -75,7 +75,7 @@ void EventHandlerComponent::update()
 
 			// send the event to the server
 			if (!isServer) {
-				clientComponent->sendEvent(ClientGame::game_event);
+				clientComponent->sendEvent(*event_ptr);
 			}
 		}
 
@@ -102,7 +102,7 @@ void EventHandlerComponent::update()
 
 			// send the event to the server
 			if (!isServer) {
-				clientComponent->sendEvent(ClientGame::game_event);
+				clientComponent->sendEvent(*event_ptr);
 			}
 		}
 		// spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");

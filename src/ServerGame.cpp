@@ -90,8 +90,6 @@ uint8_t ServerGame::handleJoinRequests() {
 
 	static std::vector<std::string> old_clients;
 	// send playerID to client
-	// TODO: poll if new player joined, if a player joined create playerid here and create mapping between socket_id and
-	// this id
 	auto clients = this->networkHost.getClients();
 	if (old_clients.size() != clients.size()) {
 		std::cout << "NEW CLIENT DETECTED" << std::endl;
@@ -121,13 +119,13 @@ void ServerGame::updatePlayerEvent() {
 	std::string unpackedAction = action.value();
 	std::cout << "Action: " << unpackedAction << std::endl;
 
-	std::istringstream is;
+	std::istringstream is(unpackedAction);
 	cereal::BinaryInputArchive archive(is);
 	archive(id, event);
 
 	// update the event inside the component of the player entity
-	ServerComponent *serCom = &players[id]->getComponent<ServerComponent>();
-	serCom->setEvent(event);
+	ServerComponent serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
+	serCom.setEvent(event);
 }
 
 void ServerGame::startGame() {

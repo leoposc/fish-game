@@ -24,8 +24,7 @@ void NetworkClient::run() {
 	while (true) {
 		if (!this->sendQueue.empty()) {
 			auto sendEvent = this->sendQueue.front();
-			this->socket.sendMessage(
-			    cereal::base64::encode(reinterpret_cast<const unsigned char *>(sendEvent.c_str()), sendEvent.length()));
+			this->socket.sendMessage(sendEvent);
 			this->sendQueue.pop();
 		}
 
@@ -72,7 +71,9 @@ void NetworkClient::handleReceive() {
 
 void NetworkClient::sendEvent(const std::string event) {
 	std::lock_guard<std::mutex> lock(this->mutex);
-	this->sendQueue.push(event);
+
+	this->sendQueue.push(
+	    cereal::base64::encode(reinterpret_cast<const unsigned char *>(event.c_str()), event.length()));
 }
 
 bool NetworkClient::hasUpdate() {

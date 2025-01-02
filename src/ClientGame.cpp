@@ -397,7 +397,6 @@ void ClientGame::receiveGameState() {
 			// create the entity with the correct components
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
-
 				if (!connected && id == numEntities) {
 					this->ownPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0});

@@ -106,7 +106,7 @@ FuncPtr joinLobby() {
 }
 
 FuncPtr hostLobby(bool isHost) {
-	std::cout << "Welcome to Fish Game" << std::endl;
+	std::cout << "Welcome to Fish Game HOST Lobby" << std::endl;
 
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
@@ -132,25 +132,9 @@ FuncPtr hostLobby(bool isHost) {
 
 		if (isHost) {
 			server->handleJoinRequests();
-			/* server->updatePlayerEvent(); */
+			server->update();
 			server->sendGameState();
-		}
-
-		switch (client->updateMainMenu()) {
-		case 0:
-			std::cout << "Leaving main menu..." << std::endl;
-			client->stop();
-			server->stop();
-			return mainMenu();
-			break;
-		case 1:
-			client->stop();
-			server->stop();
-			return combat();
-			break;
-
-		default:
-			break;
+			server->updatePlayerEvent();
 		}
 
 		frameTime = SDL_GetTicks() - frameStart;
