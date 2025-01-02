@@ -312,26 +312,24 @@ class Manager {
 	}
 
 	Entity &addEntity(uint8_t id) {
-		// std::cout << "Adding entity" << std::endl;
+		// Check if the entity with the given ID already exists
+		auto it = entities.find(id);
+		if (it != entities.end()) {
+			// Remove the existing entity
+			entities.erase(it);
+			spdlog::get("console")->info("Existing entity with ID {} removed", static_cast<int>(id));
+		}
+
+		// Create a new entity
 		Entity *e = new Entity(*this);
-		spdlog::get("console")->info("printing id in add Entity");
-		std::cout << "ID: " << static_cast<int>(id) << std::endl;
-		spdlog::get("console")->info("printing e in addEntity");
-		e->print();
+		spdlog::get("console")->info("Creating new entity with ID {}", static_cast<int>(id));
 		e->setID(id);
-		// std::cout << "Entity created" << std::endl;
-		spdlog::get("console")->info("printing e in addEntity after emplace");
+
+		// Add the new entity to the map
 		std::unique_ptr<Entity> uPtr(e);
-		// std::cout << "Unique pointer created" << std::endl;
-		spdlog::get("console")->info("printing e in addEntity after emplace");
 		entities.emplace(id, std::move(uPtr));
-		spdlog::get("console")->info("printing e in addEntity after emplace");
-		// std::cout << "Entity moved" << std::endl;
-		std::cout << "Entity added. Address: " << e << std::endl;
-		std::cout << "Returning entity address: " << &(*e) << std::endl;
-		auto &test = *e;
-		std::cout << "Returning entity address: " << &test << std::endl;
-		test.print();
+		spdlog::get("console")->info("New entity with ID {} added", static_cast<int>(id));
+
 		return *e;
 	}
 };
