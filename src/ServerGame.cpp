@@ -151,6 +151,9 @@ void ServerGame::sendGameState() {
 	cereal::BinaryOutputArchive ar(os);
 
 	// inform client about the number of the entities
+
+	// TODO: information about which playerid is whoose client needs to be transmitted here
+
 	ar(players.size());
 	std::cout << "size: " << static_cast<int>(players.size()) << std::endl;
 

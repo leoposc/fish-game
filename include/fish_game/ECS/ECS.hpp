@@ -289,13 +289,7 @@ class Manager {
 	}
 
 	// void addToGroup(Entity *entity, Group group) {}
-	void addToGroup(Entity *entity, Group group) {
-		spdlog::get("console")->info("before, index: {}, size: {}", group, groupedEntities.size());
-		auto test = groupedEntities[group];
-		spdlog::get("console")->info("after");
-		groupedEntities[group].emplace_back(entity);
-		spdlog::get("console")->info("after emplace");
-	}
+	void addToGroup(Entity *entity, Group group) { groupedEntities[group].emplace_back(entity); }
 
 	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 

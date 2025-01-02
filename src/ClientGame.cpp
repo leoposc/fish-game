@@ -387,21 +387,19 @@ void ClientGame::receiveGameState() {
 			// ar(clientManager.getEntity(id));
 		} else {
 			// create the entity
-			spdlog::get("console")->info("printing id");
-			std::cout << "ID: " << static_cast<int>(id) << std::endl;
 			auto &entity = clientManager.addEntity(id);
-			std::cout << "Entity added back in outer funciton. Address: " << &entity << std::endl;
 			entity.print();
 
-			spdlog::get("console")->info("printing manager");
 			clientManager.print();
 			this->getManager()->print();
-			spdlog::get("console")->info("printing new entity");
 			entity.print();
 
 			// create the entity with the correct components
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
+				// TODO: restore connection to own player -> change if somehow
+				// In join the only entities are players, therefore the join order can simply tell the clients what id
+				// they are
 				if (id == ownPlayerID) {
 					ClientGenerator::forPlayer(entity, {0, 0});
 				} else {
