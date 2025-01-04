@@ -1,4 +1,6 @@
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
+#include "../../include/fish_game/ECS/SpriteComponent.hpp"
+#include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/Vector2D.hpp"
 
 #include "spdlog/spdlog.h"
@@ -18,6 +20,12 @@ void MoveComponent::init() {
 	transform = &entity->getComponent<TransformComponent>();
 	transform->velocity.setX(0);
 	transform->velocity.setY(0);
+
+	// init sprite component if client
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite = &entity->getComponent<SpriteComponent>();
+		sprite->play("fishIdle");
+	}
 }
 
 void MoveComponent::update() {
@@ -36,10 +44,18 @@ void MoveComponent::up() {
 		transform->velocity.setY(-5);
 		canJump = false;
 	}
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishSwim");
+	}
 }
 
 void MoveComponent::down() {
 	transform->velocity.setY(2);
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishSwim");
+	}
 }
 
 void MoveComponent::left() {
@@ -50,6 +66,10 @@ void MoveComponent::left() {
 		transform->velocity.setX(-4);
 	} else {
 		transform->velocity.setX(-2);
+	}
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishSwim");
 	}
 }
 
@@ -62,15 +82,27 @@ void MoveComponent::right() {
 	} else {
 		transform->velocity.setX(2);
 	}
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishSwim");
+	}
 }
 
 void MoveComponent::stopX() {
 	transform->velocity.setX(0);
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishIdle");
+	}
 }
 
 void MoveComponent::stopY() {
 	if (inWater) {
 		transform->velocity.setY(0);
+	}
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishIdle");
 	}
 }
 

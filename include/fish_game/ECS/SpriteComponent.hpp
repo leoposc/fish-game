@@ -16,6 +16,7 @@ struct Animation {
 	int speed;
 
 	Animation(int i, int f, int s) : index(i), frames(f), speed(s) {}
+	Animation() : index(0), frames(1), speed(100) {}
 };
 
 class SpriteComponent : public Component {
@@ -24,7 +25,7 @@ class SpriteComponent : public Component {
 	SDL_Rect srcRect, dstRect;
 
 	bool animated = false;
-	int frames = 0;
+	int frames = 1;
 	int speed = 100; // ms
 	int currentFrame = 0;
 
@@ -33,7 +34,7 @@ class SpriteComponent : public Component {
 	// animation meta data
 	const Animation fishSwim = Animation(0, 12, 100);
 	const Animation fishIdle = Animation(1, 12, 100);
-	const Animation fishDead = Animation(2, 1, 10000);
+	const Animation fishDead = Animation(2, 1, 100);
 
 	std::map<std::string, Animation> animations = {
 	    {"fishSwim", fishSwim}, {"fishIdle", fishIdle}, {"fishDead", fishDead}};

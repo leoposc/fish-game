@@ -18,7 +18,6 @@ SpriteComponent::SpriteComponent(std::string id) : id(id) {
 }
 
 SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isAnimated), id(id) {
-	// TODO: implement animation with tiled/ tileson
 	setTexture(id);
 }
 
@@ -31,7 +30,6 @@ void SpriteComponent::setTexture(std::string id) {
 }
 
 void SpriteComponent::init() {
-	// spdlog::get("console")->debug( "SpriteComponent: initializing " << id );
 	if (entity->hasComponent<TransformComponent>()) {
 		transform = &entity->getComponent<TransformComponent>();
 	} else {
@@ -48,9 +46,12 @@ void SpriteComponent::update() {
 	if (animated) {
 		currentFrame = (SDL_GetTicks() / speed) % frames;
 		srcRect.x = currentFrame * srcRect.w;
+		srcRect.y = animationIndex * transform->height;
+		// spdlog::get("console")->debug("SpriteComponent: {} {} {}", id, currentFrame, srcRect.x);
+	} else {
+		srcRect.x = 0;
+		srcRect.y = 0;
 	}
-	srcRect.y = animationIndex * transform->height;
-
 	spriteFlip = transform->faceRight ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
 	dstRect.x = (int)transform->getX();
