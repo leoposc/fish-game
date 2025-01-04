@@ -20,11 +20,16 @@ void WearableComponent::init() {
 void WearableComponent::update() {
 	if (attached) {
 		// copy the values of the attached entity to the entity
-		transform->position = attachedEntity->getComponent<TransformComponent>().position;
-		transform->velocity = attachedEntity->getComponent<TransformComponent>().velocity;
-		transform->faceRight = attachedEntity->getComponent<TransformComponent>().faceRight;
+		TransformComponent *attached_transform = &attachedEntity->getComponent<TransformComponent>();
+		transform->position = attached_transform->position;
+		transform->velocity = attached_transform->velocity;
+		transform->faceRight = attached_transform->faceRight;
+
+		// offset the position to the center of the entity
+		transform->position.setX(attached_transform->position.getX() + attached_transform->width / 2);
+		transform->position.setY(attached_transform->position.getY() + attached_transform->height / 2);
 	} else {
-		transform->velocity -= transform->velocity * 0.000001;
+		transform->velocity -= transform->velocity * 0.00005;
 	}
 }
 
@@ -32,6 +37,7 @@ void WearableComponent::attach(Entity *entity) {
 	spdlog::get("console")->debug("WearableComponent - attach");
 	attachedEntity = entity;
 	attached = true;
+	needsUpdate = true;
 }
 
 void WearableComponent::detach() {
@@ -43,15 +49,22 @@ void WearableComponent::detach() {
 	// reset
 	attachedEntity = nullptr;
 	attached = false;
+	needsUpdate = true;
 }
 
 void WearableComponent::shoot() {
 	static int i = 50;
-	spdlog::get("console")->debug("WearableComponent - shoot");
-	Manager &manager = *entity->getManager();
-	Entity &projectile(manager.addEntity(i++));
-	std::pair<std::uint16_t, std::uint16_t> pos(transform->position.getX(), transform->position.getY());
-	ClientGenerator::forProjectile(projectile, pos, transform->faceRight);
+
+	if (ammunition > 0) {
+		spdlog::get("console")->debug("WearableComponent - shoot");
+		Manager &manager = *entity->getManager();
+		Entity &projectile(manager.addEntity(i++));
+		std::pair<std::uint16_t, std::uint16_t> pos(transform->position.getX(), transform->position.getY());
+		ClientGenerator::forProjectile(projectile, pos, transform->faceRight);
+
+		// decrease the ammunition
+		ammunition--;
+	}
 }
 
 } // namespace FishEngine

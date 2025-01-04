@@ -32,6 +32,7 @@ class WearableComponent;
 class EquipmentComponent;
 class EventHandlerComponent;
 class TransformComponent;
+class HealthComponent;
 
 using ComponentID = std::size_t;
 using Group = std::size_t;
@@ -112,7 +113,20 @@ class Entity {
 
 	template <class Archive>
 	void serialize(Archive &ar) {
-		ar(CEREAL_NVP(id), CEREAL_NVP(active), getComponent<TransformComponent>());
+		ar(id, active, getComponent<TransformComponent>());
+
+		// ========== serialize optional components ==========
+		if (hasComponent<WearableComponent>()) {
+			ar(getComponent<WearableComponent>());
+		}
+
+		if (hasComponent<EquipmentComponent>()) {
+			ar(getComponent<EquipmentComponent>());
+		}
+
+		if (hasComponent<HealthComponent>()) {
+			ar(getComponent<HealthComponent>());
+		}
 	}
 
 	Entity() : manager(manager) {} //

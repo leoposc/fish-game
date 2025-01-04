@@ -10,15 +10,26 @@ class TransformComponent;
 class WearableComponent : public Component {
 
   private:
+	// association properties for game logic
 	TransformComponent *transform = nullptr;
-
 	Entity *attachedEntity = nullptr;
 	bool attached = false;
+
+	// association properties for serialization
+	// uint8_t attachedID;
+	bool needsUpdate = false;
+
+	size_t ammunition = 5;
 
   public:
 	template <class Archive>
 	void serialize(Archive &ar) {
-		ar(attached); // todo: probably need to add a unique pointer
+		ar(ammunition, needsUpdate);
+		if (needsUpdate) {
+			ar(attached);
+			// ar(attachedID);
+			needsUpdate = false;
+		}
 	}
 
 	WearableComponent() = default;

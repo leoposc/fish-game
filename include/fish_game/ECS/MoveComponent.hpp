@@ -1,13 +1,17 @@
 #pragma once
 
 #include "ECS.hpp"
-#include "TransformComponent.hpp"
+// #include "TransformComponent.hpp"
 
 namespace FishEngine {
+
+class SpriteComponent;
+class TransformComponent;
 
 class MoveComponent : public Component {
 
 	TransformComponent *transform = nullptr;
+	SpriteComponent *sprite = nullptr;
 
 	bool canJump = false;
 
