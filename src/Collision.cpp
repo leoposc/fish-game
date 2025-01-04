@@ -1,5 +1,6 @@
 #include "../include/fish_game/Collision.hpp"
 #include "../include/fish_game/ECS/HealthComponent.hpp"
+#include "../include/fish_game/ECS/TransformComponent.hpp"
 
 namespace FishEngine {
 

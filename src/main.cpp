@@ -52,18 +52,20 @@ FuncPtr combat() {
 	server->init("map03.tmj", 4);
 	client->init("map03.tmj", 4, true);
 
-	client->sendJoinRequest("127.0.0.1", "test user in combat");
+	// client->sendJoinRequest("127.0.0.1", "test user in combat");
 
-	uint8_t id = server->acceptJoinRequest("ip");
-	std::cout << "Player ID: " << (int)id << std::endl;
-	client->ownPlayerID = id;
+	// uint8_t id = server->acceptJoinRequest("ip");
+	// std::cout << "Player ID: " << (int)id << std::endl;
+	// client->ownPlayerID = id;
 
-	for (int i = 0; i < 4; i++) {
-		std::cout << server->createPlayer("") << std::endl;
-	}
+	// for (int i = 0; i < 4; i++) {
+	// 	std::cout << server->createPlayer("") << std::endl;
+	// }
 
-	server->sendGameState();
-	client->receiveGameState();
+	client->createOwnPlayer();
+
+	// server->sendGameState();
+	// client->receiveGameState();
 
 	std::cout << "Combat init done!" << std::endl;
 
@@ -83,6 +85,8 @@ FuncPtr combat() {
 
 	client->stop();
 	server->stop();
+
+	spdlog::get("console")->info("Leaving combat...");
 
 	return mainMenu();
 }
@@ -224,7 +228,8 @@ int main(int argc, char *argv[]) {
 	// joinLobby();
 	combat();
 	// mainMenu();
-	std::cout << "Exiting..." << std::endl;
+
+	spdlog::get("console")->info("Leaving Fish Game...");
 
 	return 0;
 }

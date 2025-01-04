@@ -81,6 +81,8 @@ ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int hei
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		}
 
+		SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
 	} else {
 		spdlog::get("stderr")->error("SDL could not initialize! SDL_Error:{}", SDL_GetError());
 		isRunning = false;
@@ -88,7 +90,7 @@ ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int hei
 
 	// load assets
 	// assets->addTexture("fish", "../../assets/RedFishSmall.png");
-	assets->addTexture("fish", "../../assets/spritesheets/image77-7.png");
+	assets->addTexture("fish", "../../assets/spritesheets/f01.png");
 	assets->addTexture("pistol", "../../assets/PistolSmall.png");
 	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
 }
@@ -100,50 +102,32 @@ ClientGame::~ClientGame() {
 	// log clean
 }
 
-// todo: sync player positions with server/ fetch them from server
-// todo: sync weapon positions with server/ fetch them from server / spawn them periodically
-
 void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
-
-	// ================== init game ==================
 	isRunning = true;
+
+	// ============ control if game was reset ===========
 	assert(clientManager.checkEmpty());
-	// assert(numPlayers > 0);
 	assert(players.empty());
 
+	// ================ init clientMap ==================
 	mapPath = mp;
-	std::cout << "start: " << players.size() << std::endl;
-	// ================== init clientMap and assets ==================
 	clientMap = new Map();
-
-	spdlog::get("console")->debug("{}/{}", fs::path("../../maps").string(), mapPath.string());
-
 	clientMap->loadMap(fs::path("../../maps") / mapPath);
 
-	// ================== init player ==================
-	// auto &player(clientManager.addEntity());
-	// auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
-	// ClientGenerator::forPlayer(player, initPos.at(0));
-	// players.push_back(&player);
-
-	// if (combat) {
-	// 	// ================== init enemies ==================
-	// 	for (int i = 1; i < numPlayers; ++i) {
-	// 		auto &opponent(clientManager.addEntity());
-	// 		ClientGenerator::forEnemy(opponent, initPos.at(i));
-	// 		players.push_back(&opponent);
-	// 	}
-
-	// 	// ================== init weapons ==================
-	spawnWeapons();
-	// }
+	// ================== init weapons ==================
+	std::cout << "init weapons: " << combat << std::endl;
+	if (combat) {
+		spawnWeapons();
+	}
 }
 
 void ClientGame::handleEvents() {
 	SDL_PollEvent(&game_event);
 
 	switch (game_event.type) {
+		// case quitting the game
 	case SDL_QUIT:
+		spdlog::get("console")->info("Leaving game");
 		isRunning = false;
 		break;
 		// case F11 is pressed
@@ -155,15 +139,13 @@ void ClientGame::handleEvents() {
 	default:
 		break;
 	}
-
-	// MockServer::getInstance().enqueueEvent(game_event);
 }
 
 void ClientGame::update() {
 	// delete dead entities
 	clientManager.refresh();
 
-	// update the entities
+	// // update the entities
 	clientManager.update();
 
 	// check for collisions
@@ -172,12 +154,13 @@ void ClientGame::update() {
 	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupPlayers),
 	                           &clientManager.getGroup(groupLabels::groupProjectiles));
 
-	// animate the map
+	// // animate the map
 	clientMap->updateAnimations();
 
 	// check if game is over TODO: just handle it in the server
 	if (clientManager.getGroup(groupLabels::groupPlayers).empty()) {
-		stop();
+		spdlog::get("console")->info("Game over - stopping game");
+		isRunning = false;
 	}
 }
 

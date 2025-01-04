@@ -5,10 +5,10 @@ namespace FishEngine {
 namespace ClientGenerator {
 
 void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos) {
-	player.addComponent<TransformComponent>(pos.first, pos.second, 45, 60, 1);
+	player.addComponent<TransformComponent>(pos.first, pos.second, 50, 70, 1);
 	player.addComponent<SpriteComponent>("fish", true);
 	player.addComponent<ClientComponent>();
-	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 45, 60);
+	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 50, 70);
 	player.addComponent<MoveComponent>();
 	player.addComponent<GravityComponent>();
 	player.addComponent<EquipmentComponent>();
@@ -20,7 +20,7 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 
 void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos) {
 	enemy.addComponent<TransformComponent>(pos.first, pos.second, 45, 60, 1.0);
-	enemy.addComponent<SpriteComponent>("fish", false);
+	enemy.addComponent<SpriteComponent>("fish", true);
 	// enemy.addComponent<ClientComponent>();
 	enemy.addComponent<ColliderComponent>("enemy", pos.first, pos.second, 45, 60);
 	enemy.addComponent<MoveComponent>();
@@ -44,9 +44,10 @@ void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &po
 
 void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos, bool faceRight) {
 	Vector2D velocity = faceRight ? Vector2D(-10, 0) : Vector2D(10, 0);
-	projectile.addComponent<TransformComponent>(pos.first, pos.second, 5, 5, 1.0);
+	int offset = faceRight ? 40 : -40;
+	projectile.addComponent<TransformComponent>(pos.first + offset, pos.second, 5, 5, 1.0);
 	projectile.addComponent<SpriteComponent>("projectile", false);
-	projectile.addComponent<ColliderComponent>("projectile", pos.first, pos.second, 5, 5);
+	projectile.addComponent<ColliderComponent>("projectile", pos.first + offset, pos.second, 5, 5);
 	projectile.addComponent<ProjectileComponent>(500, 10, velocity);
 	projectile.addGroup(ClientGame::groupLabels::groupProjectiles);
 	projectile.addGroup(ClientGame::groupLabels::groupColliders);
