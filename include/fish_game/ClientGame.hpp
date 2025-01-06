@@ -21,7 +21,7 @@ class ClientGame {
 
 	void init(fs::path mp, int np, bool combat);
 
-	void initFishSprites();
+	void loadFishSprites();
 
 	void handleEvents();
 
@@ -86,6 +86,9 @@ class ClientGame {
 
 	std::unordered_map<uint8_t, Entity *> players;
 	std::map<uint8_t, ClientGame::groupLabels> entityGroups;
+
+	// increment this for each new fish sprite and reset at init
+	size_t fishSpriteID = 0;
 };
 
 } // namespace FishEngine

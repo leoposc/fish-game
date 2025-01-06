@@ -49,8 +49,9 @@ FuncPtr combat() {
 	u_int32_t frameStart;
 	int frameTime;
 
-	server->init("map04.tmj", 4);
-	client->init("map04.tmj", 4, true);
+	int numPlayers = 4; // todo: get from server
+	server->init("map04.tmj", numPlayers);
+	client->init("map04.tmj", numPlayers, true);
 
 	// client->sendJoinRequest("127.0.0.1", "test user in combat");
 
@@ -181,7 +182,7 @@ FuncPtr mainMenu() {
 	uint32_t frameStart;
 	int frameTime;
 
-	client->init("mainMenu.tmj", 0, false);
+	client->init("mainMenu.tmj", 1, false);
 	client->createOwnPlayer();
 
 	while (client->running()) {

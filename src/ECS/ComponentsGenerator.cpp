@@ -4,9 +4,10 @@ namespace FishEngine {
 
 namespace ClientGenerator {
 
-void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos) {
+void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos, size_t fishSpriteID) {
 	player.addComponent<TransformComponent>(pos.first, pos.second, 30, 40, 1);
-	player.addComponent<SpriteComponent>("fish01", true);
+	player.addComponent<SpriteComponent>("fish0" + std::to_string(fishSpriteID), true);
+	std::cout << "fish0" + std::to_string(fishSpriteID) << std::endl;
 	player.addComponent<ClientComponent>();
 	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 30, 40);
 	player.addComponent<GravityComponent>();
@@ -18,9 +19,9 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 	player.addGroup(ClientGame::groupLabels::groupColliders);
 }
 
-void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos) {
+void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos, size_t fishSpriteID) {
 	enemy.addComponent<TransformComponent>(pos.first, pos.second, 30, 40, 1.0);
-	enemy.addComponent<SpriteComponent>("fish01", true);
+	enemy.addComponent<SpriteComponent>("fish0" + std::to_string(fishSpriteID), true);
 	// enemy.addComponent<ClientComponent>();
 	enemy.addComponent<ColliderComponent>("enemy", pos.first, pos.second, 30, 40);
 	enemy.addComponent<GravityComponent>();
@@ -33,8 +34,8 @@ void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos)
 }
 
 void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &pos) {
-	weapon.addComponent<TransformComponent>(pos.first, pos.second, 13, 18, 1.0);
-	weapon.addComponent<SpriteComponent>("pistol", false);
+	weapon.addComponent<TransformComponent>(pos.first, pos.second, 20, 16, 1.0);
+	weapon.addComponent<SpriteComponent>("present", false);
 	weapon.addComponent<ColliderComponent>("weapon", pos.first, pos.second, 13, 18);
 	weapon.addComponent<WearableComponent>();
 	weapon.addComponent<GravityComponent>();

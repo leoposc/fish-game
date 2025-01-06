@@ -86,10 +86,10 @@ ClientGame::ClientGame(const char *title, int xpos, int ypos) {
 		isRunning = false;
 	}
 
-	// load assets
-	assets->addTexture("fish01", "../../assets/fish01.png");
+	// load textures
 	assets->addTexture("pistol", "../../assets/PistolSmall.png");
 	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
+	assets->addTexture("present", "../../assets/present.png");
 }
 
 ClientGame::~ClientGame() {
@@ -115,6 +115,17 @@ void ClientGame::init(fs::path mp, int nP, bool combat) {
 	// ================== init weapons ==================
 	if (combat) {
 		spawnWeapons();
+	}
+
+	fishSpriteID = 0;
+	// load assets
+	loadFishSprites();
+}
+
+void ClientGame::loadFishSprites() {
+	for (int i = 1; i <= numPlayers; i++) {
+		std::string id = "fish0" + std::to_string(i);
+		assets->addTexture(id, "../../assets/" + id + ".png");
 	}
 }
 
@@ -188,7 +199,7 @@ void ClientGame::render() {
 void ClientGame::createOwnPlayer() {
 	ownPlayer = &clientManager.addEntity();
 	auto initPos = clientMap->getPlayerSpawnpoints(1).at(0);
-	ClientGenerator::forPlayer(*ownPlayer, initPos);
+	ClientGenerator::forPlayer(*ownPlayer, initPos, ++fishSpriteID);
 	players.insert(std::make_pair(ownPlayer->getID(), ownPlayer));
 	ownPlayerID = ownPlayer->getID();
 }
@@ -376,9 +387,9 @@ void ClientGame::receiveGameState() {
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
 				if (id == ownPlayerID) {
-					ClientGenerator::forPlayer(entity, {0, 0});
+					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 				} else {
-					ClientGenerator::forEnemy(entity, {0, 0});
+					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
 				}
 				players.insert(std::make_pair(entity.getID(), &entity));
 				break;

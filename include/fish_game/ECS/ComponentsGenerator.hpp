@@ -21,9 +21,9 @@ namespace FishEngine {
 
 namespace ClientGenerator {
 
-void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos);
+void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos, size_t fishSpriteID);
 
-void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos);
+void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos, size_t fishSpriteID);
 
 void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &pos);
 

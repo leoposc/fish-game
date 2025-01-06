@@ -50,6 +50,13 @@ void WearableComponent::attach(Entity *entity) {
 	attachedID = entity->getID();
 	attached = true;
 	needsUpdate = true;
+
+	// check if code is executed on the clientside
+	if (this->entity->hasComponent<SpriteComponent>()) {
+		this->entity->getComponent<SpriteComponent>().setTexture("pistol");
+	}
+	this->entity->getComponent<TransformComponent>().width = 18;
+	this->entity->getComponent<TransformComponent>().height = 13;
 }
 
 void WearableComponent::detach() {
