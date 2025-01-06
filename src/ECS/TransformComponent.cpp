@@ -1,5 +1,6 @@
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/ECS/ColliderComponent.hpp"
+#include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/MockServer.hpp"
 #include "spdlog/spdlog.h"
 
@@ -17,7 +18,9 @@ void TransformComponent::init() {
 }
 
 void TransformComponent::update() {
+	// spdlog::get("console")->debug("Transform - before updating position - velocity Y: {}", velocity.getY());
 	position += velocity;
+	velocity = {0, 0};
 }
 
 } // namespace FishEngine
