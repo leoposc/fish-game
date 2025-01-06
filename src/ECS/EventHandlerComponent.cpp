@@ -5,6 +5,7 @@
 #include "../../include/fish_game/ECS/HealthComponent.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/ServerComponent.hpp"
+#include "../../include/fish_game/ECS/TransformComponent.hpp"
 
 #include "spdlog/spdlog.h"
 
@@ -34,37 +35,28 @@ void EventHandlerComponent::init() {
 	health = &entity->getComponent<HealthComponent>();
 }
 
-void EventHandlerComponent::update()
-
-{
+void EventHandlerComponent::update() {
+	// spdlog::get("console")->debug("EventhandlerComponent - update");
 	if (health->isAlive()) {
 		if (event_ptr->type == SDL_KEYDOWN) {
 
 			if (event_ptr->key.keysym.sym == SDLK_w) {
-				// upwards
 				move->up();
-				// sprite->play("swim");
-			} else if (event_ptr->key.keysym.sym == SDLK_s) {
-				// downwards
+			}
+			if (event_ptr->key.keysym.sym == SDLK_s) {
 				move->down();
-				// sprite->play("swim");
+			}
+			if (event_ptr->key.keysym.sym == SDLK_a) {
+				move->left();
 			}
 			if (event_ptr->key.keysym.sym == SDLK_d) {
-				// right
 				move->right();
-				// sprite->play("swim");
-			} else if (event_ptr->key.keysym.sym == SDLK_a) {
-				// left
-				move->left();
-				// sprite->play("swim");
 			}
 			if (event_ptr->key.keysym.sym == SDLK_j) {
-				// equip/ unequip
 				spdlog::get("console")->debug("J pressed");
 				equip->processCommand();
 			}
 			if (event_ptr->key.keysym.sym == SDLK_k) {
-				// shoot
 				equip->shoot();
 			}
 
@@ -77,22 +69,16 @@ void EventHandlerComponent::update()
 		// stop the player
 		if (event_ptr->type == SDL_KEYUP) {
 			if (event_ptr->key.keysym.sym == SDLK_w) {
-				// upwards
 				move->stopY();
-				// sprite->play("swim");
-			} else if (event_ptr->key.keysym.sym == SDLK_s) {
-				// downwards
+			}
+			if (event_ptr->key.keysym.sym == SDLK_s) {
 				move->stopY();
-				// sprite->play("swim");
+			}
+			if (event_ptr->key.keysym.sym == SDLK_a) {
+				move->stopX();
 			}
 			if (event_ptr->key.keysym.sym == SDLK_d) {
-				// right
 				move->stopX();
-				// sprite->play("swim");
-			} else if (event_ptr->key.keysym.sym == SDLK_a) {
-				// left
-				move->stopX();
-				// sprite->play("swim");
 			}
 
 			// send the event to the server
@@ -100,7 +86,6 @@ void EventHandlerComponent::update()
 				clientComponent->sendEvent(ClientGame::game_event);
 			}
 		}
-		// spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
 	}
 }
 

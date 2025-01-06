@@ -53,14 +53,13 @@ void SpriteComponent::update() {
 		srcRect.y = 0;
 	}
 	spriteFlip = transform->faceRight ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+}
 
+void SpriteComponent::draw() {
 	dstRect.x = (int)transform->getX();
 	dstRect.y = (int)transform->getY();
 	dstRect.w = transform->width;
 	dstRect.h = transform->height;
-}
-
-void SpriteComponent::draw() {
 	TextureManager::draw(texture, srcRect, dstRect, spriteFlip);
 }
 
