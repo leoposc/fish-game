@@ -32,8 +32,8 @@ class SpriteComponent : public Component {
 	std::string id;
 
 	// animation meta data
-	const Animation fishSwim = Animation(0, 12, 100);
-	const Animation fishIdle = Animation(1, 12, 100);
+	const Animation fishIdle = Animation(0, 20, 100);
+	const Animation fishSwim = Animation(1, 12, 100);
 	const Animation fishDead = Animation(2, 1, 100);
 
 	std::map<std::string, Animation> animations = {
