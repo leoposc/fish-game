@@ -63,8 +63,8 @@ class Component {
   public:
 	Entity *entity;
 
-	template <class Archive>
-	void serialize(Archive &ar) {}
+	// template <class Archive>
+	// void serialize(Archive &ar) {}
 
 	virtual void init() {}
 	/**
@@ -120,13 +120,13 @@ class Entity {
 			ar(getComponent<WearableComponent>());
 		}
 
-		if (hasComponent<EquipmentComponent>()) {
-			ar(getComponent<EquipmentComponent>());
-		}
+		// if (hasComponent<EquipmentComponent>()) {
+		// 	ar(getComponent<EquipmentComponent>());
+		// }
 
-		if (hasComponent<HealthComponent>()) {
-			ar(getComponent<HealthComponent>());
-		}
+		// if (hasComponent<HealthComponent>()) {
+		// 	ar(getComponent<HealthComponent>());
+		// }
 	}
 
 	Entity() : manager(manager) {} //
@@ -280,7 +280,8 @@ class Manager {
 		}
 
 		// entities.erase(std::remove_if(std::begin(entities), std::end(entities),
-		//                               [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive(); }),
+		//                               [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive();
+		//                               }),
 		//                std::end(entities));
 
 		for (auto it = entities.begin(); it != entities.end();) {
