@@ -5,26 +5,26 @@ namespace FishEngine {
 namespace ClientGenerator {
 
 void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos) {
-	player.addComponent<TransformComponent>(pos.first, pos.second, 50, 70, 1);
-	player.addComponent<SpriteComponent>("fish", true);
+	player.addComponent<TransformComponent>(pos.first, pos.second, 30, 40, 1);
+	player.addComponent<SpriteComponent>("fish01", true);
 	player.addComponent<ClientComponent>();
-	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 50, 70);
-	player.addComponent<MoveComponent>();
+	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 30, 40);
 	player.addComponent<GravityComponent>();
+	player.addComponent<MoveComponent>();
 	player.addComponent<EquipmentComponent>();
 	player.addComponent<HealthComponent>();
-	player.addComponent<EventHandlerComponent>(false);
+	player.addComponent<EventHandlerComponent, 0>(false);
 	player.addGroup(ClientGame::groupLabels::groupPlayers);
 	player.addGroup(ClientGame::groupLabels::groupColliders);
 }
 
 void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos) {
-	enemy.addComponent<TransformComponent>(pos.first, pos.second, 45, 60, 1.0);
-	enemy.addComponent<SpriteComponent>("fish", true);
+	enemy.addComponent<TransformComponent>(pos.first, pos.second, 30, 40, 1.0);
+	enemy.addComponent<SpriteComponent>("fish01", true);
 	// enemy.addComponent<ClientComponent>();
-	enemy.addComponent<ColliderComponent>("enemy", pos.first, pos.second, 45, 60);
-	enemy.addComponent<MoveComponent>();
+	enemy.addComponent<ColliderComponent>("enemy", pos.first, pos.second, 30, 40);
 	enemy.addComponent<GravityComponent>();
+	enemy.addComponent<MoveComponent>();
 	enemy.addComponent<EquipmentComponent>();
 	enemy.addComponent<HealthComponent>();
 	enemy.addGroup(ClientGame::groupLabels::groupEnemies);
@@ -44,10 +44,10 @@ void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &po
 
 void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos, bool faceRight) {
 	Vector2D velocity = faceRight ? Vector2D(-10, 0) : Vector2D(10, 0);
-	int offset = faceRight ? 40 : -40;
-	projectile.addComponent<TransformComponent>(pos.first + offset, pos.second, 5, 5, 1.0);
+	int projectileOffset = faceRight ? 40 : -50;
+	projectile.addComponent<TransformComponent>(pos.first + projectileOffset, pos.second, 5, 5, 1.0);
 	projectile.addComponent<SpriteComponent>("projectile", false);
-	projectile.addComponent<ColliderComponent>("projectile", pos.first + offset, pos.second, 5, 5);
+	projectile.addComponent<ColliderComponent>("projectile", pos.first + projectileOffset, pos.second, 5, 5);
 	projectile.addComponent<ProjectileComponent>(500, 10, velocity);
 	projectile.addGroup(ClientGame::groupLabels::groupProjectiles);
 	projectile.addGroup(ClientGame::groupLabels::groupColliders);
@@ -58,10 +58,10 @@ void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> c
 namespace ServerGenerator {
 
 void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos) {
-	player.addComponent<TransformComponent>(pos.first, pos.second, 45, 60, 1.0);
-	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 45, 60);
-	player.addComponent<MoveComponent>();
+	player.addComponent<TransformComponent>(pos.first, pos.second, 30, 40, 1.0);
+	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 30, 40);
 	player.addComponent<GravityComponent>();
+	player.addComponent<MoveComponent>();
 	player.addComponent<ServerComponent>();
 	player.addComponent<EquipmentComponent>();
 	player.addComponent<HealthComponent>();
