@@ -13,13 +13,15 @@ namespace FishEngine {
 class ClientGame {
 
   public:
-	ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen);
+	ClientGame(const char *title, int xpos, int ypos);
 
 	~ClientGame();
 
 	SDL_Event getEvent() { return game_event; }
 
-	void init(fs::path mp, int numPlayers, bool combat);
+	void init(fs::path mp, int np, bool combat);
+
+	void initFishSprites();
 
 	void handleEvents();
 
@@ -48,6 +50,8 @@ class ClientGame {
 	void stop();
 
 	void zoomIn();
+
+	void renderLoadingBar();
 
 	Manager *getManager();
 

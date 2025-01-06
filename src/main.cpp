@@ -49,8 +49,8 @@ FuncPtr combat() {
 	u_int32_t frameStart;
 	int frameTime;
 
-	server->init("map03.tmj", 4);
-	client->init("map03.tmj", 4, true);
+	server->init("map04.tmj", 4);
+	client->init("map04.tmj", 4, true);
 
 	// client->sendJoinRequest("127.0.0.1", "test user in combat");
 
@@ -85,6 +85,7 @@ FuncPtr combat() {
 
 	client->stop();
 	server->stop();
+	client->renderLoadingBar();
 
 	spdlog::get("console")->info("Leaving combat...");
 
@@ -98,10 +99,11 @@ FuncPtr joinLobby() {
 		return mainMenu();
 	}
 	std::cout << "Joining lobby at " << ip << std::endl;
-	client->sendJoinRequest(ip, "test user");
+	// client->sendJoinRequest(ip, "test user");
 
 	// todo: connect to host
 
+	client->renderLoadingBar();
 	return hostLobby();
 }
 
@@ -116,8 +118,8 @@ FuncPtr hostLobby() {
 
 	std::string ownIP = "127.0.0.1";
 
-	client->init("lobby.tmj", 1, false);
-	server->init("lobby.tmj", 1);
+	client->init("hostLobby.tmj", 1, false);
+	server->init("hostLobby.tmj", 1);
 
 	client->createOwnPlayer();
 
@@ -145,11 +147,13 @@ FuncPtr hostLobby() {
 
 			client->stop();
 			server->stop();
+			client->renderLoadingBar();
 			return mainMenu();
 			break;
-		case 1:
+		case 3:
 			client->stop();
 			server->stop();
+			client->renderLoadingBar();
 			return combat();
 			break;
 
@@ -192,17 +196,20 @@ FuncPtr mainMenu() {
 			std::cout << "Leaving main menu..." << std::endl;
 			client->stop();
 			server->stop();
+			client->renderLoadingBar();
 			return nullptr;
 			break;
 		case 1:
 			client->stop();
 			server->stop();
-			return hostLobby();
+			client->renderLoadingBar();
+			return joinLobby();
 			break;
 		case 2:
 			client->stop();
 			server->stop();
-			return joinLobby();
+			client->renderLoadingBar();
+			return hostLobby();
 			break;
 		default:
 			break;
@@ -222,12 +229,13 @@ int main(int argc, char *argv[]) {
 	auto err_logger = spdlog::stderr_color_mt("stderr");
 
 	server = new sG();
-	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
+	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
+	client->renderLoadingBar();
 	// hostLobby();
 	// joinLobby();
-	combat();
-	// mainMenu();
+	// combat();
+	mainMenu();
 
 	spdlog::get("console")->info("Leaving Fish Game...");
 

@@ -24,8 +24,8 @@
 
 namespace FishEngine {
 
-constexpr int SCREEN_WIDTH = 1280;
-constexpr int SCREEN_HEIGHT = 720;
+constexpr int SCREEN_WIDTH = 2048;
+constexpr int SCREEN_HEIGHT = 1024;
 
 SDL_Renderer *ClientGame::renderer = nullptr;
 SDL_Event ClientGame::game_event;
@@ -63,14 +63,12 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
-ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen) {
-	int flags = 0;
-	if (fullscreen) {
-		flags = SDL_WINDOW_FULLSCREEN;
-	}
+ClientGame::ClientGame(const char *title, int xpos, int ypos) {
+	int flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
+
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
 		// log init
-		window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
+		window = SDL_CreateWindow(title, xpos, ypos, SCREEN_WIDTH, SCREEN_HEIGHT, flags);
 		if (window) {
 			// log window creation
 		}
@@ -89,21 +87,21 @@ ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int hei
 	}
 
 	// load assets
-	// assets->addTexture("fish", "../../assets/RedFishSmall.png");
-	assets->addTexture("fish", "../../assets/spritesheets/f01.png");
+	assets->addTexture("fish01", "../../assets/fish01.png");
 	assets->addTexture("pistol", "../../assets/PistolSmall.png");
 	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
 }
 
 ClientGame::~ClientGame() {
-	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 	// log clean
 }
 
-void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
+void ClientGame::init(fs::path mp, int nP, bool combat) {
 	isRunning = true;
+	numPlayers = nP;
 
 	// ============ control if game was reset ===========
 	assert(clientManager.checkEmpty());
@@ -115,7 +113,6 @@ void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
 	clientMap->loadMap(fs::path("../../maps") / mapPath);
 
 	// ================== init weapons ==================
-	std::cout << "init weapons: " << combat << std::endl;
 	if (combat) {
 		spawnWeapons();
 	}
@@ -146,6 +143,7 @@ void ClientGame::update() {
 	clientManager.refresh();
 
 	// // update the entities
+	// spdlog::get("console")->debug("Updating entities");
 	clientManager.update();
 
 	// check for collisions
@@ -413,11 +411,17 @@ void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
 
 uint8_t ClientGame::updateMainMenu() {
 
-	if (Collision::checkExit(ownPlayer, clientMap))
+	if (Collision::checkBack(ownPlayer, clientMap))
 		return 0;
 
-	if (Collision::checkStart(ownPlayer, clientMap))
+	if (Collision::checkJoin(ownPlayer, clientMap))
 		return 1;
+
+	if (Collision::checkHost(ownPlayer, clientMap))
+		return 2;
+
+	if (Collision::checkStart(ownPlayer, clientMap))
+		return 3;
 
 	return -1;
 }
@@ -484,6 +488,22 @@ void ClientGame::zoomIn() {
 	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
 
 	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
+}
+
+void ClientGame::renderLoadingBar() {
+	Map *loadingScreen = new Map();
+	loadingScreen->loadMap(fs::path("../../maps/loadingBar.tmj"), false);
+
+	size_t progressBarsComplete = SCREEN_HEIGHT / 16;
+
+	for (size_t i = 0; i < progressBarsComplete; ++i) {
+		loadingScreen->drawLoadingBar(i);
+		loadingScreen->updateAnimations();
+		SDL_RenderPresent(ClientGame::renderer);
+		SDL_Delay(30);
+	}
+
+	delete loadingScreen;
 }
 
 } // namespace FishEngine
