@@ -346,6 +346,7 @@ std::string ClientGame::joinInterface() {
 }
 
 void ClientGame::sendJoinRequest(std::string ip, std::string username) {
+
 	this->networkClient.init(ip, username);
 }
 
@@ -370,6 +371,12 @@ void ClientGame::receiveGameState() {
 	size_t numEntities;
 	ar(numEntities);
 	std::cout << "size: " << static_cast<int>(numEntities) << std::endl;
+
+	// first time while joining clear all entities
+	if (!connected) {
+		this->getManager()->destroyEntities();
+		spdlog::get("console")->info("First join detected detruction");
+	}
 
 	// check if the entities are already loaded
 	for (size_t i = 0; i < numEntities; ++i) {
@@ -397,7 +404,10 @@ void ClientGame::receiveGameState() {
 			// create the entity with the correct components
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
-				if (!connected && id == numEntities) {
+				spdlog::get("console")->info("connecte bool: {} Player id: {}, numEntities: {}", connected, id,
+				                             numEntities);
+				if (!connected && i == numEntities - 1) {
+					spdlog::get("console")->info("First join detected updating id");
 					this->ownPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0});
 				} else {
@@ -421,8 +431,8 @@ void ClientGame::receiveGameState() {
 
 		// update the values of the entity
 		ar(clientManager.getEntity(id));
-		this->connected = true;
 	}
+	this->connected = true;
 }
 
 void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {

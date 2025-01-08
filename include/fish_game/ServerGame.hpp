@@ -33,6 +33,8 @@ class ServerGame {
 
 	void update();
 
+	void printManager();
+
 	uint8_t createPlayer();
 
 	uint8_t handleJoinRequests();

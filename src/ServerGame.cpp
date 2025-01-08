@@ -37,6 +37,10 @@ ServerGame::ServerGame() : isRunning(false) {}
 
 ServerGame::~ServerGame() {}
 
+void ServerGame::printManager() {
+	serverManager.print();
+}
+
 void ServerGame::init(fs::path mapPath, int p_numPlayers) {
 	// assert(serverManager.checkEmpty());
 	// assert(serverMap == nullptr);

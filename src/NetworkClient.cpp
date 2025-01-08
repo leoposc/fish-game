@@ -10,7 +10,11 @@ void NetworkClient::init(const std::string hostIP, const std::string username) {
 	this->hostIP = hostIP;
 	this->username = username;
 	// TODO: pass ip
-	this->socket.init(8080, false);
+	this->socket.init(8080, hostIP, false);
+
+	while (!this->sendQueue.empty()) {
+		this->sendQueue.pop();
+	}
 
 	this->workerThread = std::thread(&NetworkClient::run, this);
 }

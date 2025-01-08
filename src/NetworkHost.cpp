@@ -8,7 +8,7 @@
 
 NetworkHost::NetworkHost() : stopThread(false), socket(SocketManager()) {
 	this->workerThread = std::thread(&NetworkHost::threadFunction, this);
-	this->socket.init(8080, true);
+	this->socket.init(8080, "", true);
 	spdlog::get("console")->debug("Thread created \n");
 }
 

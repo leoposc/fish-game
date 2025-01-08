@@ -51,7 +51,13 @@ void EventHandlerComponent::update()
 				// sprite->play("swim");
 			} else if (event_ptr->key.keysym.sym == SDLK_p) {
 				// downwards
-				FishEngine::ServerGame::getInstance().networkHost.printEventQueue();
+				spdlog::get("console")->debug("Server Manager:");
+				FishEngine::ServerGame::getInstance().printManager();
+				spdlog::get("console")->debug("Client Manager:");
+				auto &clientGame = FishEngine::ClientGame::getInstance();
+				clientGame.getManager()->print();
+				spdlog::get("console")->debug("my player id: {}", clientGame.ownPlayerID);
+
 				// sprite->play("swim");
 			}
 			if (event_ptr->key.keysym.sym == SDLK_d) {
