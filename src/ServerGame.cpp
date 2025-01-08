@@ -132,7 +132,8 @@ void ServerGame::updatePlayerEvent() {
 	// TODO handle event
 	// update the event inside the component of the player entity
 	serverManager.print();
-	ServerComponent serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
+	ServerComponent &serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
+	std::cout << "Pointer of serCom: " << &serCom << std::endl;
 	serCom.setEvent(event);
 }
 
