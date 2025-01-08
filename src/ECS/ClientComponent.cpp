@@ -19,6 +19,7 @@ void ClientComponent::init() {
 	transform = &entity->getComponent<TransformComponent>();
 }
 
+// what should this do?
 void ClientComponent::update() {
 	Vector2D newPos;
 	if (MockServer::getInstance().pollPosition(newPos)) {
@@ -28,12 +29,12 @@ void ClientComponent::update() {
 
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
-	// TODO: Id is 0? Should start at 1, there is no entity with id of 0
 	uint8_t id = ClientGame::getInstance().ownPlayerID;
 	std::cout << "ID before sending Event: " << static_cast<int>(id) << std::endl;
 	std::ostringstream os;
 	cereal::BinaryOutputArchive archive(os);
-	archive(id, event);
+
+	archive(id, event.key.keysym.sym, event.type);
 
 	auto serializedString = os.str();
 

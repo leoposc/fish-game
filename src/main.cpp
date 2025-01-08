@@ -129,12 +129,17 @@ FuncPtr hostLobby(bool isHost) {
 		client->handleEvents();
 		client->update();
 		client->render();
+		spdlog::get("console")->debug("Server Manager:");
+		server->printManager();
+		spdlog::get("console")->debug("Client Manager:");
+		client->getManager()->print();
+		spdlog::get("console")->debug("my player id: {}", client->ownPlayerID);
 
 		if (isHost) {
 			server->handleJoinRequests();
-			server->update();
 			server->sendGameState();
 			server->updatePlayerEvent();
+			server->update();
 		}
 
 		frameTime = SDL_GetTicks() - frameStart;

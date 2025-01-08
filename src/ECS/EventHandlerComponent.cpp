@@ -26,7 +26,6 @@ void EventHandlerComponent::init() {
 
 	if (isServer) {
 		serverComponent = &entity->getComponent<ServerComponent>();
-		event_ptr = serverComponent->getEventPtr();
 	} else {
 		clientComponent = &entity->getComponent<ClientComponent>();
 		event_ptr = &ClientGame::game_event;
@@ -35,10 +34,18 @@ void EventHandlerComponent::init() {
 	health = &entity->getComponent<HealthComponent>();
 }
 
-void EventHandlerComponent::update()
-
-{
+void EventHandlerComponent::update() {
 	if (health->isAlive()) {
+		if (isServer) {
+			spdlog::get("console")->debug("Server breakpoint");
+			auto event = serverComponent->getEventPtr();
+			spdlog::get("console")->debug("Server breakpoint");
+			spdlog::get("console")->debug("Event type: {}, Event keysym.sym {}", event.type, event.key.keysym.sym);
+			event_ptr = &event;
+			spdlog::get("console")->debug("Server breakpoint");
+			spdlog::get("console")->debug("Event type: {}, Event keysym.sym {}", event_ptr->type,
+			                              event_ptr->key.keysym.sym);
+		}
 		if (event_ptr->type == SDL_KEYDOWN) {
 
 			if (event_ptr->key.keysym.sym == SDLK_w) {
@@ -62,6 +69,8 @@ void EventHandlerComponent::update()
 			}
 			if (event_ptr->key.keysym.sym == SDLK_d) {
 				// right
+				spdlog::get("console")->debug("Event type: {}, Event keysym.sym {}", event_ptr->type,
+				                              event_ptr->key.keysym.sym);
 				move->right();
 				// sprite->play("swim");
 			} else if (event_ptr->key.keysym.sym == SDLK_a) {

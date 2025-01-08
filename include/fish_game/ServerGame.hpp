@@ -21,7 +21,7 @@ class ServerGame {
 
   public:
 	static ServerGame &getInstance() {
-		static ServerGame instance; // Guaranteed to be destroyed and instantiated on first use
+		static ServerGame instance;
 		return instance;
 	}
 
