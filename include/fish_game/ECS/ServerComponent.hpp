@@ -24,7 +24,7 @@ class ServerComponent : public Component {
 	 * @brief: returns a pointer to the event, which is used
 	 * by the EventHandlerComponent to get the event
 	 */
-	SDL_Event getEventPtr() { return event; }
+	SDL_Event *getEventPtr() { return &event; }
 
 	/**
 	 * @brief: get the latest event and store it in the component's
