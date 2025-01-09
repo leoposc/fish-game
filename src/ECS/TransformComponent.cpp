@@ -20,6 +20,11 @@ void TransformComponent::update() {
 	position += velocity;
 }
 
+void TransformComponent::print() {
+	std::cout << "Velocity: (" << velocity.getX() << ", " << velocity.getY() << ")\n";
+	std::cout << "Position: (" << position.getX() << ", " << position.getY() << ")\n";
+}
+
 } // namespace FishEngine
 
 #include <cereal/archives/json.hpp>

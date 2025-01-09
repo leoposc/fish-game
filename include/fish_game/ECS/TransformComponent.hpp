@@ -35,6 +35,8 @@ class TransformComponent : public Component {
 
 	void init() override;
 
+	void print() override;
+
 	void update() override;
 
 	Vector2D velocity{0, 0};

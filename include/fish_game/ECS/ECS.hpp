@@ -79,6 +79,8 @@ class Component {
 	 */
 	virtual void draw() {}
 
+	virtual void print() {}
+
 	virtual ~Component() {}
 };
 
@@ -219,6 +221,7 @@ class Entity {
 		std::cout << "Manager Address: " << &manager << std::endl;
 		for (const auto &component : components) {
 			std::cout << "  - " << typeid(*component).name() << std::endl;
+			component->print();
 		}
 	}
 };
