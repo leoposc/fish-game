@@ -25,8 +25,8 @@ class TransformComponent : public Component {
 
 	int getX() { return position.getX(); }
 	int getY() { return position.getY(); }
-	void setX(int x) { position.setX(x); }
-	void setY(int y) { position.setY(y); }
+
+	Vector2D getPosition() { return position; }
 
 	void sync(TransformComponent serverUpdate);
 
@@ -42,7 +42,6 @@ class TransformComponent : public Component {
 	void update() override;
 
 	Vector2D velocity{0, 0};
-	Vector2D position{0, 0};
 
 	int speed = 3;
 
@@ -54,6 +53,8 @@ class TransformComponent : public Component {
 
 	bool faceRight = false;
 	bool blocked = false;
+
+	Vector2D position{0, 0};
 };
 
 } // namespace FishEngine

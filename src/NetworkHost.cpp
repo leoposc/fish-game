@@ -65,7 +65,6 @@ void NetworkHost::threadFunction() {
 				clients.insert(std::make_pair(message.client_id, message.message));
 				this->notifyJoin(message.message, message.client_id);
 			} else {
-				spdlog::get("console")->debug("SERVER: received event");
 				this->elementQueue.push(std::make_tuple(clients[message.client_id], message.message));
 			}
 		}
@@ -77,7 +76,6 @@ void NetworkHost::printEventQueue() {
 
 	while (!tempQueue.empty()) {
 		auto event = tempQueue.front();
-		std::cout << "Username/ID: " << std::get<0>(event) << ", Event: " << std::get<1>(event) << std::endl;
 		tempQueue.pop();
 	}
 }

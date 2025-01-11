@@ -30,8 +30,8 @@ void HealthComponent::update() {
 
 		spdlog::get("console")->debug("HealthComponent - entity {} destroyed, not alive anymore", entity->getID());
 		this->entity->destroy();
-	} else if ((transform->position.getY() > SCREEN_HEIGHT) || (transform->position.getY() < 0)
-	           || (transform->position.getX() > SCREEN_WIDTH) || (transform->position.getX() < 0)) {
+	} else if ((transform->getY() > SCREEN_HEIGHT) || (transform->getY() < 0) || (transform->getX() > SCREEN_WIDTH)
+	           || (transform->getX() < 0)) {
 
 		// spdlog::get("console")->debug("HealthComponent - entity {} moved out of screen. Position at: {} {}",
 		//                               entity->getID(), transform->position.getX(), transform->position.getY());

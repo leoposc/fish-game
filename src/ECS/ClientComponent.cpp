@@ -19,14 +19,6 @@ void ClientComponent::init() {
 	transform = &entity->getComponent<TransformComponent>();
 }
 
-// what should this do?
-void ClientComponent::update() {
-	Vector2D newPos;
-	if (MockServer::getInstance().pollPosition(newPos)) {
-		transform->position = newPos;
-	}
-}
-
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
 	uint8_t id = ClientGame::getInstance().ownPlayerID;

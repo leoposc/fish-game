@@ -18,8 +18,6 @@ class ServerComponent : public Component {
 
 	void init() override;
 
-	void update() override;
-
 	/**
 	 * @brief: returns a pointer to the event, which is used
 	 * by the EventHandlerComponent to get the event

@@ -41,7 +41,6 @@ std::string NetworkClient::getUpdate() {
 	std::lock_guard<std::mutex> lock(this->mutex);
 	this->hasUpdateVal = false;
 	auto updatedGamestate = cereal::base64::decode(this->gameState);
-	spdlog::get("console")->debug("NetworkClient: Got new gamestate: " + updatedGamestate);
 	return updatedGamestate;
 }
 
@@ -68,10 +67,8 @@ void NetworkClient::handleReceive() {
 		std::swap(this->sendQueue, empty);
 	}
 	if (prefix == UPDATE_PREFIX) {
-		spdlog::get("console")->debug("CLIENT: Got updated gameState" + message);
 		this->gameState = message;
 		this->hasUpdateVal = true;
-		spdlog::get("console")->debug("SET hasupdateVal to true");
 	}
 }
 

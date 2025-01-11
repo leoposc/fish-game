@@ -387,7 +387,11 @@ void ClientGame::receiveGameState() {
 			// update the values of the entity
 			// ar(clientManager.getEntity(id));
 			//
+			spdlog::get("console")->info("All entities:");
+			clientManager.print();
 
+			spdlog::get("console")->info("updated entity: {} to:", id);
+			transformation_component.print();
 			clientManager.getEntity(id).getComponent<TransformComponent>().sync(transformation_component);
 		} else {
 			// create the entity

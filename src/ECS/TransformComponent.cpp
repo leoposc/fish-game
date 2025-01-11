@@ -27,7 +27,10 @@ void TransformComponent::print() {
 
 void TransformComponent::sync(TransformComponent serverTransform) {
 	this->velocity = serverTransform.velocity;
-	this->position = serverTransform.position;
+	this->position.setX(serverTransform.position.getX());
+	this->position.setY(serverTransform.position.getY());
+	std::cout << "Updated to: (" << velocity.getX() << ", " << velocity.getY() << ")\n";
+	std::cout << "Updated to: (" << position.getX() << ", " << position.getY() << ")\n";
 }
 
 } // namespace FishEngine

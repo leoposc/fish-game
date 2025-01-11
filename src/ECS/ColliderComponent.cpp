@@ -19,9 +19,9 @@ ColliderComponent::ColliderComponent(std::string t, int xpos, int ypos, int xsiz
 void ColliderComponent::init() {
 	// spdlog::get("console")->debug( "COLLIDER COMPONENT INITS" );
 	transform = &entity->getComponent<TransformComponent>();
-	lastPosition = transform->position;
-	collider.x = static_cast<int>(transform->position.getX());
-	collider.y = static_cast<int>(transform->position.getY());
+	lastPosition = transform->getPosition();
+	collider.x = static_cast<int>(transform->getX());
+	collider.y = static_cast<int>(transform->getY());
 	collider.w = transform->width * transform->scale;
 	collider.h = transform->height * transform->scale;
 }
@@ -36,12 +36,12 @@ void ColliderComponent::update() {
 	// 	spdlog::get("console")->debug("ColliderComponent - collision detected");
 	// }
 
-	collider.x = static_cast<int>(transform->position.getX());
-	collider.y = static_cast<int>(transform->position.getY());
+	collider.x = static_cast<int>(transform->getX());
+	collider.y = static_cast<int>(transform->getY());
 	collider.w = transform->width * transform->scale;
 	collider.h = transform->height * transform->scale;
 
-	lastPosition = transform->position;
+	lastPosition = transform->getPosition();
 }
 
 void ColliderComponent::draw() {

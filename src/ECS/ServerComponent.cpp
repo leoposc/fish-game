@@ -15,11 +15,6 @@ void ServerComponent::init() {
 	transform = &entity->getComponent<TransformComponent>();
 }
 
-void ServerComponent::update() {
-	// enqueue new position after it was updated
-	MockServer::getInstance().enqueuePosition(transform->position);
-}
-
 void ServerComponent::setEvent(SDL_Event event) {
 	spdlog::get("console")->debug("Event set");
 	this->event = event;
