@@ -358,19 +358,12 @@ void ClientGame::receiveGameState() {
 	}
 
 	std::string serializedData = this->networkClient.getUpdate();
-	if (serializedData.empty()) {
-		spdlog::get("console")->info("skipped, empty");
-		return;
-	}
-
-	spdlog::get("console")->info("got update, updating...");
 	std::istringstream is(serializedData);
 	cereal::BinaryInputArchive ar(is);
 
 	// fetch the number of the entities
 	size_t numEntities;
 	ar(numEntities);
-	std::cout << "size: " << static_cast<int>(numEntities) << std::endl;
 
 	// first time while joining clear all entities
 	if (!connected) {
@@ -383,8 +376,9 @@ void ClientGame::receiveGameState() {
 		// read entity meta data from stream
 		uint8_t id;
 		ClientGame::groupLabels group;
-		ar(id, group);
-		std::cout << "ID: " << static_cast<int>(id) << std::endl;
+		TransformComponent transformation_component;
+		ar(id, group, transformation_component);
+		transformation_component.print();
 
 		if (entityGroups.count(id)) {
 			// case: entity already in clientManager
@@ -392,6 +386,9 @@ void ClientGame::receiveGameState() {
 
 			// update the values of the entity
 			// ar(clientManager.getEntity(id));
+			//
+
+			clientManager.getEntity(id).getComponent<TransformComponent>().sync(transformation_component);
 		} else {
 			// create the entity
 			auto &entity = clientManager.addEntity(id);
@@ -404,10 +401,7 @@ void ClientGame::receiveGameState() {
 			// create the entity with the correct components
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
-				spdlog::get("console")->info("connecte bool: {} Player id: {}, numEntities: {}", connected, id,
-				                             numEntities);
 				if (!connected && i == numEntities - 1) {
-					spdlog::get("console")->info("First join detected updating id");
 					this->ownPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0});
 				} else {

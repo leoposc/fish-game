@@ -160,14 +160,11 @@ void ServerGame::sendGameState() {
 	// inform client about the number of the entities
 
 	ar(players.size());
-	std::cout << "size: " << static_cast<int>(players.size()) << std::endl;
 
 	for (auto &[id, group] : entityGroups) {
-		spdlog::get("console")->debug("ServerGame - sendGameState: serialize entity with id: {}", id);
 
 		// inform the client about the current entities
-		ar(id, group);
-		std::cout << "ID: " << static_cast<int>(id) << std::endl;
+		ar(id, group, serverManager.getEntity(id).getComponent<TransformComponent>());
 
 		// if projectile, send the direction
 		if (group == groupLabels::groupProjectiles) {
@@ -179,7 +176,6 @@ void ServerGame::sendGameState() {
 	}
 
 	auto serializedString = os.str();
-	spdlog::get("console")->debug("SeverGame: Serialized string: " + serializedString);
 	this->networkHost.updateState(serializedString);
 }
 

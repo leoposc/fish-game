@@ -28,6 +28,8 @@ class TransformComponent : public Component {
 	void setX(int x) { position.setX(x); }
 	void setY(int y) { position.setY(y); }
 
+	void sync(TransformComponent serverUpdate);
+
 	void setPos(int x, int y) {
 		position.setX(x);
 		position.setY(y);

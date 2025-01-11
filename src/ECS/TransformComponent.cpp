@@ -25,6 +25,11 @@ void TransformComponent::print() {
 	std::cout << "Position: (" << position.getX() << ", " << position.getY() << ")\n";
 }
 
+void TransformComponent::sync(TransformComponent serverTransform) {
+	this->velocity = serverTransform.velocity;
+	this->position = serverTransform.position;
+}
+
 } // namespace FishEngine
 
 #include <cereal/archives/json.hpp>
