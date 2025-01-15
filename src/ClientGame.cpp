@@ -63,13 +63,11 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
-
 ClientGame::ClientGame()
-    : title("Fish Game Client"), xpos(SDL_WINDOWPOS_CENTERED), ypos(SDL_WINDOWPOS_CENTERED), width(SCREEN_WIDTH), height(SCREEN_HEIGTH),
-      fullscreen(true) {
+    : title("Fish Game Client"), xpos(SDL_WINDOWPOS_CENTERED), ypos(SDL_WINDOWPOS_CENTERED), width(SCREEN_WIDTH),
+      height(SCREEN_HEIGHT), fullscreen(true) {
 
 	int flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
-
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
 		// log init
@@ -365,6 +363,7 @@ void ClientGame::receiveGameState() {
 		return;
 	}
 
+	spdlog::get("console")->info("Got update, updating");
 	std::string serializedData = this->networkClient.getUpdate();
 	std::istringstream is(serializedData);
 	cereal::BinaryInputArchive ar(is);
@@ -416,10 +415,10 @@ void ClientGame::receiveGameState() {
 
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
-					ClientGenerator::forPlayer(entity, {0, 0},  ++fishSpriteID);
+					ClientGenerator::forPlayer(entity, {0, 0}, id);
 
 				} else {
-					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
+					ClientGenerator::forEnemy(entity, {0, 0}, id);
 				}
 				players.insert(std::make_pair(entity.getID(), &entity));
 				break;

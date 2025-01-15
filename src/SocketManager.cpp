@@ -7,6 +7,7 @@ SocketManager::SocketManager() : addrlen(sizeof(address)) {
 }
 
 void SocketManager::init(int port, std::string ip, bool host) {
+	this->host = host;
 	if (host) {
 		setupServer(port);
 	} else {

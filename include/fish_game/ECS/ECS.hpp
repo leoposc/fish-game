@@ -252,7 +252,9 @@ class Manager {
 
 	Entity &getEntity(uint8_t id) const {
 		auto it = entities.find(id);
-		assert(it != entities.end());
+		if (it == entities.end()) {
+			throw std::runtime_error("Entity not found");
+		}
 		return *it->second;
 	}
 

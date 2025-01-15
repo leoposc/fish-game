@@ -40,6 +40,7 @@ class SocketManager {
 	std::vector<std::thread> client_threads;
 	std::mutex mtx;
 	std::condition_variable cv;
+	bool host;
 	bool stopThread = false;
 	std::thread server_thread;
 	std::vector<IncomingMessage> messages;

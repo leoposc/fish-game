@@ -75,7 +75,7 @@ void ServerGame::update() {
 	// update the entities
 	serverManager.update();
 
-  // check collision
+	// check collision
 	Collision::isInWater(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 	Collision::checkCollisions(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 
@@ -143,10 +143,13 @@ void ServerGame::updatePlayerEvent() {
 
 	// TODO handle event
 	// update the event inside the component of the player entity
-	serverManager.print();
-	ServerComponent &serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
-	std::cout << "Pointer of serCom: " << &serCom << std::endl;
-	serCom.setEvent(event);
+	try {
+		serverManager.print();
+		ServerComponent &serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
+		serCom.setEvent(event);
+	} catch (...) {
+		spdlog::get("console")->debug("Received event too late");
+	}
 }
 
 void ServerGame::startGame() {

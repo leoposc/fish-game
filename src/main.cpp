@@ -51,11 +51,11 @@ FuncPtr combat() {
 	int frameTime;
 
 	int numPlayers = 4; // todo: get from server
+
 	server->init("map04.tmj", numPlayers);
 	client->init("map04.tmj", numPlayers, true);
 
 	// client->sendJoinRequest("127.0.0.1", "test user in combat");
-
 
 	client->createOwnPlayer();
 
@@ -93,7 +93,7 @@ FuncPtr combat() {
 FuncPtr joinLobby() {
 	std::string ip;
 	std::cout << "Enter IP address: ";
-	std::cin >> ip;
+	ip = client->joinInterface();
 	if (ip.empty()) {
 		return mainMenu();
 	}
@@ -115,12 +115,11 @@ FuncPtr hostLobby(bool isHost) {
 
 	if (isHost) {
 		server = &FishEngine::ServerGame::getInstance();
-		server->init("lobby.tmj", 0);
+		server->init("hostLobby.tmj", 0);
 		client->networkClient.init("127.0.0.1", "host player");
 	}
 
-
-	client->init("lobby.tmj", 1, false);
+	client->init("hostLobby.tmj", 1, false);
 
 	client->createOwnPlayer();
 
@@ -132,8 +131,6 @@ FuncPtr hostLobby(bool isHost) {
 		client->update();
 		client->render();
 
-		spdlog::get("console")->debug("Server Manager:");
-		server->printManager();
 		spdlog::get("console")->debug("Client Manager:");
 		client->getManager()->print();
 		spdlog::get("console")->debug("my player id: {}", client->ownPlayerID);
@@ -143,20 +140,25 @@ FuncPtr hostLobby(bool isHost) {
 			server->sendGameState();
 			server->updatePlayerEvent();
 			server->update();
-    }
+		}
 
 		switch (client->updateMainMenu()) {
+
 		case 0:
 			std::cout << "Leaving main menu..." << std::endl;
 
 			client->stop();
-			server->stop();
+			if (isHost) {
+				server->stop();
+			}
 			client->renderLoadingBar();
 			return mainMenu();
 			break;
 		case 3:
 			client->stop();
-			server->stop();
+			if (isHost) {
+				server->stop();
+			}
 			client->renderLoadingBar();
 			return combat();
 			break;
@@ -200,21 +202,18 @@ FuncPtr mainMenu() {
 		switch (client->updateMainMenu()) {
 		case 0:
 			client->stop();
-			server->stop();
 			client->renderLoadingBar();
 			return nullptr;
 			break;
 		case 1:
 			client->stop();
-			server->stop();
 			client->renderLoadingBar();
 			return joinLobby();
 			break;
 		case 2:
 			client->stop();
-			server->stop();
 			client->renderLoadingBar();
-			return hostLobby();
+			return hostLobby(true);
 			break;
 		default:
 			break;
@@ -235,16 +234,13 @@ int main(int argc, char *argv[]) {
 
 	client = &FishEngine::ClientGame::getInstance();
 
-
-
 	client->renderLoadingBar();
-	// hostLobby();
+	/* hostLobby(true); */
 	// joinLobby();
 	// combat();
 	mainMenu();
-  
-	spdlog::get("console")->info("Leaving Fish Game...");
 
+	spdlog::get("console")->info("Leaving Fish Game...");
 
 	return 0;
 }

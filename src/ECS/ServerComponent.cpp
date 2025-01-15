@@ -2,6 +2,7 @@
 #include "../../include/fish_game/Auxiliary.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/MockServer.hpp"
+#include "fish_game/ServerGame.hpp"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/types/polymorphic.hpp>

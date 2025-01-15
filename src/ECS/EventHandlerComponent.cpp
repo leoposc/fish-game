@@ -46,7 +46,6 @@ void EventHandlerComponent::update() {
 			}
 			if (event_ptr->key.keysym.sym == SDLK_s) {
 				move->down();
-
 			}
 			if (event_ptr->key.keysym.sym == SDLK_a) {
 				move->left();
