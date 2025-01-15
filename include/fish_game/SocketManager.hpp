@@ -22,14 +22,15 @@ struct IncomingMessage {
 
 class SocketManager {
   public:
-	SocketManager(int port, bool host);
+	SocketManager();
+	void init(int port, std::string ip, bool host);
 	~SocketManager();
 	void sendMessage(std::string message);
 	IncomingMessage popMessage();
 
   private:
 	void setupServer(int port);
-	void setupClient(int port);
+	void setupClient(int port, std::string ip);
 	void run(int client_socket);
 
 	int server_fd, socket_id;

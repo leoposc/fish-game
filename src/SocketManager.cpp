@@ -2,13 +2,16 @@
 
 #include "spdlog/spdlog.h"
 
-SocketManager::SocketManager(int port, bool host) : addrlen(sizeof(address)) {
+SocketManager::SocketManager() : addrlen(sizeof(address)) {
+	spdlog::get("console")->debug("SocketManager initialized");
+}
+
+void SocketManager::init(int port, std::string ip, bool host) {
 	if (host) {
 		setupServer(port);
 	} else {
-		setupClient(port);
+		setupClient(port, ip);
 	}
-	spdlog::get("console")->debug("SocketManager initialized");
 }
 
 SocketManager::~SocketManager() {
@@ -86,7 +89,7 @@ void SocketManager::setupServer(int port) {
 	});
 }
 
-void SocketManager::setupClient(int port) {
+void SocketManager::setupClient(int port, std::string ip) {
 	if ((socket_id = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		perror("socket failed");
 		exit(EXIT_FAILURE);
@@ -95,7 +98,8 @@ void SocketManager::setupClient(int port) {
 	address.sin_family = AF_INET;
 	address.sin_port = htons(port);
 
-	if (inet_pton(AF_INET, "127.0.0.1", &address.sin_addr) <= 0) {
+	spdlog::get("console")->debug("connecting to : {}", ip);
+	if (inet_pton(AF_INET, ip.c_str(), &address.sin_addr) <= 0) {
 		perror("Invalid address/ Address not supported");
 		exit(EXIT_FAILURE);
 	}
@@ -120,7 +124,7 @@ void SocketManager::run(int client_socket) {
 		std::lock_guard<std::mutex> lock(mtx);
 		if (valread < 0) {
 			spdlog::get("console")->debug("Problem while reading");
-			exit(EXIT_FAILURE);
+			// exit(EXIT_FAILURE);
 		} else if (valread == 0) {
 			spdlog::get("console")->debug("Client disconnected");
 			spdlog::get("console")->debug("All messages:");

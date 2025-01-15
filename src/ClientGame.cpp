@@ -63,8 +63,13 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
-ClientGame::ClientGame(const char *title, int xpos, int ypos) {
+
+ClientGame::ClientGame()
+    : title("Fish Game Client"), xpos(SDL_WINDOWPOS_CENTERED), ypos(SDL_WINDOWPOS_CENTERED), width(SCREEN_WIDTH), height(SCREEN_HEIGTH),
+      fullscreen(true) {
+
 	int flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
+
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
 		// log init
@@ -228,11 +233,14 @@ void ClientGame::spawnWeapons() {
 	// ================== init weapons ==================
 	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
 
-	// do no spawn weapons when existing weapon was not picked up
-	auto &existingWeapons(clientManager.getGroup(groupLabels::groupWeapons));
+	if (spawnpoints != nullptr) {
 
-	for (auto &spawnpoint : *spawnpoints) {
-		spawnWeaponsAux(spawnpoint, existingWeapons);
+		// do no spawn weapons when existing weapon was not picked up
+		auto &existingWeapons(clientManager.getGroup(groupLabels::groupWeapons));
+
+		for (auto &spawnpoint : *spawnpoints) {
+			spawnWeaponsAux(spawnpoint, existingWeapons);
+		}
 	}
 }
 
@@ -244,13 +252,16 @@ std::string ClientGame::joinInterface() {
 
 	clientMap = new Map();
 	clientMap->loadMap(fs::path("../../maps/joinLobby.tmj"));
+	spdlog::get("console")->info("Map loaded");
 
 	FontManager gInputTextTexture(renderer, "../../assets/zd-bold.ttf");
 	FontManager gPromptTextTexture(renderer, "../../assets/zd-bold.ttf", 26);
+	spdlog::get("console")->info("loaded textures");
 
 	SDL_Color textColor = {0, 0, 0, 255};
 	SDL_Event event;
 	SDL_StartTextInput();
+	spdlog::get("console")->info("started input");
 
 	std::string inputText = "xxx.xxx.xxx.xxx";
 	gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
@@ -343,19 +354,16 @@ std::string ClientGame::joinInterface() {
 }
 
 void ClientGame::sendJoinRequest(std::string ip, std::string username) {
-	// send request and wait for response
-	this->networkClient.init(ip, username);
 
-	// playerID =
+	this->networkClient.init(ip, username);
 }
 
 void ClientGame::receiveGameState() {
 
-	if (this->networkClient.hasUpdate()) {
+	if (!this->networkClient.hasUpdate()) {
+		spdlog::get("console")->info("skipped, no update received");
 		return;
 	}
-
-	spdlog::get("console")->info("RECIVED UPDATE");
 
 	std::string serializedData = this->networkClient.getUpdate();
 	std::istringstream is(serializedData);
@@ -365,29 +373,51 @@ void ClientGame::receiveGameState() {
 	size_t numEntities;
 	ar(numEntities);
 
+	// first time while joining clear all entities
+	if (!connected) {
+		this->getManager()->destroyEntities();
+		spdlog::get("console")->info("First join detected detruction");
+	}
+
 	// check if the entities are already loaded
 	for (size_t i = 0; i < numEntities; ++i) {
 		// read entity meta data from stream
 		uint8_t id;
 		ClientGame::groupLabels group;
-		ar(id, group);
+		TransformComponent transformation_component;
+		ar(id, group, transformation_component);
+		transformation_component.print();
 
 		if (entityGroups.count(id)) {
 			// case: entity already in clientManager
 			spdlog::get("console")->info("Entity already in clientManager");
 
 			// update the values of the entity
-			ar(clientManager.getEntity(id));
+			// ar(clientManager.getEntity(id));
+			//
+			spdlog::get("console")->info("All entities:");
+			clientManager.print();
 
+			spdlog::get("console")->info("updated entity: {} to:", id);
+			transformation_component.print();
+			clientManager.getEntity(id).getComponent<TransformComponent>().sync(transformation_component);
 		} else {
 			// create the entity
-			auto &entity(clientManager.addEntity(id));
+			auto &entity = clientManager.addEntity(id);
+			entity.print();
+
+			clientManager.print();
+			this->getManager()->print();
+			entity.print();
 
 			// create the entity with the correct components
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
-				if (id == ownPlayerID) {
-					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
+
+				if (!connected && i == numEntities - 1) {
+					this->ownPlayerID = id;
+					ClientGenerator::forPlayer(entity, {0, 0},  ++fishSpriteID);
+
 				} else {
 					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
 				}
@@ -410,6 +440,7 @@ void ClientGame::receiveGameState() {
 		// update the values of the entity
 		ar(clientManager.getEntity(id));
 	}
+	this->connected = true;
 }
 
 void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {

@@ -13,6 +13,7 @@
 #include "../include/fish_game/ECS/WearableComponent.hpp"
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/MockServer.hpp"
+#include "../include/fish_game/NetworkHost.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
 
@@ -21,6 +22,7 @@
 #include <fstream>
 #include <iostream>
 #include <spdlog/spdlog.h>
+#include <vector>
 
 namespace FishEngine {
 
@@ -35,6 +37,10 @@ ServerGame::ServerGame() : isRunning(false) {}
 
 ServerGame::~ServerGame() {}
 
+void ServerGame::printManager() {
+	serverManager.print();
+}
+
 void ServerGame::init(fs::path mapPath, int p_numPlayers) {
 	// assert(serverManager.checkEmpty());
 	// assert(serverMap == nullptr);
@@ -48,14 +54,14 @@ void ServerGame::init(fs::path mapPath, int p_numPlayers) {
 
 	// =================== init player===========================
 	for (size_t i = 0; i < p_numPlayers; i++) {
-		this->createPlayer("");
+		this->createPlayer();
 	}
 
 	spdlog::get("console")->debug("ServerGame - init done");
 }
 
 void ServerGame::handleEvents() {
-	if (MockServer::getInstance().pollEvent(ServerGame::game_event)) {
+	if (MockServer::getInstance().pollEvent()) {
 		if (game_event.type == SDL_QUIT) {
 			isRunning = false;
 		}
@@ -69,7 +75,7 @@ void ServerGame::update() {
 	// update the entities
 	serverManager.update();
 
-	// check collisions
+  // check collision
 	Collision::isInWater(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 	Collision::checkCollisions(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 
@@ -81,7 +87,7 @@ void ServerGame::update() {
 	}
 }
 
-uint8_t ServerGame::createPlayer(const std::string &ip) {
+uint8_t ServerGame::createPlayer() {
 	// update server state
 	numPlayers++;
 
@@ -90,36 +96,57 @@ uint8_t ServerGame::createPlayer(const std::string &ip) {
 	ServerGenerator::forPlayer(player, serverMap->getPlayerSpawnpoints(numPlayers).at(numPlayers - 1));
 
 	players.insert(std::make_pair(player.getID(), &player));
-	playerIPs.insert(std::make_pair(player.getID(), ip));
 	entityGroups.insert(std::make_pair(player.getID(), groupLabels::groupPlayers));
 
 	return player.getID();
 }
 
 // NOT really needed, is inside of network host
-uint8_t ServerGame::acceptJoinRequest(const std::string &ip) {
+uint8_t ServerGame::handleJoinRequests() {
 
-	// Create player entity
-	uint8_t id = createPlayer(ip);
-
+	static std::vector<std::string> old_clients;
 	// send playerID to client
-	// TODO: poll if new player joined, if a player joined create playerid here and create mapping between socket_id and
-	// this id
+	auto clients = this->networkHost.getClients();
+	if (old_clients.size() != clients.size()) {
+		std::cout << "NEW CLIENT DETECTED" << std::endl;
+		for (const auto &client : clients) {
+			std::cout << client << std::endl;
+		}
 
-	return id;
+		// TODO: create new player
+		createPlayer();
+
+		old_clients = clients;
+	}
+
+	return 0;
 }
 
 void ServerGame::updatePlayerEvent() {
 	// unpack the event from the frame
 	SDL_Event event;
 	uint8_t id;
-	std::ifstream is("event.json");
-	cereal::JSONInputArchive archive(is);
-	archive(id, event);
+	std::optional<std::string> action = this->networkHost.getAction();
+	if (!action.has_value()) {
+		std::cout << "No action available" << std::endl;
+		return;
+	}
 
+	std::string unpackedAction = action.value();
+	std::cout << "Action: " << unpackedAction << std::endl;
+
+	std::istringstream is(unpackedAction);
+	cereal::BinaryInputArchive archive(is);
+	archive(id, event.key.keysym.sym, event.type);
+	spdlog::get("console")->debug("Parsed event: id: {}, event sym: {}, event type: {}", id, event.key.keysym.sym,
+	                              event.type);
+
+	// TODO handle event
 	// update the event inside the component of the player entity
-	ServerComponent *serCom = &players[id]->getComponent<ServerComponent>();
-	serCom->setEvent(event);
+	serverManager.print();
+	ServerComponent &serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
+	std::cout << "Pointer of serCom: " << &serCom << std::endl;
+	serCom.setEvent(event);
 }
 
 void ServerGame::startGame() {
@@ -143,13 +170,13 @@ void ServerGame::sendGameState() {
 	cereal::BinaryOutputArchive ar(os);
 
 	// inform client about the number of the entities
+
 	ar(players.size());
 
 	for (auto &[id, group] : entityGroups) {
-		spdlog::get("console")->debug("ServerGame - sendGameState: serialize entity with id: {}", id);
 
 		// inform the client about the current entities
-		ar(id, group);
+		ar(id, group, serverManager.getEntity(id).getComponent<TransformComponent>());
 
 		// if projectile, send the direction
 		if (group == groupLabels::groupProjectiles) {
@@ -159,12 +186,9 @@ void ServerGame::sendGameState() {
 		// serialize components of the entity
 		ar(serverManager.getEntity(id));
 	}
-	std::string serializedData = os.str();
 
-	// send the state to the client
-	// TODO
-	// updateState() from networkHost
-	this->networkHost.updateState(os.str());
+	auto serializedString = os.str();
+	this->networkHost.updateState(serializedString);
 }
 
 bool ServerGame::running() {

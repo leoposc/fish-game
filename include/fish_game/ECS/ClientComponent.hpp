@@ -21,8 +21,6 @@ class ClientComponent : public Component {
 
 	void init() override;
 
-	void update() override;
-
 	/**
 	 * @brief: send an event to the server
 	 * @param event: the event to be sent

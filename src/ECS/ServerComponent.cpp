@@ -15,13 +15,11 @@ void ServerComponent::init() {
 	transform = &entity->getComponent<TransformComponent>();
 }
 
-void ServerComponent::update() {
-	// enqueue new position after it was updated
-	MockServer::getInstance().enqueuePosition(transform->position);
-}
-
 void ServerComponent::setEvent(SDL_Event event) {
+	spdlog::get("console")->debug("Event set");
 	this->event = event;
+	spdlog::get("console")->debug("Server breakpoint");
+	spdlog::get("console")->debug("Event type: {}, Event keysym.sym {}", event.type, event.key.keysym.sym);
 }
 
 } // namespace FishEngine
