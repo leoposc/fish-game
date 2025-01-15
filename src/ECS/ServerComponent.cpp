@@ -20,11 +20,8 @@ void ServerComponent::update() {
 	MockServer::getInstance().enqueuePosition(transform->position);
 }
 
-void ServerComponent::getEvent() {
-	// get event from the server
-	std::ifstream is("event.json");
-	cereal::JSONInputArchive archive(is);
-	archive(event);
+void ServerComponent::setEvent(SDL_Event event) {
+	this->event = event;
 }
 
 } // namespace FishEngine

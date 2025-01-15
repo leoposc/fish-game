@@ -9,7 +9,7 @@
 
 namespace FishEngine {
 
-void Map::loadMap(fs::path path) {
+void Map::loadMap(fs::path path, bool hasBackground) {
 
 	if (!fs::exists(path)) {
 		spdlog::get("stderr")->error("Map file does not exist!");
@@ -28,12 +28,10 @@ void Map::loadMap(fs::path path) {
 		return;
 	}
 
-	loadBackground();
+	if (hasBackground) {
+		loadBackground();
+	}
 	loadTilesetTextures();
-
-	// TODO load from config
-	initialPos.push_back(std::pair(400, 240));
-	initialPos.push_back(std::pair(800, 240));
 }
 
 void Map::drawMap() {
@@ -67,9 +65,10 @@ void Map::drawLayer(tson::Layer &layer) {
 	}
 }
 
-void Map::drawTileLayer(tson::Layer &layer) {
+void Map::drawTileLayer(tson::Layer &layer, int offset_y) {
 	float tileHeight = layer.getMap()->getTileSize().y;
 	float tileWidth = layer.getMap()->getTileSize().x;
+	uint8_t alpha = static_cast<uint8_t>(layer.getOpacity() * 255);
 
 	for (auto &[pos, tileObject] : layer.getTileObjects()) {
 		tson::Tileset *tileset = tileObject.getTile()->getTileset();
@@ -100,7 +99,7 @@ void Map::drawTileLayer(tson::Layer &layer) {
 			src.h = drawingRect.height;
 
 			dst.x = tileObject.getPosition().x;
-			dst.y = tileObject.getPosition().y;
+			dst.y = tileObject.getPosition().y + (16 * offset_y);
 			dst.w = tileWidth;
 			dst.h = tileHeight;
 
@@ -109,6 +108,7 @@ void Map::drawTileLayer(tson::Layer &layer) {
 			dstCenter.x += center.x;
 			dstCenter.y += center.y;
 
+			SDL_SetTextureAlphaMod(texture, alpha);
 			SDL_RenderCopy(ClientGame::renderer, texture, &src, &dst);
 		}
 	}
@@ -141,6 +141,13 @@ void Map::drawObjectLayer(tson::Layer &layer) {
 void Map::updateAnimations() {
 	for (auto &[id, animation] : animationUpdateQueue) {
 		animation->update(30);
+	}
+}
+
+void Map::drawLoadingBar(int progressBarsComplete) {
+	tson::Layer *loadingBar = currentMap->getLayer("loading");
+	for (int i = 0; i < progressBarsComplete; i++) {
+		drawTileLayer(*loadingBar, i);
 	}
 }
 
@@ -196,39 +203,37 @@ SDL_Texture *Map::getTexture(fs::path path) {
 	return tilesetTextures[path];
 }
 
-bool Map::checkPlattformCollisions(SDL_Rect *collider) {
+bool Map::checkCollisions(SDL_Rect *collider) {
 	tson::Layer *plattforms = currentMap->getLayer("plattforms");
+	int tileSize = currentMap->getTileSize().x;
 
-	for (auto &[pos, tileObject] : plattforms->getTileObjects()) {
-		tson::Rect rect = tileObject.getDrawingRect();
-		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
-		                  rect.width, rect.height};
+	// Calculate tile range to check
+	int startX = collider->x / tileSize;
+	int startY = collider->y / tileSize;
+	int endX = (collider->x + collider->w) / tileSize;
+	int endY = (collider->y + collider->h) / tileSize;
 
-		if (SDL_HasIntersection(collider, &block)) {
-			SDL_Rect intersection;
-			if (SDL_IntersectRect(collider, &block, &intersection)) {
-				std::cout << "intersection: " << intersection.w << " " << intersection.h << std::endl;
-				if (intersection.w > intersection.h) {
-					if (collider->y < block.y) {
-						collider->y -= intersection.h;
-					} else {
-						collider->y += intersection.h;
+	// Loop through tiles in the range
+	for (int x = startX; x <= endX; ++x) {
+		for (int y = startY; y <= endY; ++y) {
+			tson::Tile *tileObject = plattforms->getTileData(x, y);
+			if (tileObject != nullptr) {
+				tson::Rect rect = tileObject->getDrawingRect();
+				SDL_Rect block = {x * tileSize, y * tileSize, rect.width, rect.height};
+
+				if (SDL_HasIntersection(collider, &block)) {
+					SDL_Rect intersection;
+					if (SDL_IntersectRect(collider, &block, &intersection)) {
+						if (intersection.w < intersection.h) {
+							collider->x += (collider->x < block.x) ? -intersection.w : intersection.w;
+						} else {
+							collider->y += (collider->y < block.y) ? -intersection.h : intersection.h;
+						}
 					}
-				} else {
-					if (collider->x < block.x) {
-						collider->x -= intersection.w;
-					} else {
-						collider->x += intersection.w;
-					}
+					return true;
 				}
 			}
-
-			return true;
 		}
-
-		SDL_SetRenderDrawColor(ClientGame::renderer, 255, 0, 0, 255);
-		SDL_RenderDrawRect(ClientGame::renderer, &block);
-		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 	return false;
 }
@@ -256,46 +261,62 @@ bool Map::isInWater(SDL_Rect *collider) {
 	tson::Layer *water = currentMap->getLayer("water");
 	tson::Layer *waterfall = currentMap->getLayer("waterfalls");
 
-	for (auto &[pos, tileObject] : water->getTileObjects()) {
-		tson::Rect rect = tileObject.getDrawingRect();
-		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
-		                  rect.width, rect.height};
+	// calculate tile range to check
+	int tileSize = currentMap->getTileSize().x;
+	int startX = collider->x / tileSize;
+	int startY = collider->y / tileSize;
+	int endX = (collider->x + collider->w) / tileSize;
+	int endY = (collider->y + collider->h) / tileSize;
 
-		if (SDL_PointInRect(&point, &block)) {
-			return true;
+	for (int x = startX; x <= endX; ++x) {
+		for (int y = startY; y <= endY; ++y) {
+			tson::Tile *waterTile = water->getTileData(x, y);
+			tson::Tile *waterfallTile = waterfall->getTileData(x, y);
+
+			if (waterTile != nullptr) {
+				tson::Rect rect = waterTile->getDrawingRect();
+				SDL_Rect block = {x * tileSize, y * tileSize, rect.width, rect.height};
+
+				if (SDL_PointInRect(&point, &block)) {
+					return true;
+				}
+			}
+
+			if (waterfallTile != nullptr) {
+				tson::Rect rect = waterfallTile->getDrawingRect();
+				SDL_Rect block = {x * tileSize, y * tileSize, rect.width, rect.height};
+
+				if (SDL_PointInRect(&point, &block)) {
+					return true;
+				}
+			}
 		}
-
-		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 255, 255);
-		SDL_RenderDrawRect(ClientGame::renderer, &block);
-		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
-	}
-
-	for (auto &[pos, tileObject] : waterfall->getTileObjects()) {
-		tson::Rect rect = tileObject.getDrawingRect();
-		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
-		                  rect.width, rect.height};
-
-		if (SDL_PointInRect(&point, &block)) {
-			return true;
-		}
-
-		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 255, 255);
-		SDL_RenderDrawRect(ClientGame::renderer, &block);
-		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 	return false;
 }
 
 bool Map::checkLayer(SDL_Rect *collider, std::string layerName) {
-	tson::Layer *exit = currentMap->getLayer(layerName);
+	tson::Layer *layer = currentMap->getLayer(layerName);
 
-	for (auto &[pos, tileObject] : exit->getTileObjects()) {
-		tson::Rect rect = tileObject.getDrawingRect();
-		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
-		                  rect.width, rect.height};
+	// calculate tile range to check
+	int tileSize = currentMap->getTileSize().x;
+	int startX = collider->x / tileSize;
+	int startY = collider->y / tileSize;
+	int endX = (collider->x + collider->w) / tileSize;
+	int endY = (collider->y + collider->h) / tileSize;
 
-		if (SDL_HasIntersection(collider, &block)) {
-			return true;
+	for (int x = startX; x <= endX; ++x) {
+		for (int y = startY; y <= endY; ++y) {
+			tson::Tile *tileObject = layer->getTileData(x, y);
+
+			if (tileObject != nullptr) {
+				tson::Rect rect = tileObject->getDrawingRect();
+				SDL_Rect block = {x * tileSize, y * tileSize, rect.width, rect.height};
+
+				if (SDL_HasIntersection(collider, &block)) {
+					return true;
+				}
+			}
 		}
 	}
 	return false;

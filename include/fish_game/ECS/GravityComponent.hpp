@@ -10,17 +10,21 @@ class GravityComponent : public Component {
 
 	TransformComponent *transform = nullptr;
 	MoveComponent *move = nullptr;
+	float force = 0;
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {}
-
 	GravityComponent() = default;
 	~GravityComponent() = default;
 
 	void init() override;
 
 	void update() override;
+
+	void touchGround() { force = 0; }
+
+	void applyForce(float f) { force += f; }
+
+	void copyForceFrom(Entity *e);
 };
 
 } // namespace FishEngine

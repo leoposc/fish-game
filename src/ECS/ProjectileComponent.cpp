@@ -12,20 +12,15 @@ ProjectileComponent::ProjectileComponent(int rng, int sp, Vector2D vel) : range(
 void ProjectileComponent::init() {
 	// spdlog::get("console")->debug("PROJECTILE COMPONENT INIT" );
 	transform = &entity->getComponent<TransformComponent>();
-	transform->velocity = velocity;
+	spdlog::get("console")->debug("ProjectileComponent - init {}", (transform->faceRight ? 1.0 : -1.0));
 }
 
 void ProjectileComponent::update() {
+	transform->velocity = velocity * (transform->faceRight ? 1.0 : -1.0);
 	distance += speed;
 
 	if (distance > range) {
 		spdlog::get("console")->debug("Projectile out of range");
-		entity->destroy();
-	} else if (transform->position.getX() > ClientGame::camera.x + ClientGame::camera.w
-	           || transform->position.getX() < ClientGame::camera.x
-	           || transform->position.getY() > ClientGame::camera.y + ClientGame::camera.h
-	           || transform->position.getY() < ClientGame::camera.y) {
-		spdlog::get("console")->debug("Projectile out of bounds");
 		entity->destroy();
 	}
 }

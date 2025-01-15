@@ -10,5 +10,161 @@
  "tileheight":16,
  "tilewidth":16,
  "type":"tileset",
- "version":"1.10"
+ "version":"1.10",
+ "wangsets":[
+        {
+         "colors":[
+                {
+                 "color":"#ff0000",
+                 "name":"Earth",
+                 "probability":1,
+                 "tile":-1
+                }, 
+                {
+                 "color":"#00ff00",
+                 "name":"Leaves",
+                 "probability":1,
+                 "tile":-1
+                }],
+         "name":"Plattform",
+         "tile":-1,
+         "type":"corner",
+         "wangtiles":[
+                {
+                 "tileid":25,
+                 "wangid":[0, 0, 0, 1, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":26,
+                 "wangid":[0, 0, 0, 1, 0, 1, 0, 0]
+                }, 
+                {
+                 "tileid":27,
+                 "wangid":[0, 0, 0, 0, 0, 1, 0, 0]
+                }, 
+                {
+                 "tileid":30,
+                 "wangid":[0, 0, 0, 2, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":31,
+                 "wangid":[0, 0, 0, 2, 0, 2, 0, 0]
+                }, 
+                {
+                 "tileid":32,
+                 "wangid":[0, 0, 0, 0, 0, 2, 0, 0]
+                }, 
+                {
+                 "tileid":49,
+                 "wangid":[0, 1, 0, 1, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":50,
+                 "wangid":[0, 1, 0, 1, 0, 1, 0, 1]
+                }, 
+                {
+                 "tileid":51,
+                 "wangid":[0, 0, 0, 0, 0, 1, 0, 1]
+                }, 
+                {
+                 "tileid":54,
+                 "wangid":[0, 2, 0, 2, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":55,
+                 "wangid":[0, 2, 0, 2, 0, 2, 0, 2]
+                }, 
+                {
+                 "tileid":56,
+                 "wangid":[0, 0, 0, 0, 0, 2, 0, 2]
+                }, 
+                {
+                 "tileid":73,
+                 "wangid":[0, 1, 0, 0, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":74,
+                 "wangid":[0, 1, 0, 0, 0, 0, 0, 1]
+                }, 
+                {
+                 "tileid":75,
+                 "wangid":[0, 0, 0, 0, 0, 0, 0, 1]
+                }, 
+                {
+                 "tileid":78,
+                 "wangid":[0, 2, 0, 0, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":79,
+                 "wangid":[0, 2, 0, 0, 0, 0, 0, 2]
+                }, 
+                {
+                 "tileid":80,
+                 "wangid":[0, 0, 0, 0, 0, 0, 0, 2]
+                }, 
+                {
+                 "tileid":217,
+                 "wangid":[0, 1, 0, 1, 0, 1, 0, 0]
+                }, 
+                {
+                 "tileid":218,
+                 "wangid":[0, 0, 0, 1, 0, 1, 0, 1]
+                }, 
+                {
+                 "tileid":222,
+                 "wangid":[0, 2, 0, 2, 0, 2, 0, 0]
+                }, 
+                {
+                 "tileid":223,
+                 "wangid":[0, 0, 0, 2, 0, 2, 0, 2]
+                }, 
+                {
+                 "tileid":241,
+                 "wangid":[0, 1, 0, 1, 0, 0, 0, 1]
+                }, 
+                {
+                 "tileid":242,
+                 "wangid":[0, 1, 0, 0, 0, 1, 0, 1]
+                }, 
+                {
+                 "tileid":246,
+                 "wangid":[0, 2, 0, 2, 0, 0, 0, 2]
+                }, 
+                {
+                 "tileid":247,
+                 "wangid":[0, 2, 0, 0, 0, 2, 0, 2]
+                }, 
+                {
+                 "tileid":289,
+                 "wangid":[0, 0, 0, 1, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":290,
+                 "wangid":[0, 0, 0, 0, 0, 1, 0, 0]
+                }, 
+                {
+                 "tileid":294,
+                 "wangid":[0, 0, 0, 2, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":295,
+                 "wangid":[0, 0, 0, 0, 0, 2, 0, 0]
+                }, 
+                {
+                 "tileid":313,
+                 "wangid":[0, 1, 0, 0, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":314,
+                 "wangid":[0, 0, 0, 0, 0, 0, 0, 1]
+                }, 
+                {
+                 "tileid":318,
+                 "wangid":[0, 2, 0, 0, 0, 0, 0, 0]
+                }, 
+                {
+                 "tileid":319,
+                 "wangid":[0, 0, 0, 0, 0, 0, 0, 2]
+                }]
+        }]
 }

@@ -22,6 +22,11 @@ AssetManager::~AssetManager() {
 }
 
 void AssetManager::addTexture(std::string id, fs::path path) {
+	if (textures.find(id) != textures.end()) {
+		spdlog::get("console")->info("Texture {} already loaded!", id);
+		return;
+	}
+
 	spdlog::get("console")->debug("Loading texture from: {}", path.string());
 	textures[id] = TextureManager::loadTexture(path);
 }

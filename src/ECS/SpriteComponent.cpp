@@ -18,7 +18,6 @@ SpriteComponent::SpriteComponent(std::string id) : id(id) {
 }
 
 SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isAnimated), id(id) {
-	// TODO: implement animation with tiled/ tileson
 	setTexture(id);
 }
 
@@ -31,7 +30,6 @@ void SpriteComponent::setTexture(std::string id) {
 }
 
 void SpriteComponent::init() {
-	// spdlog::get("console")->debug( "SpriteComponent: initializing " << id );
 	if (entity->hasComponent<TransformComponent>()) {
 		transform = &entity->getComponent<TransformComponent>();
 	} else {
@@ -44,18 +42,31 @@ void SpriteComponent::init() {
 }
 
 void SpriteComponent::update() {
-	spdlog::get("console")->debug("SpriteComponent: updating {}", id);
-	// if (id == "pistol") {
-	// 	spdlog::get("console")->debug( "SpriteComponent: updating " << id );
-	// }
+
+	if (animated) {
+		currentFrame = (SDL_GetTicks() / speed) % frames;
+		srcRect.x = currentFrame * srcRect.w;
+		srcRect.y = animationIndex * transform->height;
+		// spdlog::get("console")->debug("SpriteComponent: {} {} {}", id, currentFrame, srcRect.x);
+	} else {
+		srcRect.x = 0;
+		srcRect.y = 0;
+	}
+	spriteFlip = transform->faceRight ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+}
+
+void SpriteComponent::draw() {
 	dstRect.x = (int)transform->getX();
 	dstRect.y = (int)transform->getY();
 	dstRect.w = transform->width;
 	dstRect.h = transform->height;
+	TextureManager::draw(texture, srcRect, dstRect, spriteFlip);
 }
 
-void SpriteComponent::draw() {
-	TextureManager::draw(texture, srcRect, dstRect, spriteFlip);
+void SpriteComponent::play(const char *animationName) {
+	animationIndex = animations[animationName].index;
+	frames = animations[animationName].frames;
+	speed = animations[animationName].speed;
 }
 
 } // namespace FishEngine

@@ -19,19 +19,21 @@ class Map {
 	Map() = default;
 	~Map() = default;
 
-	void loadMap(fs::path path);
+	void loadMap(fs::path path, bool hasBackground = true);
 
 	void drawMap();
 
 	void drawLayer(tson::Layer &layer);
 
-	void drawTileLayer(tson::Layer &layer);
+	void drawTileLayer(tson::Layer &layer, int offset_y = 0);
 
 	void drawImageLayer(tson::Layer &layer);
 
 	void drawObjectLayer(tson::Layer &layer);
 
 	void updateAnimations();
+
+	void drawLoadingBar(int progressBarsComplete);
 
 	// fetch the path to the tileset
 	fs::path getTilePath(int id);
@@ -45,7 +47,7 @@ class Map {
 	/**
 	 * @brief: idea: pass colllider components to the map and check for collision
 	 */
-	bool checkPlattformCollisions(SDL_Rect *collider);
+	bool checkCollisions(SDL_Rect *collider);
 
 	/**
 	 * @brief: checks if the player is on the specifies layer

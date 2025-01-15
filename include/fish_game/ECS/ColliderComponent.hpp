@@ -16,10 +16,10 @@ class ColliderComponent : public Component {
 	Vector2D lastPosition{0, 0};
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(collider);
-	}
+	// template <class Archive>
+	// void serialize(Archive &ar) {
+	// 	ar(collider);
+	// }
 
 	std::string tag;
 

@@ -2,8 +2,10 @@
 #include "../../include/fish_game/ClientGame.hpp"
 #include "../../include/fish_game/ECS/ClientComponent.hpp"
 #include "../../include/fish_game/ECS/EquipmentComponent.hpp"
+#include "../../include/fish_game/ECS/HealthComponent.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/ServerComponent.hpp"
+#include "../../include/fish_game/ECS/TransformComponent.hpp"
 
 #include "spdlog/spdlog.h"
 
@@ -29,92 +31,67 @@ void EventHandlerComponent::init() {
 		clientComponent = &entity->getComponent<ClientComponent>();
 		event_ptr = &ClientGame::game_event;
 	}
+
+	health = &entity->getComponent<HealthComponent>();
 }
 
-void EventHandlerComponent::update()
+void EventHandlerComponent::update() {
+	// spdlog::get("console")->debug("EventhandlerComponent - update");
+	if (health->isAlive()) {
+		if (event_ptr->type == SDL_KEYDOWN) {
 
-{
-	if (event_ptr->type == SDL_KEYDOWN) {
-		switch (event_ptr->key.keysym.sym) {
-		// upwards
-		case SDLK_w:
-			move->up();
-			// sprite->play("swim");
-			break;
-		// downwards
-		case SDLK_s:
-			move->down();
-			// sprite->play("swim");
-			break;
-		// left
-		case SDLK_a:
-			move->left();
-			// sprite->play("swim");
-			break;
-		// right
-		case SDLK_d:
-			move->right();
-			// sprite->play("swim");
-			break;
-		// equip/ unequip
-		case SDLK_j:
-			spdlog::get("console")->debug("J pressed");
-			equip->processCommand();
-			break;
-		case SDLK_k:
-			equip->shoot();
-			break;
+			if (event_ptr->key.keysym.sym == SDLK_w) {
+				move->up();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_s) {
+				move->down();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_a) {
+				move->left();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_d) {
+				move->right();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_j) {
+				spdlog::get("console")->debug("J pressed");
+				equip->processCommand();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_k) {
+				equip->shoot();
+			}
+
+			// send the event to the server
+			if (!isServer) {
+				clientComponent->sendEvent(ClientGame::game_event);
+			}
 		}
 
-		// send the event to the server
-		if (!isServer) {
-			clientComponent->sendEvent(ClientGame::game_event);
-		}
-	}
+		// stop the player
+		if (event_ptr->type == SDL_KEYUP) {
+			if (event_ptr->key.keysym.sym == SDLK_w) {
+				move->stopY();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_s) {
+				move->stopY();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_a) {
+				move->stopX();
+			}
+			if (event_ptr->key.keysym.sym == SDLK_d) {
+				move->stopX();
+			}
 
-	// stop the player
-	if (event_ptr->type == SDL_KEYUP) {
-		switch (event_ptr->key.keysym.sym) {
-		case SDLK_ESCAPE:
-			// TODO: add a pause menu
-			// ClientGame::stop();
-			break;
-			// upwards
-		case SDLK_w:
-			move->stop();
-			// sprite->play("idle");
-			break;
-		// downwards
-		case SDLK_s:
-			move->stop();
-			// sprite->play("idle");
-			break;
-		// left
-		case SDLK_a:
-			move->stop();
-			// sprite->play("idle");
-			// sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
-			break;
-		// right
-		case SDLK_d:
-			move->stop();
-			// sprite->play("idle");
-			break;
-		}
-
-		// send the event to the server
-		if (!isServer) {
-			clientComponent->sendEvent(ClientGame::game_event);
+			// send the event to the server
+			if (!isServer) {
+				clientComponent->sendEvent(ClientGame::game_event);
+			}
 		}
 	}
-	// spdlog::get("console")->debug("EVENTHANDLER COMPONENT UPDATED");
-
-	//
 }
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::EventHandlerComponent)

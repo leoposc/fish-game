@@ -3,10 +3,11 @@
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/MockServer.hpp"
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <fstream>
 
+#include "fish_game/NetworkHost.hpp"
 #include "spdlog/spdlog.h"
 
 namespace FishEngine {
@@ -19,7 +20,6 @@ void ClientComponent::init() {
 
 void ClientComponent::update() {
 	Vector2D newPos;
-
 	if (MockServer::getInstance().pollPosition(newPos)) {
 		transform->position = newPos;
 	}
@@ -27,11 +27,12 @@ void ClientComponent::update() {
 
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
-	{
-		std::ofstream os("event.json");
-		cereal::JSONOutputArchive archive(os);
-		archive(event);
-	}
+	uint8_t id = entity->getID();
+	std::ofstream os("event.json");
+	cereal::JSONOutputArchive archive(os);
+	archive(id, event);
+	// TODO: somehting like this:
+	// this->networkClient.send(string);
 }
 
 } // namespace FishEngine

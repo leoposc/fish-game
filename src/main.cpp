@@ -41,20 +41,6 @@ FuncPtr mainMenu();
 FuncPtr hostLobby();
 FuncPtr joinLobby();
 
-class MyRecord {
-  public:
-	uint8_t x, y;
-	float z;
-
-	MyRecord() = default;
-	MyRecord(uint8_t x, uint8_t y, float z) : x(x), y(y), z(z) {}
-
-	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(x, y, z);
-	}
-};
-
 FuncPtr combat() {
 	std::cout << "COMBAT STARTED" << std::endl;
 	const int FPS = 60;
@@ -63,8 +49,24 @@ FuncPtr combat() {
 	u_int32_t frameStart;
 	int frameTime;
 
-	client->init("map03.tmj", 4, true);
-	// server->init("map03.tmj", 4);
+	int numPlayers = 4; // todo: get from server
+	server->init("map04.tmj", numPlayers);
+	client->init("map04.tmj", numPlayers, true);
+
+	// client->sendJoinRequest("127.0.0.1", "test user in combat");
+
+	// uint8_t id = server->acceptJoinRequest("ip");
+	// std::cout << "Player ID: " << (int)id << std::endl;
+	// client->ownPlayerID = id;
+
+	// for (int i = 0; i < 4; i++) {
+	// 	std::cout << server->createPlayer("") << std::endl;
+	// }
+
+	client->createOwnPlayer();
+
+	// server->sendGameState();
+	// client->receiveGameState();
 
 	std::cout << "Combat init done!" << std::endl;
 
@@ -84,19 +86,25 @@ FuncPtr combat() {
 
 	client->stop();
 	server->stop();
+	client->renderLoadingBar();
+
+	spdlog::get("console")->info("Leaving combat...");
 
 	return mainMenu();
 }
 
 // todo: implement joinLobby
 FuncPtr joinLobby() {
-	std::string ip = client->joinGame();
+	std::string ip = client->joinInterface();
 	if (ip.empty()) {
 		return mainMenu();
 	}
 	std::cout << "Joining lobby at " << ip << std::endl;
+	// client->sendJoinRequest(ip, "test user");
+
 	// todo: connect to host
 
+	client->renderLoadingBar();
 	return hostLobby();
 }
 
@@ -111,16 +119,24 @@ FuncPtr hostLobby() {
 
 	std::string ownIP = "127.0.0.1";
 
-	client->init("lobby.tmj", 1, false);
-	server->init("lobby.tmj", 1);
-	FishEngine::ClientGame::assets->loadFromRenderedText(ownIP, "../../assets/zd-bold.ttf", 24, {0, 0, 0, 255});
+	client->init("hostLobby.tmj", 1, false);
+	server->init("hostLobby.tmj", 1);
+
+	client->createOwnPlayer();
+
+	// client->sendJoinRequest("ip");
+	// server->acceptJoinRequest("ip");
+
+	// server->sendGameState();
+	// client->receiveGameState();
 
 	// todo: start server - open socket
+	// FishEngine::ClientGame::assets->loadFromRenderedText(ownIP, "../../assets/zd-bold.ttf", 24, {0, 0, 0, 255});
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
-		// todo: wait for players logic and sync with clients
+		// 	// todo: wait for players logic and sync with clients
 
 		client->handleEvents();
 		client->update();
@@ -132,11 +148,13 @@ FuncPtr hostLobby() {
 
 			client->stop();
 			server->stop();
+			client->renderLoadingBar();
 			return mainMenu();
 			break;
-		case 1:
+		case 3:
 			client->stop();
 			server->stop();
+			client->renderLoadingBar();
 			return combat();
 			break;
 
@@ -149,6 +167,9 @@ FuncPtr hostLobby() {
 			SDL_Delay(frameDelay - frameTime);
 		}
 	}
+
+	client->stop();
+	server->stop();
 	return nullptr;
 }
 
@@ -162,14 +183,13 @@ FuncPtr mainMenu() {
 	int frameTime;
 
 	client->init("mainMenu.tmj", 1, false);
+	client->createOwnPlayer();
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
 		client->handleEvents();
-		std::cout << "Main menu init done!" << std::endl;
 		client->update();
-		std::cout << "Main menu init done!" << std::endl;
 		client->render();
 
 		switch (client->updateMainMenu()) {
@@ -177,17 +197,20 @@ FuncPtr mainMenu() {
 			std::cout << "Leaving main menu..." << std::endl;
 			client->stop();
 			server->stop();
+			client->renderLoadingBar();
 			return nullptr;
 			break;
 		case 1:
 			client->stop();
 			server->stop();
-			return hostLobby();
+			client->renderLoadingBar();
+			return joinLobby();
 			break;
 		case 2:
 			client->stop();
 			server->stop();
-			return joinLobby();
+			client->renderLoadingBar();
+			return hostLobby();
 			break;
 		default:
 			break;
@@ -206,12 +229,16 @@ int main(int argc, char *argv[]) {
 	auto console = spdlog::stdout_color_mt("console");
 	auto err_logger = spdlog::stderr_color_mt("stderr");
 
-	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, false);
 	server = new sG();
+	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
-	joinLobby();
+	client->renderLoadingBar();
+	// hostLobby();
+	// joinLobby();
 	// combat();
-	// mainMenu();
+	mainMenu();
+
+	spdlog::get("console")->info("Leaving Fish Game...");
 
 	return 0;
 }

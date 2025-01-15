@@ -10,35 +10,34 @@ constexpr float MAX_GRAVITY = 5.0;
 
 void GravityComponent::init() {
 	// spdlog::get("console")->debug( "GRAVITY COMPONENT INIT" );
-	if (!entity->hasComponent<MoveComponent>()) {
-		spdlog::get("console")->debug("Gravity Component: Creating MoveComponent.");
-		entity->addComponent<MoveComponent>();
-	}
 	if (!entity->hasComponent<TransformComponent>()) {
 		spdlog::get("console")->debug("Gravity Component: Creating TransformComponent.");
 		entity->addComponent<TransformComponent>();
 	}
 
 	transform = &entity->getComponent<TransformComponent>();
-
-	move = &entity->getComponent<MoveComponent>();
 }
 
 void GravityComponent::update() {
 	// if the entity is not a fish (no move component) or the fish is not in water, apply gravity
-	// spdlog::get("console")->debug( "GRAVITY COMPONENT UPDATE" );
-	// spdlog::get("console")->debug( !entity->hasComponent<MoveComponent>() );
-	// spdlog::get("console")->debug( !move->inWater );
-
-	if (!entity->hasComponent<MoveComponent>() || !move->inWater) {
-		float y = transform->velocity.getY();
-		transform->velocity.setY(y < MAX_GRAVITY ? y + 0.1 : MAX_GRAVITY);
+	if (!entity->hasComponent<MoveComponent>() || !(entity->getComponent<MoveComponent>().inWater)) {
+		force = force < MAX_GRAVITY ? force + 0.1 : MAX_GRAVITY;
+		// spdlog::get("console")->debug("GravityComponent - after updating - force: {}", force);
+	} else if (entity->getComponent<MoveComponent>().inWater) {
+		// do not apply force if the fish is in water, but let it sink for a little bit
+		force -= force > 0 ? force * 0.1 : 0;
 	}
+	transform->velocity += Vector2D(0, force);
+}
+
+void GravityComponent::copyForceFrom(Entity *e) {
+	// transfer the force to the entity
+	e->getComponent<GravityComponent>().applyForce(force);
 }
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::GravityComponent);

@@ -17,13 +17,15 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <cereal/archives/binary.hpp>
+#include <fstream>
 #include <iostream>
 #include <spdlog/spdlog.h>
 
 namespace FishEngine {
 
-constexpr int SCREEN_WIDTH = 1280;
-constexpr int SCREEN_HEIGHT = 720;
+constexpr int SCREEN_WIDTH = 2048;
+constexpr int SCREEN_HEIGHT = 1024;
 
 SDL_Renderer *ClientGame::renderer = nullptr;
 SDL_Event ClientGame::game_event;
@@ -61,14 +63,12 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
-ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen) {
-	int flags = 0;
-	if (fullscreen) {
-		flags = SDL_WINDOW_FULLSCREEN;
-	}
+ClientGame::ClientGame(const char *title, int xpos, int ypos) {
+	int flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
+
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
 		// log init
-		window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
+		window = SDL_CreateWindow(title, xpos, ypos, SCREEN_WIDTH, SCREEN_HEIGHT, flags);
 		if (window) {
 			// log window creation
 		}
@@ -79,67 +79,53 @@ ClientGame::ClientGame(const char *title, int xpos, int ypos, int width, int hei
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		}
 
+		SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
 	} else {
 		spdlog::get("stderr")->error("SDL could not initialize! SDL_Error:{}", SDL_GetError());
 		isRunning = false;
 	}
 
-	// load assets
-	assets->addTexture("fish", "../../assets/RedFishSmall.png");
+	// load textures
 	assets->addTexture("pistol", "../../assets/PistolSmall.png");
 	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
+	assets->addTexture("present", "../../assets/present.png");
 }
 
 ClientGame::~ClientGame() {
-	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 	// log clean
 }
 
-// todo: sync player positions with server/ fetch them from server
-// todo: sync weapon positions with server/ fetch them from server / spawn them periodically
-
-void ClientGame::init(fs::path mp, int numPlayers, bool combat) {
-
-	// ================== init game ==================
+void ClientGame::init(fs::path mp, int nP, bool combat) {
 	isRunning = true;
+	numPlayers = nP;
+
+	// ============ control if game was reset ===========
 	assert(clientManager.checkEmpty());
-	assert(numPlayers > 0);
 	assert(players.empty());
 
+	// ================ init clientMap ==================
 	mapPath = mp;
-	std::cout << "start: " << players.size() << std::endl;
-	// ================== init clientMap and assets ==================
 	clientMap = new Map();
-
-	spdlog::get("console")->debug("{}/{}", fs::path("../../maps").string(), mapPath.string());
-
 	clientMap->loadMap(fs::path("../../maps") / mapPath);
 
-	// ================== init player ==================
-	auto &player(clientManager.addEntity());
-	auto initPos = clientMap->getPlayerSpawnpoints(numPlayers);
-	ClientGenerator::forPlayer(player, initPos.at(0));
-	players.push_back(&player);
-
+	// ================== init weapons ==================
 	if (combat) {
-		// ================== init enemies ==================
-		for (int i = 1; i < numPlayers; ++i) {
-			auto &opponent(clientManager.addEntity());
-			ClientGenerator::forEnemy(opponent, initPos.at(i));
-			players.push_back(&opponent);
-		}
-
-		// ================== init weapons ==================
 		spawnWeapons();
 	}
-	spdlog::get("console")->debug(players.size());
-	// serialization test
-	{
-		std::ofstream os("data2.json");
-		cereal::JSONOutputArchive archive(os);
-		archive(clientManager);
+
+	fishSpriteID = 0;
+	// load assets
+	loadFishSprites();
+}
+
+void ClientGame::loadFishSprites() {
+	for (int i = 1; i <= numPlayers; i++) {
+		std::string id = "fish0" + std::to_string(i);
+		assets->addTexture(id, "../../assets/" + id + ".png");
 	}
 }
 
@@ -147,7 +133,9 @@ void ClientGame::handleEvents() {
 	SDL_PollEvent(&game_event);
 
 	switch (game_event.type) {
+		// case quitting the game
 	case SDL_QUIT:
+		spdlog::get("console")->info("Leaving game");
 		isRunning = false;
 		break;
 		// case F11 is pressed
@@ -159,16 +147,30 @@ void ClientGame::handleEvents() {
 	default:
 		break;
 	}
-
-	// MockServer::getInstance().enqueueEvent(game_event);
 }
 
 void ClientGame::update() {
+	// delete dead entities
 	clientManager.refresh();
+
+	// // update the entities
+	// spdlog::get("console")->debug("Updating entities");
 	clientManager.update();
-	Collision::checkWaterCollisions(&players, clientMap);
-	Collision::checkPlattformCollisions(&players, clientMap);
+
+	// check for collisions
+	Collision::isInWater(&clientManager.getGroup(groupLabels::groupPlayers), clientMap);
+	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupColliders), clientMap);
+	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupPlayers),
+	                           &clientManager.getGroup(groupLabels::groupProjectiles));
+
+	// // animate the map
 	clientMap->updateAnimations();
+
+	// check if game is over TODO: just handle it in the server
+	if (clientManager.getGroup(groupLabels::groupPlayers).empty()) {
+		spdlog::get("console")->info("Game over - stopping game");
+		isRunning = false;
+	}
 }
 
 void ClientGame::render() {
@@ -194,12 +196,43 @@ void ClientGame::render() {
 	SDL_RenderPresent(renderer);
 }
 
+void ClientGame::createOwnPlayer() {
+	ownPlayer = &clientManager.addEntity();
+	auto initPos = clientMap->getPlayerSpawnpoints(1).at(0);
+	ClientGenerator::forPlayer(*ownPlayer, initPos, ++fishSpriteID);
+	players.insert(std::make_pair(ownPlayer->getID(), ownPlayer));
+	ownPlayerID = ownPlayer->getID();
+}
+
+void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
+                     const std::vector<Entity *> &existingWeapons) {
+
+	// check for collision with existing weapons
+	for (auto &weapon : existingWeapons) {
+
+		auto &colliderA = weapon->getComponent<ColliderComponent>().collider;
+		SDL_Rect colliderB = {spawnpoint.first, spawnpoint.second, 16, 16};
+
+		// stop if there is a collision
+		if (Collision::checkCollisions(colliderA, colliderB)) {
+			return;
+		}
+	}
+
+	// spawn the weapon
+	auto &weapon(clientManager.addEntity());
+	ClientGenerator::forWeapon(weapon, spawnpoint);
+}
+
 void ClientGame::spawnWeapons() {
 	// ================== init weapons ==================
 	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
+
+	// do no spawn weapons when existing weapon was not picked up
+	auto &existingWeapons(clientManager.getGroup(groupLabels::groupWeapons));
+
 	for (auto &spawnpoint : *spawnpoints) {
-		auto &weapon(clientManager.addEntity());
-		ClientGenerator::forWeapon(weapon, spawnpoint);
+		spawnWeaponsAux(spawnpoint, existingWeapons);
 	}
 }
 
@@ -207,7 +240,7 @@ Manager *ClientGame::getManager() {
 	return &clientManager;
 }
 
-std::string ClientGame::joinGame() {
+std::string ClientGame::joinInterface() {
 
 	clientMap = new Map();
 	clientMap->loadMap(fs::path("../../maps/joinLobby.tmj"));
@@ -309,6 +342,76 @@ std::string ClientGame::joinGame() {
 	return inputText;
 }
 
+void ClientGame::sendJoinRequest(std::string ip, std::string username) {
+	// send request and wait for response
+	this->networkClient.init(ip, username);
+
+	// playerID =
+}
+
+void ClientGame::receiveGameState() {
+
+	if (this->networkClient.hasUpdate()) {
+		return;
+	}
+
+	spdlog::get("console")->info("RECIVED UPDATE");
+
+	std::string serializedData = this->networkClient.getUpdate();
+	std::istringstream is(serializedData);
+	cereal::BinaryInputArchive ar(is);
+
+	// fetch the number of the entities
+	size_t numEntities;
+	ar(numEntities);
+
+	// check if the entities are already loaded
+	for (size_t i = 0; i < numEntities; ++i) {
+		// read entity meta data from stream
+		uint8_t id;
+		ClientGame::groupLabels group;
+		ar(id, group);
+
+		if (entityGroups.count(id)) {
+			// case: entity already in clientManager
+			spdlog::get("console")->info("Entity already in clientManager");
+
+			// update the values of the entity
+			ar(clientManager.getEntity(id));
+
+		} else {
+			// create the entity
+			auto &entity(clientManager.addEntity(id));
+
+			// create the entity with the correct components
+			switch (group) {
+			case ClientGame::groupLabels::groupPlayers:
+				if (id == ownPlayerID) {
+					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
+				} else {
+					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
+				}
+				players.insert(std::make_pair(entity.getID(), &entity));
+				break;
+			case ClientGame::groupLabels::groupWeapons:
+				ClientGenerator::forWeapon(entity, {0, 0});
+				break;
+			case ClientGame::groupLabels::groupProjectiles:
+				bool faceRight;
+				ar(faceRight);
+				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
+				break;
+			}
+
+			// add the entity to the clientManager
+			entityGroups.insert(std::make_pair(id, group));
+		}
+
+		// update the values of the entity
+		ar(clientManager.getEntity(id));
+	}
+}
+
 void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
 	int x = 0;
 	int y = 0;
@@ -317,13 +420,19 @@ void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
 	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
 }
 
-Uint8 ClientGame::updateMainMenu() {
+uint8_t ClientGame::updateMainMenu() {
 
-	if (Collision::checkExit(players.at(0), clientMap))
+	if (Collision::checkBack(ownPlayer, clientMap))
 		return 0;
 
-	if (Collision::checkStart(players.at(0), clientMap))
+	if (Collision::checkJoin(ownPlayer, clientMap))
 		return 1;
+
+	if (Collision::checkHost(ownPlayer, clientMap))
+		return 2;
+
+	if (Collision::checkStart(ownPlayer, clientMap))
+		return 3;
 
 	return -1;
 }
@@ -390,6 +499,22 @@ void ClientGame::zoomIn() {
 	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
 
 	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
+}
+
+void ClientGame::renderLoadingBar() {
+	Map *loadingScreen = new Map();
+	loadingScreen->loadMap(fs::path("../../maps/loadingBar.tmj"), false);
+
+	size_t progressBarsComplete = SCREEN_HEIGHT / 16;
+
+	for (size_t i = 0; i < progressBarsComplete; ++i) {
+		loadingScreen->drawLoadingBar(i);
+		loadingScreen->updateAnimations();
+		SDL_RenderPresent(ClientGame::renderer);
+		SDL_Delay(30);
+	}
+
+	delete loadingScreen;
 }
 
 } // namespace FishEngine

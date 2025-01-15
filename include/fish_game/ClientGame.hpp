@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetManager.hpp"
+#include "fish_game/NetworkClient.hpp"
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
@@ -12,13 +13,15 @@ namespace FishEngine {
 class ClientGame {
 
   public:
-	ClientGame(const char *title, int xpos, int ypos, int width, int height, bool fullscreen);
+	ClientGame(const char *title, int xpos, int ypos);
 
 	~ClientGame();
 
 	SDL_Event getEvent() { return game_event; }
 
-	void init(fs::path mp, int numPlayers, bool combat);
+	void init(fs::path mp, int np, bool combat);
+
+	void loadFishSprites();
 
 	void handleEvents();
 
@@ -26,13 +29,19 @@ class ClientGame {
 
 	void render();
 
+	void createOwnPlayer();
+
 	void spawnWeapons();
 
 	void showIP(SDL_Texture *mTexture, int width, int height);
 
 	uint8_t updateMainMenu();
 
-	std::string joinGame();
+	std::string joinInterface();
+
+	void sendJoinRequest(std::string ip, std::string username);
+
+	void receiveGameState();
 
 	bool hasStarted();
 
@@ -42,12 +51,16 @@ class ClientGame {
 
 	void zoomIn();
 
+	void renderLoadingBar();
+
 	Manager *getManager();
 
 	static SDL_Renderer *renderer;
 	static SDL_Event game_event;
 	static SDL_Rect camera;
 	static AssetManager *assets;
+
+	NetworkClient networkClient;
 
 	enum groupLabels : std::size_t {
 		groupMap,
@@ -58,7 +71,11 @@ class ClientGame {
 		groupWeapons
 	};
 
+	uint8_t ownPlayerID;
+
   private:
+	Entity *ownPlayer;
+
 	fs::path mapPath;
 	int numPlayers;
 	bool isRunning;
@@ -67,7 +84,11 @@ class ClientGame {
 	SDL_Window *window;
 	bool windowed = true;
 
-	std::vector<Entity *> players;
+	std::unordered_map<uint8_t, Entity *> players;
+	std::map<uint8_t, ClientGame::groupLabels> entityGroups;
+
+	// increment this for each new fish sprite and reset at init
+	size_t fishSpriteID = 0;
 };
 
 } // namespace FishEngine

@@ -10,18 +10,9 @@
 namespace FishEngine {
 
 void EquipmentComponent::init() {
-	spdlog::get("console")->debug("EQUIPMENT COMPONENT INIT");
-
+	// spdlog::get("console")->debug("EQUIPMENT COMPONENT INIT");
 	collider = &entity->getComponent<ColliderComponent>();
 }
-
-// void EquipmentComponent::update() {
-// 	if (isEquipped) {
-// 		spdlog::get("console")->debug( "EquipmentComponent - equipped" );
-// 	} else {
-// 		spdlog::get("console")->debug( "EquipmentComponent - not equipped" );
-// 	}
-// }
 
 void EquipmentComponent::processCommand() {
 	if (isEquipped) {
@@ -32,8 +23,14 @@ void EquipmentComponent::processCommand() {
 		SDL_Rect col = collider->collider;
 		for (auto weapon : weapons) {
 			if (SDL_HasIntersection(&col, &weapon->getComponent<ColliderComponent>().collider)) {
-				equip(weapon);
-				break;
+				if (weapon->getComponent<WearableComponent>().isAttached()) {
+					spdlog::info("Weapon already attached!");
+					return;
+				} else {
+					spdlog::info("Weapon attached!");
+					equip(weapon);
+					break;
+				}
 			}
 		}
 	}
@@ -41,7 +38,10 @@ void EquipmentComponent::processCommand() {
 
 void EquipmentComponent::equip(Entity *entity) {
 	isEquipped = true;
-	wearable = &entity->getComponent<WearableComponent>();
+	wearable = entity->getComponentSmartPtr<WearableComponent>();
+	// wearable = &entity->getComponent<WearableComponent>();
+
+	// attach the weapon to the player
 	assert(wearable != nullptr);
 	wearable->attach(this->entity);
 }
@@ -65,7 +65,7 @@ void EquipmentComponent::shoot() {
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::EquipmentComponent);

@@ -13,9 +13,6 @@ class ServerComponent : public Component {
 	SDL_Event event;
 
   public:
-	template <class Archive>
-	void serialize(Archive &ar) {}
-
 	ServerComponent() = default;
 	~ServerComponent() = default;
 
@@ -34,7 +31,7 @@ class ServerComponent : public Component {
 	 * private SDL_Event event
 	 * @details: The event is stored in a file called event.json
 	 */
-	void getEvent();
+	void setEvent(SDL_Event event);
 };
 
 } // namespace FishEngine

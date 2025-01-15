@@ -27,7 +27,7 @@ void ColliderComponent::init() {
 }
 
 void ColliderComponent::update() {
-	spdlog::get("console")->debug("ColliderComponent - new pos: {} {}", collider.x, collider.y);
+	// spdlog::get("console")->debug("ColliderComponent - new pos: {} {}", collider.x, collider.y);
 
 	// if (ServerGame::checkCollisions(entity)) {
 	// 	SDL_Rect *collider = &entity->getComponent<ColliderComponent>().collider;
@@ -52,7 +52,7 @@ void ColliderComponent::draw() {
 
 } // namespace FishEngine
 
-#include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 
 CEREAL_REGISTER_TYPE(FishEngine::ColliderComponent);
