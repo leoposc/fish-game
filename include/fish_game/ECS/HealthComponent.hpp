@@ -18,8 +18,17 @@ class HealthComponent : public Component {
 
   public:
 	template <class Archive>
-	void serialize(Archive &ar) {
+	void save(Archive &ar) const {
 		ar(alive);
+	}
+
+	template <class Archive>
+	void load(Archive &ar) {
+		ar(alive);
+
+		if (!alive) {
+			takeDamage();
+		}
 	}
 
 	HealthComponent() : alive(true) {}

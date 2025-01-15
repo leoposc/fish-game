@@ -1,4 +1,5 @@
 #include "../../include/fish_game/ECS/HealthComponent.hpp"
+#include "../../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 
 #include <cereal/archives/binary.hpp>
@@ -8,8 +9,8 @@
 CEREAL_REGISTER_TYPE(FishEngine::HealthComponent);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::HealthComponent);
 
-constexpr int SCREEN_WIDTH = 1280;
-constexpr int SCREEN_HEIGHT = 720;
+constexpr int SCREEN_WIDTH = 2048;
+constexpr int SCREEN_HEIGHT = 1024;
 
 namespace FishEngine {
 
@@ -30,12 +31,16 @@ void HealthComponent::update() {
 
 		spdlog::get("console")->debug("HealthComponent - entity {} destroyed, not alive anymore", entity->getID());
 		this->entity->destroy();
-	} else if ((transform->getY() > SCREEN_HEIGHT) || (transform->getY() < 0) || (transform->getX() > SCREEN_WIDTH)
-	           || (transform->getX() < 0)) {
+    
+	} else if (transform->getY() > SCREEN_HEIGHT + 50 || (transform->getX() > SCREEN_WIDTH + 50)
+	           || (transform->getX() < -50)) {
 
-		// spdlog::get("console")->debug("HealthComponent - entity {} moved out of screen. Position at: {} {}",
-		//                               entity->getID(), transform->position.getX(), transform->position.getY());
+
 		takeDamage();
+
+		// another way of checking if this code is executed on the client side which has to update the sprite
+		if (entity->hasComponent<SpriteComponent>())
+			entity->getComponent<SpriteComponent>().play("fishDead");
 	}
 }
 

@@ -13,14 +13,18 @@ namespace FishEngine {
 class ClientGame {
 
   public:
+
 	static ClientGame &getInstance() {
 		static ClientGame instance; // Guaranteed to be destroyed and instantiated on first use
 		return instance;
 	}
 
+
 	SDL_Event getEvent() { return game_event; }
 
-	void init(fs::path mp, int numPlayers, bool combat);
+	void init(fs::path mp, int np, bool combat);
+
+	void loadFishSprites();
 
 	void handleEvents();
 
@@ -49,6 +53,8 @@ class ClientGame {
 	void stop();
 
 	void zoomIn();
+
+	void renderLoadingBar();
 
 	Manager *getManager();
 
@@ -92,12 +98,18 @@ class ClientGame {
 
 	std::unordered_map<uint8_t, Entity *> players;
 	std::map<uint8_t, ClientGame::groupLabels> entityGroups;
+
 	const char *title;
 	int xpos;
 	int ypos;
 	int width;
 	int height;
 	bool fullscreen;
+
+
+	// increment this for each new fish sprite and reset at init
+	size_t fishSpriteID = 0;
+
 };
 
 } // namespace FishEngine

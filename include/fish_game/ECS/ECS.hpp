@@ -32,6 +32,7 @@ class WearableComponent;
 class EquipmentComponent;
 class EventHandlerComponent;
 class TransformComponent;
+class HealthComponent;
 
 using ComponentID = std::size_t;
 using Group = std::size_t;
@@ -62,8 +63,8 @@ class Component {
   public:
 	Entity *entity;
 
-	template <class Archive>
-	void serialize(Archive &ar) {}
+	// template <class Archive>
+	// void serialize(Archive &ar) {}
 
 	virtual void init() {}
 	/**
@@ -114,7 +115,20 @@ class Entity {
 
 	template <class Archive>
 	void serialize(Archive &ar) {
-		ar(CEREAL_NVP(id), CEREAL_NVP(active), getComponent<TransformComponent>());
+		ar(id, active, getComponent<TransformComponent>());
+
+		// ========== serialize optional components ==========
+		if (hasComponent<WearableComponent>()) {
+			ar(getComponent<WearableComponent>());
+		}
+
+		// if (hasComponent<EquipmentComponent>()) {
+		// 	ar(getComponent<EquipmentComponent>());
+		// }
+
+		// if (hasComponent<HealthComponent>()) {
+		// 	ar(getComponent<HealthComponent>());
+		// }
 	}
 
 	Entity() : manager(manager) {} //
@@ -279,7 +293,8 @@ class Manager {
 		}
 
 		// entities.erase(std::remove_if(std::begin(entities), std::end(entities),
-		//                               [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive(); }),
+		//                               [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive();
+		//                               }),
 		//                std::end(entities));
 
 		for (auto it = entities.begin(); it != entities.end();) {

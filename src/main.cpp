@@ -50,22 +50,17 @@ FuncPtr combat() {
 	u_int32_t frameStart;
 	int frameTime;
 
-	server->init("map03.tmj", 4);
-	client->init("map03.tmj", 4, true);
+	int numPlayers = 4; // todo: get from server
+	server->init("map04.tmj", numPlayers);
+	client->init("map04.tmj", numPlayers, true);
 
-	client->sendJoinRequest("127.0.0.1", "test user in combat");
+	// client->sendJoinRequest("127.0.0.1", "test user in combat");
 
-	uint8_t id = server->handleJoinRequests();
-	std::cout << "Player ID: " << (int)id << std::endl;
-	client->ownPlayerID = id;
 
-	for (int i = 0; i < 4; i++) {
-		std::cout << server->createPlayer() << std::endl;
-	}
+	client->createOwnPlayer();
 
-	server->sendGameState();
-	std::this_thread::sleep_for(std::chrono::seconds(3));
-	client->receiveGameState();
+	// server->sendGameState();
+	// client->receiveGameState();
 
 	std::cout << "Combat init done!" << std::endl;
 
@@ -87,6 +82,9 @@ FuncPtr combat() {
 
 	client->stop();
 	server->stop();
+	client->renderLoadingBar();
+
+	spdlog::get("console")->info("Leaving combat...");
 
 	return mainMenu();
 }
@@ -100,8 +98,10 @@ FuncPtr joinLobby() {
 		return mainMenu();
 	}
 	std::cout << "Joining lobby at " << ip << std::endl;
+
 	client->sendJoinRequest(ip, "join user");
 
+	client->renderLoadingBar();
 	return hostLobby(false);
 }
 
@@ -119,7 +119,9 @@ FuncPtr hostLobby(bool isHost) {
 		client->networkClient.init("127.0.0.1", "host player");
 	}
 
+
 	client->init("lobby.tmj", 1, false);
+
 	client->createOwnPlayer();
 
 	while (client->running()) {
@@ -129,6 +131,7 @@ FuncPtr hostLobby(bool isHost) {
 		client->handleEvents();
 		client->update();
 		client->render();
+
 		spdlog::get("console")->debug("Server Manager:");
 		server->printManager();
 		spdlog::get("console")->debug("Client Manager:");
@@ -140,6 +143,26 @@ FuncPtr hostLobby(bool isHost) {
 			server->sendGameState();
 			server->updatePlayerEvent();
 			server->update();
+    }
+
+		switch (client->updateMainMenu()) {
+		case 0:
+			std::cout << "Leaving main menu..." << std::endl;
+
+			client->stop();
+			server->stop();
+			client->renderLoadingBar();
+			return mainMenu();
+			break;
+		case 3:
+			client->stop();
+			server->stop();
+			client->renderLoadingBar();
+			return combat();
+			break;
+
+		default:
+			break;
 		}
 
 		frameTime = SDL_GetTicks() - frameStart;
@@ -164,7 +187,7 @@ FuncPtr mainMenu() {
 	uint32_t frameStart;
 	int frameTime;
 
-	client->init("mainMenu.tmj", 0, false);
+	client->init("mainMenu.tmj", 1, false);
 	client->createOwnPlayer();
 
 	while (client->running()) {
@@ -176,19 +199,22 @@ FuncPtr mainMenu() {
 
 		switch (client->updateMainMenu()) {
 		case 0:
-			std::cout << "Joining lobby" << std::endl;
 			client->stop();
-			return joinLobby();
+			server->stop();
+			client->renderLoadingBar();
+			return nullptr;
 			break;
 		case 1:
-			std::cout << "Hosting lobby" << std::endl;
 			client->stop();
-			return hostLobby(true);
+			server->stop();
+			client->renderLoadingBar();
+			return joinLobby();
 			break;
 		case 2:
-			std::cout << "Leaving main menu..." << std::endl;
 			client->stop();
-			return nullptr;
+			server->stop();
+			client->renderLoadingBar();
+			return hostLobby();
 			break;
 		default:
 			break;
@@ -209,11 +235,16 @@ int main(int argc, char *argv[]) {
 
 	client = &FishEngine::ClientGame::getInstance();
 
+
+
+	client->renderLoadingBar();
 	// hostLobby();
 	// joinLobby();
 	// combat();
 	mainMenu();
-	std::cout << "Exiting..." << std::endl;
+  
+	spdlog::get("console")->info("Leaving Fish Game...");
+
 
 	return 0;
 }

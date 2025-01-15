@@ -13,10 +13,10 @@ void ProjectileComponent::init() {
 	// spdlog::get("console")->debug("PROJECTILE COMPONENT INIT" );
 	transform = &entity->getComponent<TransformComponent>();
 	spdlog::get("console")->debug("ProjectileComponent - init {}", (transform->faceRight ? 1.0 : -1.0));
-	transform->velocity = velocity * (transform->faceRight ? 1.0 : -1.0);
 }
 
 void ProjectileComponent::update() {
+	transform->velocity = velocity * (transform->faceRight ? 1.0 : -1.0);
 	distance += speed;
 
 	if (distance > range) {

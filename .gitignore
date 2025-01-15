@@ -48,3 +48,4 @@ maps/fish-game.tiled-project
 compile_commands.json
 
 build_and_run.sh
+src/test.cpp

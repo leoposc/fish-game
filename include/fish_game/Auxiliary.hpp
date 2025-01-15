@@ -12,7 +12,7 @@ void serialize(Archive &ar, SDL_Event &event) {
 
 template <class Archive>
 void serialize(Archive &ar, SDL_Rect &rect) {
-	ar(CEREAL_NVP(rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
+	ar(rect.x, rect.y, rect.w, rect.h);
 }
 
 bool isValidIPv4(std::string ip);

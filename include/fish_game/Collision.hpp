@@ -18,7 +18,11 @@ void checkCollisions(std::vector<Entity *> *players, std::vector<Entity *> *proj
 
 void isInWater(std::vector<Entity *> *players, Map *map);
 
-bool checkExit(Entity *player, Map *map);
+bool checkBack(Entity *player, Map *map);
+
+bool checkJoin(Entity *player, Map *map);
+
+bool checkHost(Entity *player, Map *map);
 
 bool checkStart(Entity *player, Map *map);
 

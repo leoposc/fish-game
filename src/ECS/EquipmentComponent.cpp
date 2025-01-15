@@ -10,18 +10,9 @@
 namespace FishEngine {
 
 void EquipmentComponent::init() {
-	spdlog::get("console")->debug("EQUIPMENT COMPONENT INIT");
-
+	// spdlog::get("console")->debug("EQUIPMENT COMPONENT INIT");
 	collider = &entity->getComponent<ColliderComponent>();
 }
-
-// void EquipmentComponent::update() {
-// 	if (isEquipped) {
-// 		spdlog::get("console")->debug( "EquipmentComponent - equipped" );
-// 	} else {
-// 		spdlog::get("console")->debug( "EquipmentComponent - not equipped" );
-// 	}
-// }
 
 void EquipmentComponent::processCommand() {
 	if (isEquipped) {

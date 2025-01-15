@@ -1,13 +1,14 @@
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
+#include "../../include/fish_game/ECS/GravityComponent.hpp"
+#include "../../include/fish_game/ECS/SpriteComponent.hpp"
+#include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/Vector2D.hpp"
 
 #include "spdlog/spdlog.h"
 
-// #include "MoveComponent.hpp"
+constexpr float MAX_JUMP_FORCE = -7.0;
 
 namespace FishEngine {
-
-// MoveComponent::MoveComponent() {}
 
 void MoveComponent::init() {
 	// spdlog::get("console")->debug( "MOVE COMPONENT INIT");
@@ -16,62 +17,98 @@ void MoveComponent::init() {
 		entity->addComponent<TransformComponent>();
 	}
 	transform = &entity->getComponent<TransformComponent>();
+	gravityC = &entity->getComponent<GravityComponent>();
 	transform->velocity.setX(0);
 	transform->velocity.setY(0);
-}
 
-void MoveComponent::update() {
-	// every entity with a MoveComponent ignores gravity while in water
-	if (inWater) {
-		transform->velocity.setY(0);
+	// init sprite component if client
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite = &entity->getComponent<SpriteComponent>();
+		sprite->play("fishIdle");
 	}
 }
 
-void MoveComponent::up() {
-
+void MoveComponent::update() {
+	// spdlog::get("console")->debug("MoveComponent - before updating - velocity Y: {}", transform->velocity.getY());
+	// every entity with a MoveComponent ignores gravity while in water and can jump
 	if (inWater) {
-		transform->velocity.setY(-2);
 		canJump = true;
+	}
+	transform->velocity += velocity;
+}
+
+void MoveComponent::up() {
+	if (inWater) {
+		velocity.setY(-2);
 	} else if (canJump) {
-		transform->velocity.setY(-5);
+		velocity.setY(0);
+		gravityC->applyForce(MAX_JUMP_FORCE);
 		canJump = false;
+	}
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishSwim");
 	}
 }
 
 void MoveComponent::down() {
-	transform->velocity.setY(2);
+
+	velocity.setY(2);
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishSwim");
+	}
 }
 
 void MoveComponent::left() {
-	// face left
 	transform->faceRight = false;
 
 	if (inWater) {
-		transform->velocity.setX(-4);
+		velocity.setX(-4);
 	} else {
-		transform->velocity.setX(-2);
+		velocity.setX(-2);
+	}
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishSwim");
 	}
 }
 
 void MoveComponent::right() {
-	// face right
 	transform->faceRight = true;
 
 	if (inWater) {
-		transform->velocity.setX(4);
+		velocity.setX(4);
 	} else {
-		transform->velocity.setX(2);
+		velocity.setX(2);
+	}
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishSwim");
 	}
 }
 
 void MoveComponent::stopX() {
-	transform->velocity.setX(0);
+	velocity.setX(0);
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishIdle");
+	}
 }
 
 void MoveComponent::stopY() {
-	if (inWater) {
-		transform->velocity.setY(0);
+	// if (inWater) {
+	velocity.setY(0);
+	// }
+	// velocity.setY(0);
+
+	if (entity->hasComponent<SpriteComponent>()) {
+		sprite->play("fishIdle");
 	}
+}
+
+void MoveComponent::collisionStop() {
+	velocity.setX(0);
+	velocity.setY(0);
 }
 
 } // namespace FishEngine
