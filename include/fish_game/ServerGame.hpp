@@ -3,6 +3,7 @@
 // #include "ECS/Components.hpp"
 #include "AssetManager.hpp"
 #include "fish_game/NetworkHost.hpp"
+#include "fish_game/Player.hpp"
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
@@ -69,14 +70,11 @@ class ServerGame {
 	// fs::path mapPath;
 	// bool started;
 
-	int numPlayers = 0;
 	bool isRunning;
 	SDL_Window *window;
 
-	// std::vector<Entity *> players;
+	std::vector<Player> players;
 
-	std::unordered_map<uint8_t, std::string> playerIPs;
-	std::unordered_map<uint8_t, Entity *> players;
 	std::map<uint8_t, groupLabels> entityGroups;
 };
 
