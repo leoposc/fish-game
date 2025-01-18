@@ -415,10 +415,10 @@ void ClientGame::receiveGameState() {
 
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
-					ClientGenerator::forPlayer(entity, {0, 0}, id);
+					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 
 				} else {
-					ClientGenerator::forEnemy(entity, {0, 0}, id);
+					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
 				}
 				players.insert(std::make_pair(entity.getID(), &entity));
 				break;
