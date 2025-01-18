@@ -15,14 +15,35 @@ class EquipmentComponent : public Component {
 
   private:
 	bool isEquipped = false;
+	bool needsUpdate = false;
+	uint8_t equippedID = -1;
 	std::shared_ptr<WearableComponent> wearable = nullptr;
 	// WearableComponent *wearable = nullptr;
 	ColliderComponent *collider = nullptr;
 
   public:
 	template <class Archive>
-	void serialize(Archive &ar) {
-		ar(isEquipped);
+	void save(Archive &ar) {
+		ar(needsUpdate);
+		if (needsUpdate) {
+			ar(isEquipped, equippedID);
+			needsUpdate = false;
+		}
+	}
+
+	template <class Archive>
+	void load(Archive &ar) {
+		ar(needsUpdate);
+		if (needsUpdate) {
+			needsUpdate = false;
+			ar(isEquipped, equippedID);
+			if (isEquipped) {
+				assert(equippedID != -1);
+				equip(&entity->getManager()->getEntity(equippedID));
+			} else {
+				unequip();
+			}
+		}
 	}
 
 	EquipmentComponent() = default;

@@ -25,7 +25,6 @@ void EquipmentComponent::processCommand() {
 			if (SDL_HasIntersection(&col, &weapon->getComponent<ColliderComponent>().collider)) {
 				if (weapon->getComponent<WearableComponent>().isAttached()) {
 					spdlog::info("Weapon already attached!");
-					return;
 				} else {
 					spdlog::info("Weapon attached!");
 					equip(weapon);
@@ -37,7 +36,9 @@ void EquipmentComponent::processCommand() {
 }
 
 void EquipmentComponent::equip(Entity *entity) {
+	needsUpdate = true;
 	isEquipped = true;
+	equippedID = entity->getID();
 	wearable = entity->getComponentSmartPtr<WearableComponent>();
 	// wearable = &entity->getComponent<WearableComponent>();
 
@@ -47,7 +48,9 @@ void EquipmentComponent::equip(Entity *entity) {
 }
 
 void EquipmentComponent::unequip() {
+	needsUpdate = true;
 	isEquipped = false;
+	equippedID = -1;
 	if (wearable != nullptr) {
 		wearable->detach();
 	} else {
