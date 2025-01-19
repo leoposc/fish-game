@@ -80,6 +80,8 @@ class Component {
 	 */
 	virtual void draw() {}
 
+	virtual void print() {}
+
 	virtual ~Component() {}
 };
 
@@ -225,6 +227,17 @@ class Entity {
 		}
 		return nullptr;
 	}
+
+	void print() const {
+		std::cout << "Entity ID: " << static_cast<int>(id) << std::endl;
+		std::cout << "Active: " << (active ? "true" : "false") << std::endl;
+		std::cout << "Components: " << std::endl;
+		std::cout << "Manager Address: " << &manager << std::endl;
+		for (const auto &component : components) {
+			std::cout << "  - " << typeid(*component).name() << std::endl;
+			component->print();
+		}
+	}
 };
 
 class Manager {
@@ -239,7 +252,9 @@ class Manager {
 
 	Entity &getEntity(uint8_t id) const {
 		auto it = entities.find(id);
-		assert(it != entities.end());
+		if (it == entities.end()) {
+			throw std::runtime_error("Entity not found");
+		}
 		return *it->second;
 	}
 
@@ -303,15 +318,32 @@ class Manager {
 		std::cout << "Entity added. size now: " << entities.size() << std::endl;
 	}
 
+	void print() const {
+		for (const auto &pair : entities) {
+			const auto &entity = pair.second;
+			entity->print();
+		}
+	}
+
 	Entity &addEntity(uint8_t id) {
-		// std::cout << "Adding entity" << std::endl;
+		// Check if the entity with the given ID already exists
+		auto it = entities.find(id);
+		if (it != entities.end()) {
+			// Remove the existing entity
+			entities.erase(it);
+			spdlog::get("console")->info("Existing entity with ID {} removed", static_cast<int>(id));
+		}
+
+		// Create a new entity
 		Entity *e = new Entity(*this);
+		spdlog::get("console")->info("Creating new entity with ID {}", static_cast<int>(id));
 		e->setID(id);
-		// std::cout << "Entity created" << std::endl;
+
+		// Add the new entity to the map
 		std::unique_ptr<Entity> uPtr(e);
-		// std::cout << "Unique pointer created" << std::endl;
 		entities.emplace(id, std::move(uPtr));
-		// std::cout << "Entity moved" << std::endl;
+		spdlog::get("console")->info("New entity with ID {} added", static_cast<int>(id));
+
 		return *e;
 	}
 };

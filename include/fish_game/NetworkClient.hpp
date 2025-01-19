@@ -21,7 +21,7 @@ class NetworkClient {
 
 	void init(const std::string hostIP, const std::string username);
 
-	void setEvent(const InputEvent::Event event);
+	void sendEvent(const std::string event);
 	std::string getUpdate();
 	bool hasUpdate();
 
@@ -29,6 +29,7 @@ class NetworkClient {
 	// data variables
 	std::string hostIP;
 	std::string username;
+	int player_id;
 
 	// what should the network host have?
 	// Needs all players, so it should also have all the elements -> first time transfer of everything?
@@ -56,7 +57,7 @@ class NetworkClient {
 	SocketManager socket;
 	std::thread workerThread;
 	std::mutex mutex;
-	std::queue<InputEvent::Event> sendQueue;
+	std::queue<std::string> sendQueue;
 
 	std::vector<std::tuple<std::string, int>> newUsers;
 	std::string gameState;

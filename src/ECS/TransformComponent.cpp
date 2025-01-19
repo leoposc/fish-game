@@ -23,6 +23,19 @@ void TransformComponent::update() {
 	velocity = {0, 0};
 }
 
+void TransformComponent::print() {
+	std::cout << "Velocity: (" << velocity.getX() << ", " << velocity.getY() << ")\n";
+	std::cout << "Position: (" << position.getX() << ", " << position.getY() << ")\n";
+}
+
+void TransformComponent::sync(TransformComponent serverTransform) {
+	this->velocity = serverTransform.velocity;
+	this->position.setX(serverTransform.position.getX());
+	this->position.setY(serverTransform.position.getY());
+	std::cout << "Updated to: (" << velocity.getX() << ", " << velocity.getY() << ")\n";
+	std::cout << "Updated to: (" << position.getX() << ", " << position.getY() << ")\n";
+}
+
 } // namespace FishEngine
 
 #include <cereal/archives/json.hpp>

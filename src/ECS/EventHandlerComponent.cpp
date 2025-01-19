@@ -7,6 +7,7 @@
 #include "../../include/fish_game/ECS/ServerComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 
+#include "fish_game/ServerGame.hpp"
 #include "spdlog/spdlog.h"
 
 namespace FishEngine {
@@ -36,7 +37,7 @@ void EventHandlerComponent::init() {
 }
 
 void EventHandlerComponent::update() {
-	// spdlog::get("console")->debug("EventhandlerComponent - update");
+
 	if (health->isAlive()) {
 		if (event_ptr->type == SDL_KEYDOWN) {
 
@@ -62,7 +63,7 @@ void EventHandlerComponent::update() {
 
 			// send the event to the server
 			if (!isServer) {
-				clientComponent->sendEvent(ClientGame::game_event);
+				clientComponent->sendEvent(*event_ptr);
 			}
 		}
 
@@ -83,7 +84,7 @@ void EventHandlerComponent::update() {
 
 			// send the event to the server
 			if (!isServer) {
-				clientComponent->sendEvent(ClientGame::game_event);
+				clientComponent->sendEvent(*event_ptr);
 			}
 		}
 	}

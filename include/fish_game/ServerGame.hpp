@@ -3,6 +3,7 @@
 // #include "ECS/Components.hpp"
 #include "AssetManager.hpp"
 #include "fish_game/NetworkHost.hpp"
+#include "fish_game/Player.hpp"
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
@@ -20,8 +21,10 @@ namespace FishEngine {
 class ServerGame {
 
   public:
-	ServerGame();
-	~ServerGame();
+	static ServerGame &getInstance() {
+		static ServerGame instance;
+		return instance;
+	}
 
 	SDL_Event getEvent() { return game_event; }
 
@@ -31,9 +34,13 @@ class ServerGame {
 
 	void update();
 
-	uint8_t createPlayer(const std::string &ip);
+	void printManager();
 
-	uint8_t acceptJoinRequest(const std ::string &ip);
+	uint8_t createPlayer();
+
+	uint8_t createPlayer(int id);
+
+	uint8_t handleJoinRequests();
 
 	void updatePlayerEvent();
 
@@ -54,20 +61,22 @@ class ServerGame {
 
 	enum groupLabels : std::size_t { groupMap, groupPlayers, groupEnemies, groupColliders, groupProjectiles };
 
+	NetworkHost networkHost;
+
   private:
+	ServerGame();
+	~ServerGame();
+	ServerGame(const ServerGame &) = delete;
+	ServerGame &operator=(const ServerGame &) = delete;
+
 	// fs::path mapPath;
 	// bool started;
 
-	int numPlayers = 0;
 	bool isRunning;
 	SDL_Window *window;
 
-	// std::vector<Entity *> players;
+	std::vector<Player> players;
 
-	NetworkHost networkHost;
-
-	std::unordered_map<uint8_t, std::string> playerIPs;
-	std::unordered_map<uint8_t, Entity *> players;
 	std::map<uint8_t, groupLabels> entityGroups;
 };
 

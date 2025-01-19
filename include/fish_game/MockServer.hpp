@@ -15,11 +15,11 @@ class MockServer {
 
 	void enqueueEvent(SDL_Event event) { eventQueue.push(event); }
 
-	bool pollEvent(SDL_Event &event) {
+	bool pollEvent() {
 		if (eventQueue.empty()) {
 			return false;
 		}
-		event = eventQueue.front();
+		auto event = eventQueue.front();
 		eventQueue.pop();
 
 		return true;

@@ -1,11 +1,14 @@
 #include "../include/fish_game/NetworkHost.hpp"
+#include "cereal/external/base64.hpp"
 #include "spdlog/spdlog.h"
 #include <iostream>
 #include <string>
 #include <tuple>
+#include <vector>
 
-NetworkHost::NetworkHost() : stopThread(false), socket(SocketManager(8080, true)) {
+NetworkHost::NetworkHost() : stopThread(false), socket(SocketManager()) {
 	this->workerThread = std::thread(&NetworkHost::threadFunction, this);
+	this->socket.init(8080, "", true);
 	spdlog::get("console")->debug("Thread created \n");
 }
 
@@ -17,20 +20,22 @@ NetworkHost::~NetworkHost() {
 	spdlog::get("console")->debug("NetworkHost deconstructed finished\n");
 }
 
-std::optional<InputEvent::Event> NetworkHost::getAction() {
+std::optional<std::string> NetworkHost::getAction() {
 	std::lock_guard<std::mutex> lock(mtx);
 	if (this->elementQueue.empty()) {
 		return std::nullopt;
 	}
 	auto element = this->elementQueue.front();
 	this->elementQueue.pop();
-	return std::get<1>(element);
+	return cereal::base64::decode(std::get<1>(element));
 }
 
 void NetworkHost::updateState(const std::string &updatedState) {
 	std::lock_guard<std::mutex> lock(mtx);
-	this->state = updatedState;
-	this->socket.sendMessage(UPDATE_PREFIX + updatedState);
+	std::string encodedState =
+	    cereal::base64::encode(reinterpret_cast<const unsigned char *>(updatedState.c_str()), updatedState.length());
+	this->state = encodedState;
+	this->socket.sendMessage(UPDATE_PREFIX + this->state);
 }
 
 void NetworkHost::notifyJoin(std::string username, int client_id) {
@@ -60,10 +65,26 @@ void NetworkHost::threadFunction() {
 				clients.insert(std::make_pair(message.client_id, message.message));
 				this->notifyJoin(message.message, message.client_id);
 			} else {
-				spdlog::get("console")->debug("SERVER: received event");
-				this->elementQueue.push(
-				    std::make_tuple(clients[message.client_id], InputEvent::deserialize(message.message)));
+				this->elementQueue.push(std::make_tuple(clients[message.client_id], message.message));
 			}
 		}
 	}
+}
+
+void NetworkHost::printEventQueue() {
+	std::queue<std::tuple<std::string, std::string>> tempQueue = elementQueue;
+
+	while (!tempQueue.empty()) {
+		auto event = tempQueue.front();
+		tempQueue.pop();
+	}
+}
+
+std::vector<std::string> NetworkHost::getClients() {
+	std::vector<std::string> clientList;
+	for (const auto &client : this->clients) {
+		clientList.push_back(client.second);
+	}
+
+	return clientList;
 }
