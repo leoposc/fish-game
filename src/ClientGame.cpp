@@ -19,6 +19,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <cereal/archives/binary.hpp>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <spdlog/spdlog.h>
 
@@ -100,6 +101,9 @@ ClientGame::~ClientGame() {
 }
 
 void ClientGame::init(fs::path mp, int nP, bool combat) {
+	size_t progressUpdate = 0;
+	auto future = std::async(std::launch::async, &FishEngine::ClientGame::startLoadingBar, this);
+
 	isRunning = true;
 	numPlayers = nP;
 
@@ -117,9 +121,17 @@ void ClientGame::init(fs::path mp, int nP, bool combat) {
 		spawnWeapons();
 	}
 
-	fishSpriteID = 0;
 	// load assets
+	fishSpriteID = 0;
 	loadFishSprites();
+
+	// render loading bar and wait for it to finish
+	renderLoadingBar();
+	future.wait();
+
+	// remove all SDL_Events which occured during loading from the queue
+	SDL_PumpEvents();
+	SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 }
 
 void ClientGame::loadFishSprites() {
@@ -501,17 +513,25 @@ void ClientGame::zoomIn() {
 	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
 }
 
+void ClientGame::startLoadingBar() {
+	progressUpdate = 0;
+	for (size_t i = 0; i < SCREEN_HEIGHT / 16; ++i) {
+		++progressUpdate;
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+	}
+}
+
 void ClientGame::renderLoadingBar() {
 	Map *loadingScreen = new Map();
 	loadingScreen->loadMap(fs::path("../../maps/loadingBar.tmj"), false);
 
 	size_t progressBarsComplete = SCREEN_HEIGHT / 16;
 
-	for (size_t i = 0; i < progressBarsComplete; ++i) {
-		loadingScreen->drawLoadingBar(i);
+	while (progressUpdate < progressBarsComplete) {
+		loadingScreen->drawLoadingBar(progressUpdate);
 		loadingScreen->updateAnimations();
 		SDL_RenderPresent(ClientGame::renderer);
-		SDL_Delay(30);
+		SDL_Delay(1);
 	}
 
 	delete loadingScreen;

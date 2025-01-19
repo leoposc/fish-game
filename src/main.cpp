@@ -86,7 +86,6 @@ FuncPtr combat() {
 
 	client->stop();
 	server->stop();
-	client->renderLoadingBar();
 
 	spdlog::get("console")->info("Leaving combat...");
 
@@ -104,7 +103,6 @@ FuncPtr joinLobby() {
 
 	// todo: connect to host
 
-	client->renderLoadingBar();
 	return hostLobby();
 }
 
@@ -148,13 +146,11 @@ FuncPtr hostLobby() {
 
 			client->stop();
 			server->stop();
-			client->renderLoadingBar();
 			return mainMenu();
 			break;
 		case 3:
 			client->stop();
 			server->stop();
-			client->renderLoadingBar();
 			return combat();
 			break;
 
@@ -197,19 +193,16 @@ FuncPtr mainMenu() {
 			std::cout << "Leaving main menu..." << std::endl;
 			client->stop();
 			server->stop();
-			client->renderLoadingBar();
 			return nullptr;
 			break;
 		case 1:
 			client->stop();
 			server->stop();
-			client->renderLoadingBar();
 			return joinLobby();
 			break;
 		case 2:
 			client->stop();
 			server->stop();
-			client->renderLoadingBar();
 			return hostLobby();
 			break;
 		default:
@@ -232,11 +225,10 @@ int main(int argc, char *argv[]) {
 	server = new sG();
 	client = new cG("Fish Game Client", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
-	client->renderLoadingBar();
 	// hostLobby();
 	// joinLobby();
-	combat();
-	// mainMenu();
+	// combat();
+	mainMenu();
 
 	spdlog::get("console")->info("Leaving Fish Game...");
 

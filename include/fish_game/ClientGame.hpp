@@ -51,6 +51,8 @@ class ClientGame {
 
 	void zoomIn();
 
+	void startLoadingBar();
+
 	void renderLoadingBar();
 
 	Manager *getManager();
@@ -89,6 +91,7 @@ class ClientGame {
 
 	// increment this for each new fish sprite and reset at init
 	size_t fishSpriteID = 0;
+	size_t progressUpdate = 0;
 };
 
 } // namespace FishEngine
