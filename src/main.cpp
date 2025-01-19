@@ -41,8 +41,8 @@ FuncPtr mainMenu();
 FuncPtr hostLobby(bool isHost);
 FuncPtr joinLobby();
 
-FuncPtr combat() {
-	std::this_thread::sleep_for(std::chrono::seconds(10));
+FuncPtr combat(bool isHost) {
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 	std::cout << "COMBAT STARTED" << std::endl;
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
@@ -50,17 +50,10 @@ FuncPtr combat() {
 	u_int32_t frameStart;
 	int frameTime;
 
-	int numPlayers = 4; // todo: get from server
-
-	server->init("map04.tmj", numPlayers);
-	client->init("map04.tmj", numPlayers, true);
-
-	// client->sendJoinRequest("127.0.0.1", "test user in combat");
-
-	client->createOwnPlayer();
-
-	// server->sendGameState();
-	// client->receiveGameState();
+	if (isHost) {
+		server->init("map04.tmj", 0);
+	}
+	client->init("map04.tmj", 6, true);
 
 	std::cout << "Combat init done!" << std::endl;
 
@@ -69,9 +62,22 @@ FuncPtr combat() {
 
 		client->handleEvents();
 
+		// problem: cliengame doesnt have the entity
+		client->receiveGameState();
+		client->handleEvents();
 		client->update();
-		server->update();
 		client->render();
+
+		spdlog::get("console")->debug("Client Manager:");
+		client->getManager()->print();
+		spdlog::get("console")->debug("my player id: {}", client->ownPlayerID);
+
+		if (isHost) {
+			server->handleJoinRequests();
+			server->sendGameState();
+			server->updatePlayerEvent();
+			server->update();
+		}
 
 		frameTime = SDL_GetTicks() - frameStart;
 
@@ -119,7 +125,7 @@ FuncPtr hostLobby(bool isHost) {
 		client->networkClient.init("127.0.0.1", "host player");
 	}
 
-	client->init("hostLobby.tmj", 1, false);
+	client->init("hostLobby.tmj", 6, false);
 
 	client->createOwnPlayer();
 
@@ -159,8 +165,9 @@ FuncPtr hostLobby(bool isHost) {
 			if (isHost) {
 				server->stop();
 			}
+
 			client->renderLoadingBar();
-			return combat();
+			return combat(isHost);
 			break;
 
 		default:

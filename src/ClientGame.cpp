@@ -389,17 +389,9 @@ void ClientGame::receiveGameState() {
 
 		if (entityGroups.count(id)) {
 			// case: entity already in clientManager
-			spdlog::get("console")->info("Entity already in clientManager");
-
-			// update the values of the entity
-			// ar(clientManager.getEntity(id));
-			//
+			spdlog::get("console")->info("Entity {} already in clientManager", id);
 			spdlog::get("console")->info("All entities:");
 			clientManager.print();
-
-			spdlog::get("console")->info("updated entity: {} to:", id);
-			transformation_component.print();
-			clientManager.getEntity(id).getComponent<TransformComponent>().sync(transformation_component);
 		} else {
 			// create the entity
 			auto &entity = clientManager.addEntity(id);
@@ -413,10 +405,13 @@ void ClientGame::receiveGameState() {
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
 
+				// TODO: when joining combat its already connected -> no new eventhandler is created
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 
+				} else if (connected && id == this->ownPlayerID) {
+					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 				} else {
 					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
 				}
@@ -485,6 +480,7 @@ bool ClientGame::running() {
 void ClientGame::stop() {
 	clientManager.destroyEntities();
 	players.clear();
+	entityGroups.clear();
 	delete clientMap;
 	clientMap = nullptr;
 	isRunning = false;

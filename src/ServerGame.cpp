@@ -14,6 +14,7 @@
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/MockServer.hpp"
 #include "../include/fish_game/NetworkHost.hpp"
+#include "../include/fish_game/Player.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
 
@@ -57,6 +58,13 @@ void ServerGame::init(fs::path mapPath, int p_numPlayers) {
 		this->createPlayer();
 	}
 
+	// create existing players
+	if (p_numPlayers == 0 && this->players.size() > 0) {
+		for (auto player : this->players) {
+			this->createPlayer(player.getEntityId());
+		}
+	}
+
 	spdlog::get("console")->debug("ServerGame - init done");
 }
 
@@ -89,21 +97,30 @@ void ServerGame::update() {
 
 uint8_t ServerGame::createPlayer() {
 	// update server state
-	numPlayers++;
 
 	auto &player(serverManager.addEntity());
 	serverManager.addToGroup(&player, groupLabels::groupPlayers);
-	ServerGenerator::forPlayer(player, serverMap->getPlayerSpawnpoints(numPlayers).at(numPlayers - 1));
+	ServerGenerator::forPlayer(player, serverMap->getPlayerSpawnpoints(players.size() + 1).at(players.size()));
 
-	players.insert(std::make_pair(player.getID(), &player));
+	players.push_back(Player(player.getID()));
 	entityGroups.insert(std::make_pair(player.getID(), groupLabels::groupPlayers));
 
 	return player.getID();
 }
 
-// NOT really needed, is inside of network host
-uint8_t ServerGame::handleJoinRequests() {
+uint8_t ServerGame::createPlayer(int id) {
+	// update server state
 
+	auto &player(serverManager.addEntity(id));
+
+	serverManager.addToGroup(&player, groupLabels::groupPlayers);
+	ServerGenerator::forPlayer(player, serverMap->getPlayerSpawnpoints(players.size() + 1).at(players.size()));
+	entityGroups.insert(std::make_pair(player.getID(), groupLabels::groupPlayers));
+
+	return player.getID();
+}
+
+uint8_t ServerGame::handleJoinRequests() {
 	static std::vector<std::string> old_clients;
 	// send playerID to client
 	auto clients = this->networkHost.getClients();
@@ -152,21 +169,6 @@ void ServerGame::updatePlayerEvent() {
 	}
 }
 
-void ServerGame::startGame() {
-
-	// Choose a random map from 01 to 03
-	std::string mapPath = "map0" + std::to_string(rand() % 3 + 1) + ".tmj";
-	mapPath = "map03.tmj"; // todo:  only one map yet
-
-	// initialize server
-	init(mapPath, numPlayers);
-
-	// send start signal to clients
-	for (const auto &[playerID, ip] : playerIPs) {
-		// send start signal
-	}
-}
-
 void ServerGame::sendGameState() {
 
 	std::ostringstream os;
@@ -200,7 +202,6 @@ bool ServerGame::running() {
 
 void ServerGame::stop() {
 	serverManager.destroyEntities();
-	players.clear();
 	entityGroups.clear();
 	delete serverMap;
 	serverMap = nullptr;
