@@ -88,7 +88,6 @@ FuncPtr combat(bool isHost) {
 
 	client->stop();
 	server->stop();
-	client->renderLoadingBar();
 
 	spdlog::get("console")->info("Leaving combat...");
 
@@ -106,9 +105,8 @@ FuncPtr joinLobby() {
 	std::cout << "Joining lobby at " << ip << std::endl;
 
 	client->sendJoinRequest(ip, "join user");
-
-	client->renderLoadingBar();
 	return hostLobby(false);
+
 }
 
 FuncPtr hostLobby(bool isHost) {
@@ -157,7 +155,7 @@ FuncPtr hostLobby(bool isHost) {
 			if (isHost) {
 				server->stop();
 			}
-			client->renderLoadingBar();
+
 			return mainMenu();
 			break;
 		case 3:
@@ -165,11 +163,8 @@ FuncPtr hostLobby(bool isHost) {
 			if (isHost) {
 				server->stop();
 			}
-
-			client->renderLoadingBar();
 			return combat(isHost);
 			break;
-
 		default:
 			break;
 		}
@@ -209,17 +204,14 @@ FuncPtr mainMenu() {
 		switch (client->updateMainMenu()) {
 		case 0:
 			client->stop();
-			client->renderLoadingBar();
 			return nullptr;
 			break;
 		case 1:
 			client->stop();
-			client->renderLoadingBar();
 			return joinLobby();
 			break;
 		case 2:
 			client->stop();
-			client->renderLoadingBar();
 			return hostLobby(true);
 			break;
 		default:
@@ -240,12 +232,9 @@ int main(int argc, char *argv[]) {
 	auto err_logger = spdlog::stderr_color_mt("stderr");
 
 	client = &FishEngine::ClientGame::getInstance();
-
-	client->renderLoadingBar();
-	/* hostLobby(true); */
 	// joinLobby();
-	combat();
-	// mainMenu();
+	// combat();
+	mainMenu();
 
 	spdlog::get("console")->info("Leaving Fish Game...");
 
