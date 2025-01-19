@@ -122,13 +122,13 @@ class Entity {
 			ar(getComponent<WearableComponent>());
 		}
 
-		// if (hasComponent<EquipmentComponent>()) {
-		// 	ar(getComponent<EquipmentComponent>());
-		// }
+		if (hasComponent<EquipmentComponent>()) {
+			ar(getComponent<EquipmentComponent>());
+		}
 
-		// if (hasComponent<HealthComponent>()) {
-		// 	ar(getComponent<HealthComponent>());
-		// }
+		if (hasComponent<HealthComponent>()) {
+			ar(getComponent<HealthComponent>());
+		}
 	}
 
 	Entity() : manager(manager) {} //

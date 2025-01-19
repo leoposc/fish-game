@@ -44,7 +44,7 @@ FuncPtr joinLobby();
 FuncPtr combat(bool isHost) {
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 	std::cout << "COMBAT STARTED" << std::endl;
-	const int FPS = 60;
+	const int FPS = 200;
 	const int frameDelay = 1000 / FPS;
 
 	u_int32_t frameStart;
@@ -244,8 +244,8 @@ int main(int argc, char *argv[]) {
 	client->renderLoadingBar();
 	/* hostLobby(true); */
 	// joinLobby();
-	// combat();
-	mainMenu();
+	combat();
+	// mainMenu();
 
 	spdlog::get("console")->info("Leaving Fish Game...");
 
