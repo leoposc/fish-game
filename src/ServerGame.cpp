@@ -58,6 +58,13 @@ void ServerGame::init(fs::path mapPath, int p_numPlayers) {
 		this->createPlayer();
 	}
 
+	// create existing players
+	if (p_numPlayers == 0 && this->players.size() > 0) {
+		for (auto player : this->players) {
+			this->createPlayer(player.getEntityId());
+		}
+	}
+
 	spdlog::get("console")->debug("ServerGame - init done");
 }
 
@@ -101,9 +108,19 @@ uint8_t ServerGame::createPlayer() {
 	return player.getID();
 }
 
-// NOT really needed, is inside of network host
-uint8_t ServerGame::handleJoinRequests() {
+uint8_t ServerGame::createPlayer(int id) {
+	// update server state
 
+	auto &player(serverManager.addEntity(id));
+
+	serverManager.addToGroup(&player, groupLabels::groupPlayers);
+	ServerGenerator::forPlayer(player, serverMap->getPlayerSpawnpoints(players.size() + 1).at(players.size()));
+	entityGroups.insert(std::make_pair(player.getID(), groupLabels::groupPlayers));
+
+	return player.getID();
+}
+
+uint8_t ServerGame::handleJoinRequests() {
 	static std::vector<std::string> old_clients;
 	// send playerID to client
 	auto clients = this->networkHost.getClients();
