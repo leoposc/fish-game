@@ -2,6 +2,7 @@
 
 // #include "ECS/Components.hpp"
 #include "AssetManager.hpp"
+#include "fish_game/Map.hpp"
 #include "fish_game/NetworkHost.hpp"
 #include "fish_game/Player.hpp"
 
@@ -52,7 +53,7 @@ class ServerGame {
 
 	void stop();
 
-	static bool checkCollisions(Entity *player);
+	bool checkCollisions(Entity *player);
 
 	static SDL_Renderer *renderer;
 	static SDL_Event game_event;
@@ -62,6 +63,7 @@ class ServerGame {
 	enum groupLabels : std::size_t { groupMap, groupPlayers, groupEnemies, groupColliders, groupProjectiles };
 
 	NetworkHost networkHost;
+	Map *serverMap;
 
   private:
 	ServerGame();
