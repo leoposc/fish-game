@@ -15,12 +15,12 @@ namespace FishEngine {
 void EventHandlerComponent::init() {
 	spdlog::get("console")->debug("EVENT HANDLER COMPONENT INTI");
 	if (!entity->hasComponent<MoveComponent>()) {
-		spdlog::get("console")->debug("Event Handler Component: no MoveComponent found.");
+		spdlog::get("err_logger")->debug("Event Handler Component: no MoveComponent found.");
 	} else {
 		move = &entity->getComponent<MoveComponent>();
 	}
 	if (!entity->hasComponent<EquipmentComponent>()) {
-		spdlog::get("console")->debug("Event Handler Component: no EquipmentComponent found.");
+		spdlog::get("err_logger")->debug("Event Handler Component: no EquipmentComponent found.");
 	} else {
 		equip = &entity->getComponent<EquipmentComponent>();
 	}

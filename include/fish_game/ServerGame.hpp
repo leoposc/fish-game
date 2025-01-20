@@ -80,6 +80,9 @@ class ServerGame {
 	std::vector<Player> players;
 
 	std::map<uint8_t, groupLabels> entityGroups;
+
+	const unsigned int updateRate_ms = 150;
+	unsigned int nextUpdate = 0;
 };
 
 } // namespace FishEngine

@@ -93,6 +93,7 @@ ClientGame::ClientGame()
 }
 
 ClientGame::~ClientGame() {
+	networkClient.~NetworkClient();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

@@ -34,7 +34,9 @@ AssetManager *ServerGame::assets = new AssetManager(&serverManager); // todo: ne
 
 ServerGame::ServerGame() : isRunning(false) {}
 
-ServerGame::~ServerGame() {}
+ServerGame::~ServerGame() {
+	networkHost.~NetworkHost();
+}
 
 void ServerGame::printManager() {
 	serverManager.print();
@@ -135,12 +137,12 @@ void ServerGame::updatePlayerEvent() {
 	uint8_t id;
 	std::optional<std::string> action = this->networkHost.getAction();
 	if (!action.has_value()) {
-		std::cout << "No action available" << std::endl;
+		spdlog::get("network_logger")->debug("No action received");
 		return;
 	}
 
 	std::string unpackedAction = action.value();
-	std::cout << "Action: " << unpackedAction << std::endl;
+	spdlog::get("network_logger")->debug("Action: {}", unpackedAction);
 
 	std::istringstream is(unpackedAction);
 	cereal::BinaryInputArchive archive(is);
@@ -155,11 +157,16 @@ void ServerGame::updatePlayerEvent() {
 		ServerComponent &serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
 		serCom.setEvent(event);
 	} catch (...) {
-		spdlog::get("console")->debug("Received event too late");
+		spdlog::get("network_logger")->debug("Received event too late");
 	}
 }
 
 void ServerGame::sendGameState() {
+	if (SDL_GetTicks() < nextUpdate) {
+		return;
+	}
+
+	nextUpdate = SDL_GetTicks() + updateRate_ms;
 
 	std::ostringstream os;
 	cereal::BinaryOutputArchive ar(os);

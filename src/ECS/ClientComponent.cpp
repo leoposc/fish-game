@@ -13,15 +13,14 @@
 namespace FishEngine {
 
 void ClientComponent::init() {
-	spdlog::get("console")->debug("Client Component Initialized");
-
+	spdlog::get("console")->info("Client Component Initialized");
 	transform = &entity->getComponent<TransformComponent>();
 }
 
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
 	uint8_t id = ClientGame::getInstance().ownPlayerID;
-	spdlog::get("network_logger")->info("ID before sending Event: {}", id);
+	spdlog::get("network_logger")->debug("ID before sending Event: {}", id);
 	std::ostringstream os;
 	cereal::BinaryOutputArchive archive(os);
 

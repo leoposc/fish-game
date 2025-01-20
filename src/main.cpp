@@ -251,9 +251,9 @@ int main(int argc, char *argv[]) {
 	auto console = spdlog::stdout_color_mt("console");
 	auto err_logger = spdlog::stderr_color_mt("stderr");
 	auto network_logger = spdlog::stdout_color_mt("network_logger");
-	// network_logger->set_level(spdlog::level::off);
-	// console->set_level(spdlog::level::off);
-	err_logger->set_level(spdlog::level::off);
+	network_logger->set_level(spdlog::level::off);
+	console->set_level(spdlog::level::off);
+	err_logger->set_level(spdlog::level::info);
 
 	client = &FishEngine::ClientGame::getInstance();
 	// joinLobby();
