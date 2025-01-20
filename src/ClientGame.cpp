@@ -43,15 +43,12 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
 	// changes.
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	std::cout << "first: " << *windowed << std::endl;
 	*windowed = !*windowed;
-	std::cout << "second: " << *windowed << std::endl;
 	if (*windowed) {
 		int i = SDL_GetWindowDisplayIndex(win);
 		// screenWidth = 1280;
 		// screenHeight = 720;
 		SDL_SetWindowFullscreen(win, 0);
-		std::cout << "Windowed" << std::endl;
 	} else {
 		int i = SDL_GetWindowDisplayIndex(win);
 		SDL_Rect j;
@@ -59,7 +56,6 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 		// screenWidth = j.w;
 		// screenHeight = j.h;
 		SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		std::cout << "Fullscreen" << std::endl;
 	}
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
@@ -364,7 +360,6 @@ std::string ClientGame::joinInterface() {
 }
 
 void ClientGame::sendJoinRequest(std::string ip, std::string username) {
-
 	this->networkClient.init(ip, username);
 }
 

@@ -38,7 +38,7 @@ cG *client = nullptr;
 sG *server = nullptr;
 
 FuncPtr mainMenu();
-FuncPtr hostLobby(bool isHost);
+FuncPtr hostLobby(bool isHost, bool needInit = true);
 FuncPtr joinLobby();
 
 std::thread serverThread;
@@ -79,7 +79,6 @@ void stopServerThread() {
 
 FuncPtr combat(bool isHost) {
 	std::this_thread::sleep_for(std::chrono::seconds(1));
-	std::cout << "COMBAT STARTED" << std::endl;
 	const int FPS = 200;
 	const int frameDelay = 1000 / FPS;
 
@@ -91,8 +90,6 @@ FuncPtr combat(bool isHost) {
 		startServerThread();
 	}
 	client->init("map04.tmj", 6, true);
-
-	std::cout << "Combat init done!" << std::endl;
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
@@ -125,33 +122,28 @@ FuncPtr combat(bool isHost) {
 	spdlog::get("console")->info("Leaving combat...");
 
 	return mainMenu();
+	return hostLobby(isHost, false);
 }
 
 // todo: implement joinLobby
 FuncPtr joinLobby() {
 	std::string ip;
-	std::cout << "Enter IP address: ";
 	ip = client->joinInterface();
 	if (ip.empty()) {
 		return mainMenu();
 	}
-	std::cout << "Joining lobby at " << ip << std::endl;
 
 	client->sendJoinRequest(ip, "join user");
 	return hostLobby(false);
-
 }
 
-FuncPtr hostLobby(bool isHost) {
-	std::cout << "Welcome to Fish Game HOST Lobby" << std::endl;
-
+FuncPtr hostLobby(bool isHost, bool needInit) {
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 	uint32_t frameStart;
 	int frameTime;
 
 	if (isHost) {
-		std::cout << "starting host_thread" << std::endl;
 		server = &FishEngine::ServerGame::getInstance();
 		server->init("hostLobby.tmj", 0);
 		spdlog::get("console")->debug("Server address (where map was loaded): {}", static_cast<void *>(server));
@@ -179,8 +171,6 @@ FuncPtr hostLobby(bool isHost) {
 		switch (client->updateMainMenu()) {
 
 		case 0:
-			std::cout << "Leaving main menu..." << std::endl;
-
 			client->stop();
 			if (isHost) {
 				stopServerThread();
@@ -216,9 +206,6 @@ FuncPtr hostLobby(bool isHost) {
 }
 
 FuncPtr mainMenu() {
-
-	std::cout << "Welcome to Fish Game" << std::endl;
-
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 	uint32_t frameStart;
@@ -263,13 +250,17 @@ int main(int argc, char *argv[]) {
 	spdlog::set_level(spdlog::level::debug);
 	auto console = spdlog::stdout_color_mt("console");
 	auto err_logger = spdlog::stderr_color_mt("stderr");
+	auto network_logger = spdlog::stdout_color_mt("network_logger");
+	// network_logger->set_level(spdlog::level::off);
+	// console->set_level(spdlog::level::off);
+	err_logger->set_level(spdlog::level::off);
 
 	client = &FishEngine::ClientGame::getInstance();
 	// joinLobby();
 	// combat();
 	mainMenu();
 
+	// TODO: DESTROY other threads - 2 threads are still running
 	spdlog::get("console")->info("Leaving Fish Game...");
-
 	return 0;
 }

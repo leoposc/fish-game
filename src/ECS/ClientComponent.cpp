@@ -2,14 +2,13 @@
 #include "../../include/fish_game/Auxiliary.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
 #include "../../include/fish_game/MockServer.hpp"
+#include "fish_game/ClientGame.hpp"
+#include "fish_game/NetworkHost.hpp"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <fstream>
-
-#include "fish_game/ClientGame.hpp"
-#include "fish_game/NetworkHost.hpp"
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 namespace FishEngine {
 
@@ -22,7 +21,7 @@ void ClientComponent::init() {
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
 	uint8_t id = ClientGame::getInstance().ownPlayerID;
-	std::cout << "ID before sending Event: " << static_cast<int>(id) << std::endl;
+	spdlog::get("network_logger")->info("ID before sending Event: {}", id);
 	std::ostringstream os;
 	cereal::BinaryOutputArchive archive(os);
 

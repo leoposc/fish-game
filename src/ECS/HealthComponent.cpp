@@ -31,10 +31,9 @@ void HealthComponent::update() {
 
 		spdlog::get("console")->debug("HealthComponent - entity {} destroyed, not alive anymore", entity->getID());
 		this->entity->destroy();
-    
+
 	} else if (transform->getY() > SCREEN_HEIGHT + 50 || (transform->getX() > SCREEN_WIDTH + 50)
 	           || (transform->getX() < -50)) {
-
 
 		takeDamage();
 

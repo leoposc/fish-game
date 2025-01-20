@@ -126,7 +126,6 @@ uint8_t ServerGame::handleJoinRequests() {
 
 		old_clients = clients;
 	}
-
 	return 0;
 }
 

@@ -229,14 +229,14 @@ class Entity {
 	}
 
 	void print() const {
-		std::cout << "Entity ID: " << static_cast<int>(id) << std::endl;
-		std::cout << "Active: " << (active ? "true" : "false") << std::endl;
-		std::cout << "Components: " << std::endl;
-		std::cout << "Manager Address: " << &manager << std::endl;
-		for (const auto &component : components) {
-			std::cout << "  - " << typeid(*component).name() << std::endl;
-			component->print();
-		}
+		// spdlog::get("network_logger")->info("Entity ID: {}", static_cast<int>(id));
+		// spdlog::get("network_logger")->info("Active: {}", active ? "true" : "false");
+		// spdlog::get("network_logger")->info("Manager Address: {}", &manager);
+		// spdlog::get("network_logger")->info("Components: ");
+		// for (const auto &component : components) {
+		// 	spdlog::get("network_logger")->info("  - {}", typeid(*component).name());
+		// 	component->print();
+		// }
 	}
 };
 

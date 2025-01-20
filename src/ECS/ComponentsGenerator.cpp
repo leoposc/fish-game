@@ -7,7 +7,6 @@ namespace ClientGenerator {
 void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos, size_t fishSpriteID) {
 	player.addComponent<TransformComponent>(pos.first, pos.second, 30, 40, 1);
 	player.addComponent<SpriteComponent>("fish0" + std::to_string(fishSpriteID), true);
-	std::cout << "fish0" + std::to_string(fishSpriteID) << std::endl;
 	player.addComponent<ClientComponent>();
 	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 30, 40);
 	player.addComponent<GravityComponent>();

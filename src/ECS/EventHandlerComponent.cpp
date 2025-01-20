@@ -54,7 +54,6 @@ void EventHandlerComponent::update() {
 				move->right();
 			}
 			if (event_ptr->key.keysym.sym == SDLK_j) {
-				spdlog::get("console")->debug("J pressed");
 				equip->processCommand();
 			}
 			if (event_ptr->key.keysym.sym == SDLK_k) {

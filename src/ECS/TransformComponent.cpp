@@ -24,16 +24,16 @@ void TransformComponent::update() {
 }
 
 void TransformComponent::print() {
-	std::cout << "Velocity: (" << velocity.getX() << ", " << velocity.getY() << ")\n";
-	std::cout << "Position: (" << position.getX() << ", " << position.getY() << ")\n";
+	spdlog::get("console")->info("Velocity: ({}, {})", velocity.getX(), velocity.getY());
+	spdlog::get("console")->info("Position: ({}, {})", position.getX(), position.getY());
 }
 
 void TransformComponent::sync(TransformComponent serverTransform) {
-	this->velocity = serverTransform.velocity;
-	this->position.setX(serverTransform.position.getX());
-	this->position.setY(serverTransform.position.getY());
-	std::cout << "Updated to: (" << velocity.getX() << ", " << velocity.getY() << ")\n";
-	std::cout << "Updated to: (" << position.getX() << ", " << position.getY() << ")\n";
+	// this->velocity = serverTransform.velocity;
+	// this->position.setX(serverTransform.position.getX());
+	// this->position.setY(serverTransform.position.getY());
+	// std::cout << "Updated to: (" << velocity.getX() << ", " << velocity.getY() << ")\n";
+	// std::cout << "Updated to: (" << position.getX() << ", " << position.getY() << ")\n";
 }
 
 } // namespace FishEngine

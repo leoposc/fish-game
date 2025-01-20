@@ -9,7 +9,6 @@ NetworkClient::NetworkClient() : socket(SocketManager()), sendQueue(std::queue<s
 void NetworkClient::init(const std::string hostIP, const std::string username) {
 	this->hostIP = hostIP;
 	this->username = username;
-	// TODO: pass ip
 	this->socket.init(8080, hostIP, false);
 
 	while (!this->sendQueue.empty()) {
@@ -20,7 +19,9 @@ void NetworkClient::init(const std::string hostIP, const std::string username) {
 }
 
 NetworkClient::~NetworkClient() {
+	spdlog::get("console")->debug("starting NetworkClient deconstruction!");
 	this->workerThread.join();
+	spdlog::get("console")->debug("NetworkClient deconstructed!");
 }
 
 void NetworkClient::run() {

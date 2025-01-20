@@ -1,11 +1,11 @@
 #include "../include/fish_game/Map.hpp"
 #include "../include/fish_game/ClientGame.hpp"
-#include "spdlog/spdlog.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <fstream>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 namespace FishEngine {
 
@@ -122,7 +122,7 @@ void Map::drawImageLayer(tson::Layer &layer) {
 	if (texture != nullptr) {
 		SDL_RenderCopy(ClientGame::renderer, texture, nullptr, nullptr);
 	} else {
-		std::cout << "Failed to load texture for image layer: " << imagePath << std::endl;
+		spdlog::get("stderr")->error("Failed to load image layer texture!");
 	}
 }
 
@@ -177,7 +177,7 @@ void Map::loadBackground() {
 	fs::path imagePath = getImagePath(background->getImage()).relative_path();
 	SDL_Texture *texture = loadTexture(imagePath.generic_string());
 	if (texture == nullptr) {
-		std::cout << "Failed to load background image!" << std::endl;
+		spdlog::get("stderr")->error("Failed to load background texture!");
 	}
 	tilesetTextures[imagePath] = texture;
 }
