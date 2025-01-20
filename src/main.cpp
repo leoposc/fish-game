@@ -41,6 +41,42 @@ FuncPtr mainMenu();
 FuncPtr hostLobby(bool isHost);
 FuncPtr joinLobby();
 
+std::thread serverThread;
+std::mutex serverMutex;
+std::condition_variable serverCv;
+bool serverRunning = false;
+
+void serverLoop() {
+	while (serverRunning) {
+		std::unique_lock<std::mutex> lock(serverMutex);
+		serverCv.wait(lock, [] { return serverRunning; });
+
+		server->handleJoinRequests();
+		server->sendGameState();
+		server->updatePlayerEvent();
+		server->update();
+
+		lock.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(17)); // Approx 60 FPS
+	}
+}
+
+void startServerThread() {
+	serverRunning = true;
+	serverThread = std::thread(serverLoop);
+}
+
+void stopServerThread() {
+	{
+		std::lock_guard<std::mutex> lock(serverMutex);
+		serverRunning = false;
+	}
+	serverCv.notify_all();
+	if (serverThread.joinable()) {
+		serverThread.join();
+	}
+}
+
 FuncPtr combat(bool isHost) {
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 	std::cout << "COMBAT STARTED" << std::endl;
@@ -52,6 +88,7 @@ FuncPtr combat(bool isHost) {
 
 	if (isHost) {
 		server->init("map04.tmj", 0);
+		startServerThread();
 	}
 	client->init("map04.tmj", 6, true);
 
@@ -72,13 +109,6 @@ FuncPtr combat(bool isHost) {
 		client->getManager()->print();
 		spdlog::get("console")->debug("my player id: {}", client->ownPlayerID);
 
-		if (isHost) {
-			server->handleJoinRequests();
-			server->sendGameState();
-			server->updatePlayerEvent();
-			server->update();
-		}
-
 		frameTime = SDL_GetTicks() - frameStart;
 
 		if (frameDelay > frameTime) {
@@ -87,7 +117,11 @@ FuncPtr combat(bool isHost) {
 	}
 
 	client->stop();
-	server->stop();
+	client->stop();
+	if (isHost) {
+		stopServerThread();
+		server->stop();
+	}
 	client->renderLoadingBar();
 
 	spdlog::get("console")->info("Leaving combat...");
@@ -120,13 +154,17 @@ FuncPtr hostLobby(bool isHost) {
 	int frameTime;
 
 	if (isHost) {
+		std::cout << "starting host_thread" << std::endl;
 		server = &FishEngine::ServerGame::getInstance();
 		server->init("hostLobby.tmj", 0);
+		spdlog::get("console")->debug("Server address (where map was loaded): {}", static_cast<void *>(server));
+		spdlog::get("console")->debug("Server map address (where map was loaded): {}",
+		                              static_cast<void *>(server->serverMap));
 		client->networkClient.init("127.0.0.1", "host player");
+		startServerThread();
 	}
 
 	client->init("hostLobby.tmj", 6, false);
-
 	client->createOwnPlayer();
 
 	while (client->running()) {
@@ -141,13 +179,6 @@ FuncPtr hostLobby(bool isHost) {
 		client->getManager()->print();
 		spdlog::get("console")->debug("my player id: {}", client->ownPlayerID);
 
-		if (isHost) {
-			server->handleJoinRequests();
-			server->sendGameState();
-			server->updatePlayerEvent();
-			server->update();
-		}
-
 		switch (client->updateMainMenu()) {
 
 		case 0:
@@ -155,6 +186,7 @@ FuncPtr hostLobby(bool isHost) {
 
 			client->stop();
 			if (isHost) {
+				stopServerThread();
 				server->stop();
 			}
 			client->renderLoadingBar();
@@ -163,6 +195,7 @@ FuncPtr hostLobby(bool isHost) {
 		case 3:
 			client->stop();
 			if (isHost) {
+				stopServerThread();
 				server->stop();
 			}
 
@@ -182,6 +215,7 @@ FuncPtr hostLobby(bool isHost) {
 
 	client->stop();
 	if (isHost) {
+		stopServerThread();
 		server->stop();
 	}
 	return nullptr;
@@ -244,8 +278,8 @@ int main(int argc, char *argv[]) {
 	client->renderLoadingBar();
 	/* hostLobby(true); */
 	// joinLobby();
-	combat();
-	// mainMenu();
+	// combat();
+	mainMenu();
 
 	spdlog::get("console")->info("Leaving Fish Game...");
 

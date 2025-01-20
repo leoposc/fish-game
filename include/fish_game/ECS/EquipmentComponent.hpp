@@ -15,7 +15,7 @@ class EquipmentComponent : public Component {
 
   private:
 	bool isEquipped = false;
-	bool needsUpdate = false;
+	mutable bool needsUpdate = false;
 	uint8_t equippedID = -1;
 	std::shared_ptr<WearableComponent> wearable = nullptr;
 	// WearableComponent *wearable = nullptr;
@@ -23,7 +23,7 @@ class EquipmentComponent : public Component {
 
   public:
 	template <class Archive>
-	void save(Archive &ar) {
+	void save(Archive &ar) const {
 		ar(needsUpdate);
 		if (needsUpdate) {
 			ar(isEquipped, equippedID);

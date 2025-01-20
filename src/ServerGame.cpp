@@ -32,8 +32,6 @@ SDL_Event ServerGame::game_event;
 Manager serverManager;
 AssetManager *ServerGame::assets = new AssetManager(&serverManager); // todo: need it?
 
-Map *serverMap;
-
 ServerGame::ServerGame() : isRunning(false) {}
 
 ServerGame::~ServerGame() {}
@@ -86,13 +84,6 @@ void ServerGame::update() {
 	// check collision
 	Collision::isInWater(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 	Collision::checkCollisions(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
-
-	// check for exit
-	if (serverManager.getGroup(ClientGame::groupLabels::groupPlayers).empty()) {
-		stop();
-
-		// send end signal to clients TODO
-	}
 }
 
 uint8_t ServerGame::createPlayer() {
