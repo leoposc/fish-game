@@ -47,7 +47,13 @@ std::condition_variable serverCv;
 bool serverRunning = false;
 
 void serverLoop() {
+	const int updates_per_second = 60;
+	const int loopDelay = 1000 / updates_per_second;
+	uint32_t start;
+	int loopTime;
+
 	while (serverRunning) {
+		start = SDL_GetTicks();
 		std::unique_lock<std::mutex> lock(serverMutex);
 		serverCv.wait(lock, [] { return serverRunning; });
 
@@ -57,7 +63,10 @@ void serverLoop() {
 		server->update();
 
 		lock.unlock();
-		std::this_thread::sleep_for(std::chrono::milliseconds(17)); // Approx 60 FPS
+		loopTime = SDL_GetTicks() - start;
+		if (loopDelay > loopTime) {
+			SDL_Delay(loopDelay - loopTime);
+		}
 	}
 }
 
