@@ -2,6 +2,7 @@
 #include "../../include/fish_game/ECS/GravityComponent.hpp"
 #include "../../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
+#include "../../include/fish_game/MusicPlayer.hpp"
 #include "../../include/fish_game/Vector2D.hpp"
 
 #include "spdlog/spdlog.h"
@@ -33,6 +34,7 @@ void MoveComponent::update() {
 	// every entity with a MoveComponent ignores gravity while in water and can jump
 	if (inWater) {
 		canJump = true;
+		MusicPlayer::getInstance().playSplashSound();
 	}
 	transform->velocity += velocity;
 }
