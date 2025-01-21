@@ -162,11 +162,6 @@ void ServerGame::updatePlayerEvent() {
 }
 
 void ServerGame::sendGameState() {
-	if (SDL_GetTicks() < nextUpdate) {
-		return;
-	}
-
-	nextUpdate = SDL_GetTicks() + updateRate_ms;
 
 	std::ostringstream os;
 	cereal::BinaryOutputArchive ar(os);
@@ -178,7 +173,7 @@ void ServerGame::sendGameState() {
 	for (auto &[id, group] : entityGroups) {
 
 		// inform the client about the current entities
-		ar(id, group, serverManager.getEntity(id).getComponent<TransformComponent>());
+		ar(id, group);
 
 		// if projectile, send the direction
 		if (group == groupLabels::groupProjectiles) {

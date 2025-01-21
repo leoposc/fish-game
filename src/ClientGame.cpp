@@ -392,8 +392,7 @@ void ClientGame::receiveGameState() {
 		uint8_t id;
 		ClientGame::groupLabels group;
 		TransformComponent transformation_component;
-		ar(id, group, transformation_component);
-		transformation_component.print();
+		ar(id, group);
 
 		if (entityGroups.count(id)) {
 			// case: entity already in clientManager
