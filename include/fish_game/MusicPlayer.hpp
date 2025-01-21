@@ -21,6 +21,7 @@ class MusicPlayer {
 	void playShootSound();
 	void playSplashSound();
 	void playEquipSound();
+	void playJumpSound();
 	void setMusicVolume(int volume); // New method to set music volume
 
   private:
@@ -36,6 +37,7 @@ class MusicPlayer {
 	Mix_Chunk *ShootSound;
 	Mix_Chunk *SplashSound;
 	Mix_Chunk *EquipSound;
+	Mix_Chunk *JumpSound;
 };
 
 #endif // MUSICPLAYER_HPP

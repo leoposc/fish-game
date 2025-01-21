@@ -42,6 +42,7 @@ void MoveComponent::up() {
 	if (inWater) {
 		velocity.setY(-2);
 	} else if (canJump) {
+		MusicPlayer::getInstance().playJumpSound();
 		velocity.setY(0);
 		gravityC->applyForce(MAX_JUMP_FORCE);
 		canJump = false;
