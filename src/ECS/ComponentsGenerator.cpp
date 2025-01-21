@@ -24,7 +24,7 @@ void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos,
 	// enemy.addComponent<ClientComponent>();
 	enemy.addComponent<ColliderComponent>("enemy", pos.first, pos.second, 30, 40);
 	enemy.addComponent<GravityComponent>();
-	enemy.addComponent<MoveComponent>();
+	enemy.addComponent<MoveComponent, 0>();
 	enemy.addComponent<EquipmentComponent>();
 	enemy.addComponent<HealthComponent>();
 	enemy.addGroup(ClientGame::groupLabels::groupEnemies);
@@ -61,11 +61,11 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 	player.addComponent<TransformComponent>(pos.first, pos.second, 30, 40, 1.0);
 	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 30, 40);
 	player.addComponent<GravityComponent>();
-	player.addComponent<MoveComponent>();
+	player.addComponent<MoveComponent, 0>();
 	player.addComponent<ServerComponent>();
 	player.addComponent<EquipmentComponent>();
 	player.addComponent<HealthComponent>();
-	player.addComponent<EventHandlerComponent>(true);
+	player.addComponent<EventHandlerComponent, 0>(true);
 	player.addGroup(ServerGame::groupLabels::groupPlayers);
 	player.addGroup(ServerGame::groupLabels::groupColliders);
 }

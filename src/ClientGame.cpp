@@ -142,6 +142,10 @@ void ClientGame::loadFishSprites() {
 
 void ClientGame::handleEvents() {
 	SDL_PollEvent(&game_event);
+	int eventCount = SDL_PeepEvents(nullptr, 0, SDL_PEEKEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT);
+	spdlog::get("pollEvent")
+	    ->info("Client poll Event: {}, type: {}, evetnQueueSize: {}", game_event.key.keysym.sym, game_event.type,
+	           eventCount);
 
 	switch (game_event.type) {
 		// case quitting the game

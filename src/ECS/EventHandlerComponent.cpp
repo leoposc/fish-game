@@ -62,7 +62,10 @@ void EventHandlerComponent::update() {
 
 			// send the event to the server
 			if (!isServer) {
+				spdlog::get("stderr")->info("Client Event: {}, type: {}", event_ptr->key.keysym.sym, event_ptr->type);
 				clientComponent->sendEvent(*event_ptr);
+			} else {
+				spdlog::get("stderr")->info("Server Event: {}, type: {}", event_ptr->key.keysym.sym, event_ptr->type);
 			}
 		}
 
@@ -84,6 +87,9 @@ void EventHandlerComponent::update() {
 			// send the event to the server
 			if (!isServer) {
 				clientComponent->sendEvent(*event_ptr);
+				spdlog::get("stderr")->info("Client Event: {}, type: {}", event_ptr->key.keysym.sym, event_ptr->type);
+			} else {
+				spdlog::get("stderr")->info("Server Event: {}, type: {}", event_ptr->key.keysym.sym, event_ptr->type);
 			}
 		}
 	}
