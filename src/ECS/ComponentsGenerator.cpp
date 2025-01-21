@@ -10,7 +10,7 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 	player.addComponent<ClientComponent>();
 	player.addComponent<ColliderComponent>("player", pos.first, pos.second, 30, 40);
 	player.addComponent<GravityComponent>();
-	player.addComponent<MoveComponent>();
+	player.addComponent<MoveComponent, 0>();
 	player.addComponent<EquipmentComponent>();
 	player.addComponent<HealthComponent>();
 	player.addComponent<EventHandlerComponent, 0>(false);

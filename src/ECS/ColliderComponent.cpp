@@ -27,15 +27,6 @@ void ColliderComponent::init() {
 }
 
 void ColliderComponent::update() {
-	// spdlog::get("console")->debug("ColliderComponent - new pos: {} {}", collider.x, collider.y);
-
-	// if (ServerGame::checkCollisions(entity)) {
-	// 	SDL_Rect *collider = &entity->getComponent<ColliderComponent>().collider;
-	// 	transform->position = {static_cast<float>(collider->x), static_cast<float>(collider->y)};
-
-	// 	spdlog::get("console")->debug("ColliderComponent - collision detected");
-	// }
-
 	collider.x = static_cast<int>(transform->getX());
 	collider.y = static_cast<int>(transform->getY());
 	collider.w = transform->width * transform->scale;

@@ -28,8 +28,6 @@ class TransformComponent : public Component {
 
 	Vector2D getPosition() { return position; }
 
-	void sync(TransformComponent serverUpdate);
-
 	void setPos(int x, int y) {
 		position.setX(x);
 		position.setY(y);
