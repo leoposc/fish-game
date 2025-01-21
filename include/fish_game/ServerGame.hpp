@@ -29,7 +29,7 @@ class ServerGame {
 
 	SDL_Event getEvent() { return game_event; }
 
-	void init(fs::path mapPath, int numPlayer);
+	void init(fs::path mapPath);
 
 	void handleEvents();
 
