@@ -93,10 +93,11 @@ ClientGame::ClientGame()
 }
 
 ClientGame::~ClientGame() {
-	networkClient.~NetworkClient();
+	/* networkClient.~NetworkClient(); */
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+	spdlog::get("console")->info("Deconstructed GameClient");
 	// log clean
 }
 

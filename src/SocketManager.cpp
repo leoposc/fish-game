@@ -37,7 +37,9 @@ SocketManager::~SocketManager() {
 	spdlog::get("console")->debug("closed all sockets");
 
 	spdlog::get("console")->debug("waiting for server thread");
-	server_thread.join();
+	if (server_thread.joinable()) {
+		server_thread.join();
+	}
 	spdlog::get("console")->debug("SocketManager deconstructed finished");
 }
 
@@ -72,20 +74,45 @@ void SocketManager::setupServer(int port) {
 	}
 
 	this->server_thread = std::thread([this]() {
-		while (true) {
-			int client_socket;
-			if ((client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
-				perror("accept");
+		fd_set readfds;
+		struct timeval timeout;
+
+		while (!stopThread) {
+			FD_ZERO(&readfds);
+			FD_SET(server_fd, &readfds);
+
+			// Set timeout to 1 second
+			timeout.tv_sec = 1;
+			timeout.tv_usec = 0;
+
+			int activity = select(server_fd + 1, &readfds, nullptr, nullptr, &timeout);
+
+			if (activity < 0 && errno != EINTR) {
+				perror("select");
 				close(server_fd);
 				exit(EXIT_FAILURE);
 			}
-			{
-				spdlog::get("console")->debug("client got");
-				std::lock_guard<std::mutex> lock(mtx);
-				client_sockets.push_back(client_socket);
+
+			if (activity == 0) {
+				// Timeout occurred, check if we need to stop the thread
+				continue;
 			}
-			client_threads.emplace_back(&SocketManager::run, this, client_socket);
-			spdlog::get("console")->debug("Client received finished");
+
+			if (FD_ISSET(server_fd, &readfds)) {
+				int client_socket;
+				if ((client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
+					perror("accept");
+					close(server_fd);
+					exit(EXIT_FAILURE);
+				}
+				{
+					spdlog::get("console")->debug("client got");
+					std::lock_guard<std::mutex> lock(mtx);
+					client_sockets.push_back(client_socket);
+				}
+				client_threads.emplace_back(&SocketManager::run, this, client_socket);
+				spdlog::get("console")->debug("Client received finished");
+			}
 		}
 	});
 }
@@ -115,41 +142,68 @@ void SocketManager::setupClient(int port, std::string ip) {
 }
 
 void SocketManager::run(int client_socket) {
+	fd_set readfds;
+	struct timeval timeout;
+
 	while (true) {
-		char buffer[BUFFER_SIZE] = {0};
+		FD_ZERO(&readfds);
+		FD_SET(client_socket, &readfds);
 
-		spdlog::get("console")->debug("waiting for read");
-		int valread = read(client_socket, buffer, BUFFER_SIZE);
-		spdlog::get("console")->debug("read finished");
+		// Set timeout to 1 second
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
 
-		std::lock_guard<std::mutex> lock(mtx);
-		if (valread < 0) {
-			spdlog::get("console")->debug("Problem while reading");
-			// exit(EXIT_FAILURE);
-		} else if (valread == 0) {
-			spdlog::get("console")->debug("Client disconnected");
-			spdlog::get("console")->debug("All messages:");
+		int activity = select(client_socket + 1, &readfds, nullptr, nullptr, &timeout);
 
-			for (const auto &message : messages) {
-				spdlog::get("console")->debug(message.message);
-			}
-			this->sendMessage("Someone disconnected");
-			close(client_socket);
-			return;
+		if (activity < 0 && errno != EINTR) {
+			spdlog::get("console")->debug("select error");
+			break;
 		}
 
-		// Split the buffer on null-termination sign
-		char *start = buffer;
-		while (start < buffer + valread) {
-			char *end = strchr(start, '\0');
-			if (end == nullptr) {
-				end = buffer + valread;
+		if (activity == 0) {
+			// Timeout occurred, check if we need to stop the thread
+			if (stopThread) {
+				return;
 			}
-			std::string message(start, end);
-			messages.push_back(IncomingMessage{client_socket, message});
-			spdlog::get("console")->debug("Received: {}", message);
+			continue;
+		}
 
-			start = end + 1;
+		if (FD_ISSET(client_socket, &readfds)) {
+			char buffer[BUFFER_SIZE] = {0};
+
+			spdlog::get("console")->debug("waiting for read");
+			int valread = read(client_socket, buffer, BUFFER_SIZE);
+			spdlog::get("console")->debug("read finished");
+
+			std::lock_guard<std::mutex> lock(mtx);
+			if (valread < 0) {
+				spdlog::get("console")->debug("Problem while reading");
+				// exit(EXIT_FAILURE);
+			} else if (valread == 0) {
+				spdlog::get("console")->debug("Client disconnected");
+				spdlog::get("console")->debug("All messages:");
+
+				for (const auto &message : messages) {
+					spdlog::get("console")->debug(message.message);
+				}
+				this->sendMessage("Someone disconnected");
+				close(client_socket);
+				return;
+			}
+
+			// Split the buffer on null-termination sign
+			char *start = buffer;
+			while (start < buffer + valread) {
+				char *end = strchr(start, '\0');
+				if (end == nullptr) {
+					end = buffer + valread;
+				}
+				std::string message(start, end);
+				messages.push_back(IncomingMessage{client_socket, message});
+				spdlog::get("console")->debug("Received: {}", message);
+
+				start = end + 1;
+			}
 		}
 
 		if (stopThread) {

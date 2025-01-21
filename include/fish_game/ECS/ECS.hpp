@@ -131,7 +131,6 @@ class Entity {
 		}
 	}
 
-	Entity() : manager(manager) {} //
 	Entity(Manager &man) : manager(man) {}
 
 	Manager *getManager() { return &manager; }

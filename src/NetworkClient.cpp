@@ -20,7 +20,10 @@ void NetworkClient::init(const std::string hostIP, const std::string username) {
 
 NetworkClient::~NetworkClient() {
 	spdlog::get("console")->debug("starting NetworkClient deconstruction!");
-	this->workerThread.join();
+
+	if (this->workerThread.joinable()) {
+		this->workerThread.join();
+	}
 	spdlog::get("console")->debug("NetworkClient deconstructed!");
 }
 
@@ -33,7 +36,6 @@ void NetworkClient::run() {
 			this->sendQueue.pop();
 		}
 
-		// TODO:move this into the client gameloop to avoid race conditions
 		this->handleReceive();
 	}
 }
