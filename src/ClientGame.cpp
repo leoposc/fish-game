@@ -94,6 +94,7 @@ ClientGame::ClientGame()
 
 ClientGame::~ClientGame() {
 	/* networkClient.~NetworkClient(); */
+	spdlog::get("console")->info("Deconstruciton of GameClient starts");
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

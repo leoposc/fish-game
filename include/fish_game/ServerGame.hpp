@@ -67,7 +67,6 @@ class ServerGame {
 
   private:
 	ServerGame();
-	~ServerGame();
 	ServerGame(const ServerGame &) = delete;
 	ServerGame &operator=(const ServerGame &) = delete;
 

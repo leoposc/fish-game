@@ -49,13 +49,10 @@ void NetworkHost::notifyJoin(std::string username, int client_id) {
 
 void NetworkHost::threadFunction() {
 	int counter = 0;
-	while (true) {
+	while (!stopThread) {
 		counter++;
 		{
 			std::lock_guard<std::mutex> lock(mtx);
-			if (stopThread) {
-				return;
-			}
 
 			auto message = this->socket.popMessage();
 			if (message.message == "") {

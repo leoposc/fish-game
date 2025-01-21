@@ -34,10 +34,6 @@ AssetManager *ServerGame::assets = new AssetManager(&serverManager); // todo: ne
 
 ServerGame::ServerGame() : isRunning(false) {}
 
-ServerGame::~ServerGame() {
-	networkHost.~NetworkHost();
-}
-
 void ServerGame::printManager() {
 	serverManager.print();
 }
