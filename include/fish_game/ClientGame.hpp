@@ -13,12 +13,10 @@ namespace FishEngine {
 class ClientGame {
 
   public:
-
 	static ClientGame &getInstance() {
 		static ClientGame instance; // Guaranteed to be destroyed and instantiated on first use
 		return instance;
 	}
-
 
 	SDL_Event getEvent() { return game_event; }
 
@@ -108,11 +106,9 @@ class ClientGame {
 	int height;
 	bool fullscreen;
 
-
 	// increment this for each new fish sprite and reset at init
 	size_t fishSpriteID = 0;
 	size_t progressUpdate = 0;
-
 };
 
 } // namespace FishEngine

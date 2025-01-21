@@ -3,7 +3,7 @@
 #include "spdlog/spdlog.h"
 
 SocketManager::SocketManager() : addrlen(sizeof(address)) {
-	spdlog::get("console")->debug("SocketManager initialized");
+	spdlog::get("socket_logger")->info("SocketManager initialized");
 }
 
 void SocketManager::init(int port, std::string ip, bool host) {
@@ -16,29 +16,29 @@ void SocketManager::init(int port, std::string ip, bool host) {
 }
 
 SocketManager::~SocketManager() {
-	spdlog::get("console")->debug("SocketManager deconstruction started");
+	spdlog::get("socket_logger")->info("SocketManager deconstruction started");
 	{
 		std::lock_guard<std::mutex> lock(mtx);
 		stopThread = true;
 	}
-	spdlog::get("console")->debug("set stopThread");
+	spdlog::get("socket_logger")->info("set stopThread");
 	cv.notify_all();
-	spdlog::get("console")->debug("notified all");
+	spdlog::get("socket_logger")->info("notified all");
 	for (auto &thread : client_threads) {
 		if (thread.joinable()) {
 			thread.join();
 		}
 	}
-	spdlog::get("console")->debug("joinded all threads");
+	spdlog::get("socket_logger")->info("joinded all threads");
 	for (int client_socket : client_sockets) {
 		close(client_socket);
 	}
 	close(server_fd);
-	spdlog::get("console")->debug("closed all sockets");
+	spdlog::get("socket_logger")->info("closed all sockets");
 
-	spdlog::get("console")->debug("waiting for server thread");
+	spdlog::get("socket_logger")->info("waiting for server thread");
 	server_thread.join();
-	spdlog::get("console")->debug("SocketManager deconstructed finished");
+	spdlog::get("socket_logger")->info("SocketManager deconstructed");
 }
 
 void SocketManager::setupServer(int port) {
@@ -80,7 +80,7 @@ void SocketManager::setupServer(int port) {
 				exit(EXIT_FAILURE);
 			}
 			{
-				spdlog::get("console")->debug("client got");
+				spdlog::get("socket_logger")->info("client got");
 				std::lock_guard<std::mutex> lock(mtx);
 				client_sockets.push_back(client_socket);
 			}
@@ -118,20 +118,20 @@ void SocketManager::run(int client_socket) {
 	while (true) {
 		char buffer[BUFFER_SIZE] = {0};
 
-		spdlog::get("console")->debug("waiting for read");
+		spdlog::get("socket_logger")->debug("waiting for read");
 		int valread = read(client_socket, buffer, BUFFER_SIZE);
-		spdlog::get("console")->debug("read finished");
+		spdlog::get("socket_logger")->debug("read finished");
 
 		std::lock_guard<std::mutex> lock(mtx);
 		if (valread < 0) {
-			spdlog::get("console")->debug("Problem while reading");
+			spdlog::get("socket_logger")->debug("Problem while reading");
 			// exit(EXIT_FAILURE);
 		} else if (valread == 0) {
-			spdlog::get("console")->debug("Client disconnected");
-			spdlog::get("console")->debug("All messages:");
+			spdlog::get("socket_logger")->debug("Client disconnected");
+			spdlog::get("socket_logger")->debug("All messages:");
 
 			for (const auto &message : messages) {
-				spdlog::get("console")->debug(message.message);
+				spdlog::get("socket_logger")->debug(message.message);
 			}
 			this->sendMessage("Someone disconnected");
 			close(client_socket);
@@ -147,7 +147,7 @@ void SocketManager::run(int client_socket) {
 			}
 			std::string message(start, end);
 			messages.push_back(IncomingMessage{client_socket, message});
-			spdlog::get("console")->debug("Received: {}", message);
+			spdlog::get("socket_logger")->debug("Received: {}", message);
 
 			start = end + 1;
 		}
@@ -169,17 +169,17 @@ IncomingMessage SocketManager::popMessage() {
 }
 
 void SocketManager::sendMessage(std::string message) {
-	spdlog::get("console")->debug("message sending");
+	spdlog::get("socket_logger")->debug("message sending");
 	char buffer[BUFFER_SIZE] = {0};
 	strncpy(buffer, (message + "\0").c_str(), BUFFER_SIZE - 1);
-	spdlog::get("console")->debug("message copied");
+	spdlog::get("socket_logger")->debug("message copied");
 
 	for (int client_socket : client_sockets) {
 		ssize_t bytes_sent = send(client_socket, buffer, strlen(buffer), 0);
 		if (bytes_sent < 0) {
 			perror("send");
 		} else {
-			spdlog::get("console")->debug("Echo message sent: {}", message);
+			spdlog::get("socket_logger")->debug("Echo message sent: {}", message);
 		}
 	}
 }

@@ -36,6 +36,7 @@ ServerGame::ServerGame() : isRunning(false) {}
 
 ServerGame::~ServerGame() {
 	networkHost.~NetworkHost();
+	spdlog::get("console")->info("ServerGame - deconstructed");
 }
 
 void ServerGame::printManager() {
@@ -65,7 +66,7 @@ void ServerGame::init(fs::path mapPath, int p_numPlayers) {
 		}
 	}
 
-	spdlog::get("console")->debug("ServerGame - init done");
+	spdlog::get("console")->info("ServerGame - init done");
 }
 
 void ServerGame::handleEvents() {

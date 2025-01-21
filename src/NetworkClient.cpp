@@ -19,9 +19,9 @@ void NetworkClient::init(const std::string hostIP, const std::string username) {
 }
 
 NetworkClient::~NetworkClient() {
-	spdlog::get("console")->debug("starting NetworkClient deconstruction!");
+	spdlog::get("network_logger")->info("starting NetworkClient deconstruction!");
 	this->workerThread.join();
-	spdlog::get("console")->debug("NetworkClient deconstructed!");
+	spdlog::get("network_logger")->info("NetworkClient deconstructed!");
 }
 
 void NetworkClient::run() {
@@ -62,7 +62,7 @@ void NetworkClient::handleReceive() {
 
 		int id = atoi(raw_message.substr(0, pos).c_str());
 		std::string username = raw_message.substr(pos + 1);
-		spdlog::get("console")->debug("CLIENT: Player " + message + " joined the game");
+		spdlog::get("network_logger")->info("CLIENT: Player " + message + " joined the game");
 		this->newUsers.push_back(std::make_tuple(message, id));
 		std::queue<std::string> empty;
 		std::swap(this->sendQueue, empty);
