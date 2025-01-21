@@ -21,6 +21,7 @@ void NetworkClient::init(const std::string hostIP, const std::string username) {
 NetworkClient::~NetworkClient() {
 	spdlog::get("console")->debug("starting NetworkClient deconstruction!");
 
+	this->isRunning = false;
 	if (this->workerThread.joinable()) {
 		this->workerThread.join();
 	}
@@ -29,7 +30,7 @@ NetworkClient::~NetworkClient() {
 
 void NetworkClient::run() {
 	this->socket.sendMessage(this->username);
-	while (true) {
+	while (this->isRunning) {
 		if (!this->sendQueue.empty()) {
 			auto sendEvent = this->sendQueue.front();
 			this->socket.sendMessage(sendEvent);
