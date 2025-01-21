@@ -155,9 +155,6 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 	if (isHost) {
 		server = &FishEngine::ServerGame::getInstance();
 		server->init("hostLobby.tmj", 0);
-		spdlog::get("console")->debug("Server address (where map was loaded): {}", static_cast<void *>(server));
-		spdlog::get("console")->debug("Server map address (where map was loaded): {}",
-		                              static_cast<void *>(server->serverMap));
 		client->networkClient.init("127.0.0.1", "host player");
 		startServerThread();
 	}
@@ -173,12 +170,11 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		client->update();
 		client->render();
 
-		spdlog::get("console")->debug("Client Manager:");
+		spdlog::get("network_logger")->debug("Client Manager:");
 		client->getManager()->print();
-		spdlog::get("console")->debug("my player id: {}", client->ownPlayerID);
+		spdlog::get("network_logger")->debug("my player id: {}", client->ownPlayerID);
 
 		switch (client->updateMainMenu()) {
-
 		case 0:
 			client->stop();
 			if (isHost) {

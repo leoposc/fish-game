@@ -20,20 +20,22 @@ void NetworkClient::init(const std::string hostIP, const std::string username) {
 
 NetworkClient::~NetworkClient() {
 	spdlog::get("network_logger")->info("starting NetworkClient deconstruction!");
-	this->workerThread.join();
+	this->isRunning = false;
+	if (this->workerThread.joinable()) {
+		this->workerThread.join();
+	}
 	spdlog::get("network_logger")->info("NetworkClient deconstructed!");
 }
 
 void NetworkClient::run() {
 	this->socket.sendMessage(this->username);
-	while (true) {
+	while (this->isRunning) {
 		if (!this->sendQueue.empty()) {
 			auto sendEvent = this->sendQueue.front();
 			this->socket.sendMessage(sendEvent);
 			this->sendQueue.pop();
 		}
 
-		// TODO:move this into the client gameloop to avoid race conditions
 		this->handleReceive();
 	}
 }

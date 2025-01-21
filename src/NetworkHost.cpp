@@ -17,7 +17,10 @@ NetworkHost::~NetworkHost() {
 	this->stopThread = true;
 	this->cv.notify_all();
 	this->workerThread.join();
-	spdlog::get("network_logger")->info("NetworkHost deconstructed finished\n");
+	if (this->workerThread.joinable()) {
+		this->workerThread.join();
+	}
+	spdlog::get("console")->debug("NetworkHost deconstructed finished\n");
 }
 
 std::optional<std::string> NetworkHost::getAction() {
