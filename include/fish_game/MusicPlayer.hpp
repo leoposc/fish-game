@@ -8,33 +8,34 @@
 
 class MusicPlayer {
   public:
-    static MusicPlayer& getInstance() {
-        static MusicPlayer instance;
-        return instance;
-    }
+	static MusicPlayer &getInstance() {
+		static MusicPlayer instance;
+		return instance;
+	}
 
-    bool loadMusic(const std::string &filePath);
-    void stopMusic();
+	bool loadMusic(const std::string &filePath);
+	void stopMusic();
 
-
-    void playLobbyMusic();
-    void playCombatMusic();
-    void playShootSound();
-    void playSplashSound();
-    void setMusicVolume(int volume); // New method to set music volume
+	void playLobbyMusic();
+	void playCombatMusic();
+	void playShootSound();
+	void playSplashSound();
+	void playEquipSound();
+	void setMusicVolume(int volume); // New method to set music volume
 
   private:
-    MusicPlayer();
-    ~MusicPlayer();
+	MusicPlayer();
+	~MusicPlayer();
 
-    // Delete copy constructor and assignment operator
-    MusicPlayer(const MusicPlayer&) = delete;
-    MusicPlayer& operator=(const MusicPlayer&) = delete;
+	// Delete copy constructor and assignment operator
+	MusicPlayer(const MusicPlayer &) = delete;
+	MusicPlayer &operator=(const MusicPlayer &) = delete;
 
-    Mix_Music *LobbyMusic;
-    Mix_Music *CombatMusic;
-    Mix_Chunk *ShootSound;
-    Mix_Chunk *SplashSound;
+	Mix_Music *LobbyMusic;
+	Mix_Music *CombatMusic;
+	Mix_Chunk *ShootSound;
+	Mix_Chunk *SplashSound;
+	Mix_Chunk *EquipSound;
 };
 
 #endif // MUSICPLAYER_HPP

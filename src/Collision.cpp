@@ -2,6 +2,8 @@
 #include "../include/fish_game/ECS/GravityComponent.hpp"
 #include "../include/fish_game/ECS/HealthComponent.hpp"
 #include "../include/fish_game/ECS/TransformComponent.hpp"
+#include "fish_game/ECS/MoveComponent.hpp"
+#include "fish_game/MusicPlayer.hpp"
 
 namespace FishEngine {
 
@@ -66,8 +68,11 @@ void checkCollisions(std::vector<Entity *> *players, std::vector<Entity *> *proj
 
 void isInWater(std::vector<Entity *> *players, Map *map) {
 	for (auto &player : *players) {
-		player->getComponent<MoveComponent>().inWater =
-		    map->isInWater(&player->getComponent<ColliderComponent>().collider);
+		bool inWater = map->isInWater(&player->getComponent<ColliderComponent>().collider);
+		if (!player->getComponent<MoveComponent>().inWater && inWater) {
+			MusicPlayer::getInstance().playSplashSound();
+		}
+		player->getComponent<MoveComponent>().inWater = inWater;
 	}
 }
 

@@ -34,7 +34,6 @@ void MoveComponent::update() {
 	// every entity with a MoveComponent ignores gravity while in water and can jump
 	if (inWater) {
 		canJump = true;
-		MusicPlayer::getInstance().playSplashSound();
 	}
 	transform->velocity += velocity;
 }

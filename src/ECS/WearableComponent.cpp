@@ -52,6 +52,8 @@ void WearableComponent::attach(Entity *entity) {
 	attached = true;
 	needsUpdate = true;
 
+	MusicPlayer::getInstance().playEquipSound();
+
 	// check if code is executed on the clientside
 	if (this->entity->hasComponent<SpriteComponent>()) {
 		this->entity->getComponent<SpriteComponent>().setTexture("pistol");
