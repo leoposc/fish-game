@@ -29,7 +29,7 @@ class ServerGame {
 
 	SDL_Event getEvent() { return game_event; }
 
-	void init(fs::path mapPath, int numPlayer);
+	void init(fs::path mapPath);
 
 	void handleEvents();
 
@@ -67,7 +67,6 @@ class ServerGame {
 
   private:
 	ServerGame();
-	~ServerGame();
 	ServerGame(const ServerGame &) = delete;
 	ServerGame &operator=(const ServerGame &) = delete;
 

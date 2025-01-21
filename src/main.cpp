@@ -95,7 +95,7 @@ FuncPtr combat(bool isHost) {
 	int frameTime;
 
 	if (isHost) {
-		server->init("map04.tmj", 0);
+		server->init("map04.tmj");
 		startServerThread();
 	}
 	client->init("map04.tmj", 6, true);
@@ -154,7 +154,7 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 
 	if (isHost) {
 		server = &FishEngine::ServerGame::getInstance();
-		server->init("hostLobby.tmj", 0);
+		server->init("hostLobby.tmj");
 		client->networkClient.init("127.0.0.1", "host player");
 		startServerThread();
 	}

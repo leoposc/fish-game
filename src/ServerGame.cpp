@@ -34,16 +34,11 @@ AssetManager *ServerGame::assets = new AssetManager(&serverManager); // todo: ne
 
 ServerGame::ServerGame() : isRunning(false) {}
 
-ServerGame::~ServerGame() {
-	networkHost.~NetworkHost();
-	spdlog::get("console")->info("ServerGame - deconstructed");
-}
-
 void ServerGame::printManager() {
 	serverManager.print();
 }
 
-void ServerGame::init(fs::path mapPath, int p_numPlayers) {
+void ServerGame::init(fs::path mapPath) {
 	// assert(serverManager.checkEmpty());
 	// assert(serverMap == nullptr);
 	// assert(numPlayers > 0);
@@ -54,13 +49,8 @@ void ServerGame::init(fs::path mapPath, int p_numPlayers) {
 	serverMap = new Map();
 	serverMap->loadMap(fs::path("../../maps") / mapPath);
 
-	// =================== init player===========================
-	for (size_t i = 0; i < p_numPlayers; i++) {
-		this->createPlayer();
-	}
-
 	// create existing players
-	if (p_numPlayers == 0 && this->players.size() > 0) {
+	if (this->players.size() > 0) {
 		for (auto player : this->players) {
 			this->createPlayer(player.getEntityId());
 		}
