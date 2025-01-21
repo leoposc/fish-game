@@ -5,6 +5,7 @@
 #include "../../include/fish_game/ECS/ProjectileComponent.hpp"
 #include "../../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
+#include "../../include/fish_game/MusicPlayer.hpp"
 #include "spdlog/spdlog.h"
 
 #include <cereal/archives/json.hpp>
@@ -51,6 +52,8 @@ void WearableComponent::attach(Entity *entity) {
 	attached = true;
 	needsUpdate = true;
 
+	MusicPlayer::getInstance().playEquipSound();
+
 	// check if code is executed on the clientside
 	if (this->entity->hasComponent<SpriteComponent>()) {
 		this->entity->getComponent<SpriteComponent>().setTexture("pistol");
@@ -83,6 +86,7 @@ void WearableComponent::shoot() {
 	if (ammunition > 0) {
 		spdlog::get("console")->debug("WearableComponent - shoot");
 		Manager &manager = *entity->getManager();
+		MusicPlayer::getInstance().playShootSound();
 		Entity &projectile(manager.addEntity(i++));
 		std::pair<std::uint16_t, std::uint16_t> pos(transform->position.getX(), transform->position.getY());
 		ClientGenerator::forProjectile(projectile, pos, transform->faceRight);

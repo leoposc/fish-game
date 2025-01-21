@@ -2,6 +2,7 @@
 #include "../../include/fish_game/ECS/GravityComponent.hpp"
 #include "../../include/fish_game/ECS/SpriteComponent.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
+#include "../../include/fish_game/MusicPlayer.hpp"
 #include "../../include/fish_game/Vector2D.hpp"
 
 #include "spdlog/spdlog.h"

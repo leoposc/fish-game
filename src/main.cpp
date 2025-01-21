@@ -1,11 +1,14 @@
 #include "../include/fish_game/ClientGame.hpp"
 #include "../include/fish_game/FontManager.hpp"
 #include "../include/fish_game/GameInputEvents.hpp"
+#include "../include/fish_game/MusicPlayer.hpp"
 #include "../include/fish_game/NetworkClient.hpp"
 #include "../include/fish_game/NetworkHost.hpp"
 #include "../include/fish_game/ServerGame.hpp"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
+#include <SDL2/SDL_mixer.h>
+#include <iostream>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -91,6 +94,7 @@ FuncPtr combat(bool isHost) {
 	const int FPS = 200;
 	const int frameDelay = 1000 / FPS;
 
+	MusicPlayer::getInstance().playCombatMusic();
 	u_int32_t frameStart;
 	int frameTime;
 
@@ -215,6 +219,7 @@ FuncPtr mainMenu() {
 	const int frameDelay = 1000 / FPS;
 	uint32_t frameStart;
 	int frameTime;
+	MusicPlayer::getInstance().playLobbyMusic();
 
 	client->init("mainMenu.tmj", false);
 	client->createOwnPlayer();
@@ -263,6 +268,10 @@ int main(int argc, char *argv[]) {
 	console->set_level(spdlog::level::off);
 	err_logger->set_level(spdlog::level::info);
 	pollEvent->set_level(spdlog::level::info);
+
+	auto &player = MusicPlayer::getInstance();
+
+	player.setMusicVolume(MIX_MAX_VOLUME / 10);
 
 	client = &FishEngine::ClientGame::getInstance();
 	// joinLobby();
