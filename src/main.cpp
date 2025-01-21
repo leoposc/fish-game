@@ -155,9 +155,6 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 	if (isHost) {
 		server = &FishEngine::ServerGame::getInstance();
 		server->init("hostLobby.tmj");
-		spdlog::get("console")->debug("Server address (where map was loaded): {}", static_cast<void *>(server));
-		spdlog::get("console")->debug("Server map address (where map was loaded): {}",
-		                              static_cast<void *>(server->serverMap));
 		client->networkClient.init("127.0.0.1", "host player");
 		startServerThread();
 	}
@@ -173,12 +170,11 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		client->update();
 		client->render();
 
-		spdlog::get("console")->debug("Client Manager:");
+		spdlog::get("network_logger")->debug("Client Manager:");
 		client->getManager()->print();
-		spdlog::get("console")->debug("my player id: {}", client->ownPlayerID);
+		spdlog::get("network_logger")->debug("my player id: {}", client->ownPlayerID);
 
 		switch (client->updateMainMenu()) {
-
 		case 0:
 			client->stop();
 			if (isHost) {
@@ -260,9 +256,11 @@ int main(int argc, char *argv[]) {
 	auto console = spdlog::stdout_color_mt("console");
 	auto err_logger = spdlog::stderr_color_mt("stderr");
 	auto network_logger = spdlog::stdout_color_mt("network_logger");
-	network_logger->set_level(spdlog::level::off);
-	console->set_level(spdlog::level::debug);
-	err_logger->set_level(spdlog::level::info);
+	auto socket_logger = spdlog::stdout_color_mt("socket_logger");
+	socket_logger->set_level(spdlog::level::info);
+	network_logger->set_level(spdlog::level::info);
+	console->set_level(spdlog::level::off);
+	err_logger->set_level(spdlog::level::off);
 
 	client = &FishEngine::ClientGame::getInstance();
 	// joinLobby();

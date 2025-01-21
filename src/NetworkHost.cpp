@@ -9,13 +9,14 @@
 NetworkHost::NetworkHost() : stopThread(false), socket(SocketManager()) {
 	this->workerThread = std::thread(&NetworkHost::threadFunction, this);
 	this->socket.init(8080, "", true);
-	spdlog::get("console")->debug("Thread created \n");
+	spdlog::get("network_logger")->info("Thread created \n");
 }
 
 NetworkHost::~NetworkHost() {
-	spdlog::get("console")->debug("NetworkHost deconstructed \n");
+	spdlog::get("network_logger")->info("NetworkHost deconstructed \n");
 	this->stopThread = true;
 	this->cv.notify_all();
+	this->workerThread.join();
 	if (this->workerThread.joinable()) {
 		this->workerThread.join();
 	}
@@ -43,7 +44,7 @@ void NetworkHost::updateState(const std::string &updatedState) {
 void NetworkHost::notifyJoin(std::string username, int client_id) {
 	this->socket.sendMessage(JOIN_PREFIX + std::to_string(client_id) + "%" + username);
 	for (const auto &client : clients) {
-		spdlog::get("console")->debug("SERVER: Client ID: {}, Client Name: {}", client.first, client.second);
+		spdlog::get("network_logger")->info("SERVER: Client ID: {}, Client Name: {}", client.first, client.second);
 	}
 }
 
@@ -60,7 +61,7 @@ void NetworkHost::threadFunction() {
 			}
 			if (clients.find(message.client_id) == clients.end()) {
 				// first time -> register user
-				spdlog::get("console")->debug("SERVER: Player " + message.message + " joined the game");
+				spdlog::get("network_logger")->debug("SERVER: Player " + message.message + " joined the game");
 				clients.insert(std::make_pair(message.client_id, message.message));
 				this->notifyJoin(message.message, message.client_id);
 			} else {

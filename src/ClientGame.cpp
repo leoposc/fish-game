@@ -98,8 +98,7 @@ ClientGame::~ClientGame() {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-	spdlog::get("console")->info("Deconstructed GameClient");
-	// log clean
+	spdlog::get("console")->info("ClientGame deconstructed");
 }
 
 void ClientGame::init(fs::path mp, bool combat) {
@@ -110,7 +109,6 @@ void ClientGame::init(fs::path mp, bool combat) {
 
 	// ============ control if game was reset ===========
 	assert(clientManager.checkEmpty());
-	assert(players.empty());
 
 	// ================ init clientMap ==================
 	mapPath = mp;
@@ -213,7 +211,6 @@ void ClientGame::createOwnPlayer() {
 	ownPlayer = &clientManager.addEntity();
 	auto initPos = clientMap->getPlayerSpawnpoints(1).at(0);
 	ClientGenerator::forPlayer(*ownPlayer, initPos, ++fishSpriteID);
-	players.insert(std::make_pair(ownPlayer->getID(), ownPlayer));
 	ownPlayerID = ownPlayer->getID();
 }
 
@@ -368,11 +365,11 @@ void ClientGame::sendJoinRequest(std::string ip, std::string username) {
 void ClientGame::receiveGameState() {
 
 	if (!this->networkClient.hasUpdate()) {
-		spdlog::get("console")->info("skipped, no update received");
+		spdlog::get("console")->debug("skipped, no update received");
 		return;
 	}
 
-	spdlog::get("console")->info("Got update, updating");
+	spdlog::get("console")->debug("Got update, updating");
 	std::string serializedData = this->networkClient.getUpdate();
 	std::istringstream is(serializedData);
 	cereal::BinaryInputArchive ar(is);
@@ -384,7 +381,7 @@ void ClientGame::receiveGameState() {
 	// first time while joining clear all entities
 	if (!connected) {
 		this->getManager()->destroyEntities();
-		spdlog::get("console")->info("First join detected detruction");
+		spdlog::get("console")->debug("First join detected detruction");
 	}
 
 	// check if the entities are already loaded
@@ -392,38 +389,27 @@ void ClientGame::receiveGameState() {
 		// read entity meta data from stream
 		uint8_t id;
 		ClientGame::groupLabels group;
-		TransformComponent transformation_component;
 		ar(id, group);
 
 		if (entityGroups.count(id)) {
 			// case: entity already in clientManager
-			spdlog::get("console")->info("Entity {} already in clientManager", id);
-			spdlog::get("console")->info("All entities:");
-			clientManager.print();
+			spdlog::get("console")->debug("Entity {} already in clientManager", id);
 		} else {
 			// create the entity
 			auto &entity = clientManager.addEntity(id);
-			entity.print();
-
-			clientManager.print();
-			this->getManager()->print();
-			entity.print();
 
 			// create the entity with the correct components
 			switch (group) {
 			case ClientGame::groupLabels::groupPlayers:
-
 				// TODO: when joining combat its already connected -> no new eventhandler is created
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
-
 				} else if (connected && id == this->ownPlayerID) {
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 				} else {
 					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
 				}
-				players.insert(std::make_pair(entity.getID(), &entity));
 				break;
 			case ClientGame::groupLabels::groupWeapons:
 				ClientGenerator::forWeapon(entity, {0, 0});
@@ -487,7 +473,6 @@ bool ClientGame::running() {
 
 void ClientGame::stop() {
 	clientManager.destroyEntities();
-	players.clear();
 	entityGroups.clear();
 	delete clientMap;
 	clientMap = nullptr;

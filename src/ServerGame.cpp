@@ -56,7 +56,7 @@ void ServerGame::init(fs::path mapPath) {
 		}
 	}
 
-	spdlog::get("console")->debug("ServerGame - init done");
+	spdlog::get("console")->info("ServerGame - init done");
 }
 
 void ServerGame::handleEvents() {
