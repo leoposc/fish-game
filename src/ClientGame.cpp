@@ -102,12 +102,11 @@ ClientGame::~ClientGame() {
 	// log clean
 }
 
-void ClientGame::init(fs::path mp, int nP, bool combat) {
+void ClientGame::init(fs::path mp, bool combat) {
 	size_t progressUpdate = 0;
 	auto future = std::async(std::launch::async, &FishEngine::ClientGame::startLoadingBar, this);
 
 	isRunning = true;
-	numPlayers = nP;
 
 	// ============ control if game was reset ===========
 	assert(clientManager.checkEmpty());

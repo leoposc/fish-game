@@ -98,7 +98,7 @@ FuncPtr combat(bool isHost) {
 		server->init("map04.tmj");
 		startServerThread();
 	}
-	client->init("map04.tmj", 6, true);
+	client->init("map04.tmj", true);
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
@@ -162,7 +162,7 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		startServerThread();
 	}
 
-	client->init("hostLobby.tmj", 6, false);
+	client->init("hostLobby.tmj", false);
 	client->createOwnPlayer();
 
 	while (client->running()) {
@@ -220,7 +220,7 @@ FuncPtr mainMenu() {
 	uint32_t frameStart;
 	int frameTime;
 
-	client->init("mainMenu.tmj", 1, false);
+	client->init("mainMenu.tmj", false);
 	client->createOwnPlayer();
 
 	while (client->running()) {
