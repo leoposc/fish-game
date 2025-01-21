@@ -12,11 +12,11 @@ AssetManager::AssetManager(Manager *m) : manager(m) {}
 
 AssetManager::~AssetManager() {
 	for (auto &tex : textures) {
-		std::cout << "Destroying texture: " << tex.first << std::endl;
+		spdlog::get("console")->info("Destroying texture: {}", tex.first);
 		SDL_DestroyTexture(tex.second);
 	}
 	for (auto &font : fonts) {
-		std::cout << "Destroying font: " << font.first << std::endl;
+		spdlog::get("console")->info("Destroying font: {}", font.first);
 		delete font.second;
 	}
 }
@@ -52,7 +52,7 @@ FontManager *AssetManager::loadFromRenderedText(std::string textureText, fs::pat
 
 void AssetManager::renderFonts() {
 	for (auto &font : fonts) {
-		std::cout << "Rendering font: " << font.first << std::endl;
+		spdlog::get("console")->info("Rendering font: {}", font.first);
 		font.second->render((1280 - font.second->getWidth()) / 2, 720 / 3);
 	}
 }
