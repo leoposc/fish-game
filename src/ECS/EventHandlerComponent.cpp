@@ -54,18 +54,21 @@ void EventHandlerComponent::update() {
 				move->right();
 			}
 			if (event_ptr->key.keysym.sym == SDLK_j) {
+				if (isServer)
+					spdlog::get("console")->debug("Server: J pressed");
 				equip->processCommand();
 			}
 			if (event_ptr->key.keysym.sym == SDLK_k) {
 				equip->shoot();
+				if (isServer)
+					spdlog::get("console")->debug("Server: K pressed");
+				equip->processCommand();
 			}
 
 			// send the event to the server
 			if (!isServer) {
-				spdlog::get("stderr")->info("Client Event: {}, type: {}", event_ptr->key.keysym.sym, event_ptr->type);
+				spdlog::get("console")->debug("Sending event to server {}", event_ptr->key.keysym.sym);
 				clientComponent->sendEvent(*event_ptr);
-			} else {
-				spdlog::get("stderr")->info("Server Event: {}, type: {}", event_ptr->key.keysym.sym, event_ptr->type);
 			}
 		}
 
@@ -87,9 +90,6 @@ void EventHandlerComponent::update() {
 			// send the event to the server
 			if (!isServer) {
 				clientComponent->sendEvent(*event_ptr);
-				spdlog::get("stderr")->info("Client Event: {}, type: {}", event_ptr->key.keysym.sym, event_ptr->type);
-			} else {
-				spdlog::get("stderr")->info("Server Event: {}, type: {}", event_ptr->key.keysym.sym, event_ptr->type);
 			}
 		}
 	}

@@ -54,15 +54,16 @@ void EquipmentComponent::unequip() {
 	if (wearable != nullptr) {
 		wearable->detach();
 	} else {
-		spdlog::info("No wearable attached!");
+		spdlog::get("console")->info("No wearable attached!");
 	}
 }
 
 void EquipmentComponent::shoot() {
+	spdlog::get("console")->info("EquipmentComponent::shoot() {}", isEquipped);
 	if (isEquipped) {
 		wearable->shoot();
 	} else {
-		spdlog::info("No weapon equipped!");
+		spdlog::get("console")->info("No weapon equipped!");
 	}
 }
 

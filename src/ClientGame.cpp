@@ -142,10 +142,7 @@ void ClientGame::loadFishSprites() {
 
 void ClientGame::handleEvents() {
 	SDL_PollEvent(&game_event);
-	int eventCount = SDL_PeepEvents(nullptr, 0, SDL_PEEKEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT);
-	spdlog::get("pollEvent")
-	    ->info("Client poll Event: {}, type: {}, evetnQueueSize: {}", game_event.key.keysym.sym, game_event.type,
-	           eventCount);
+	// int eventCount = SDL_PeepEvents(nullptr, 0, SDL_PEEKEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT);
 
 	switch (game_event.type) {
 		// case quitting the game
@@ -369,11 +366,10 @@ void ClientGame::sendJoinRequest(std::string ip, std::string username) {
 void ClientGame::receiveGameState() {
 
 	if (!this->networkClient.hasUpdate()) {
-		spdlog::get("console")->debug("skipped, no update received");
+		// spdlog::get("console")->debug("skipped, no update received");
 		return;
 	}
 
-	spdlog::get("console")->debug("Got update, updating");
 	std::string serializedData = this->networkClient.getUpdate();
 	std::istringstream is(serializedData);
 	cereal::BinaryInputArchive ar(is);
@@ -397,7 +393,7 @@ void ClientGame::receiveGameState() {
 
 		if (entityGroups.count(id)) {
 			// case: entity already in clientManager
-			spdlog::get("console")->debug("Entity {} already in clientManager", id);
+			// spdlog::get("console")->debug("Entity {} already in clientManager", id);
 		} else {
 			// create the entity
 			auto &entity = clientManager.addEntity(id);

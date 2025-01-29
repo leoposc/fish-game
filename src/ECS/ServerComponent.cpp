@@ -17,10 +17,7 @@ void ServerComponent::init() {
 }
 
 void ServerComponent::setEvent(SDL_Event event) {
-	spdlog::get("console")->debug("Event set");
 	this->event = event;
-	spdlog::get("console")->debug("Server breakpoint");
-	spdlog::get("console")->debug("Event type: {}, Event keysym.sym {}", event.type, event.key.keysym.sym);
 }
 
 } // namespace FishEngine

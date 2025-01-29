@@ -107,9 +107,6 @@ FuncPtr combat(bool isHost) {
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
 
-		client->handleEvents();
-
-		// problem: cliengame doesnt have the entity
 		client->receiveGameState();
 		client->handleEvents();
 		client->update();
@@ -265,9 +262,9 @@ int main(int argc, char *argv[]) {
 	auto pollEvent = spdlog::stdout_color_mt("pollEvent");
 	socket_logger->set_level(spdlog::level::off);
 	network_logger->set_level(spdlog::level::off);
-	console->set_level(spdlog::level::off);
-	err_logger->set_level(spdlog::level::info);
-	pollEvent->set_level(spdlog::level::info);
+	console->set_level(spdlog::level::info);
+	err_logger->set_level(spdlog::level::off);
+	pollEvent->set_level(spdlog::level::off);
 
 	auto &player = MusicPlayer::getInstance();
 
