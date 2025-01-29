@@ -18,13 +18,13 @@ void checkCollisions(std::vector<Entity *> *players, std::vector<Entity *> *proj
 
 void isInWater(std::vector<Entity *> *players, Map *map);
 
-bool checkBack(Entity *player, Map *map);
+bool checkBack(const Entity &player, const Map &map);
 
-bool checkJoin(Entity *player, Map *map);
+bool checkJoin(const Entity &player, const Map &map);
 
-bool checkHost(Entity *player, Map *map);
+bool checkHost(const Entity &player, const Map &map);
 
-bool checkStart(Entity *player, Map *map);
+bool checkStart(const Entity &player, const Map &map);
 
 } // namespace Collision
 

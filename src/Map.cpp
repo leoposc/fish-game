@@ -295,7 +295,7 @@ bool Map::isInWater(SDL_Rect *collider) {
 	return false;
 }
 
-bool Map::checkLayer(SDL_Rect *collider, std::string layerName) {
+bool Map::checkLayer(const SDL_Rect *collider, const std::string layerName) const {
 	tson::Layer *layer = currentMap->getLayer(layerName);
 
 	// calculate tile range to check

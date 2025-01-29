@@ -76,20 +76,20 @@ void isInWater(std::vector<Entity *> *players, Map *map) {
 	}
 }
 
-bool checkBack(Entity *player, Map *map) {
-	return map->checkLayer(&player->getComponent<ColliderComponent>().collider, "back");
+bool checkBack(const Entity &player, const Map &map) {
+	return map.checkLayer(&player.getComponent<ColliderComponent>().collider, "back");
 }
 
-bool checkJoin(Entity *player, Map *map) {
-	return map->checkLayer(&player->getComponent<ColliderComponent>().collider, "join");
+bool checkJoin(const Entity &player, const Map &map) {
+	return map.checkLayer(&player.getComponent<ColliderComponent>().collider, "join");
 }
 
-bool checkHost(Entity *player, Map *map) {
-	return map->checkLayer(&player->getComponent<ColliderComponent>().collider, "host");
+bool checkHost(const Entity &player, const Map &map) {
+	return map.checkLayer(&player.getComponent<ColliderComponent>().collider, "host");
 }
 
-bool checkStart(Entity *player, Map *map) {
-	return map->checkLayer(&player->getComponent<ColliderComponent>().collider, "start");
+bool checkStart(const Entity &player, const Map &map) {
+	return map.checkLayer(&player.getComponent<ColliderComponent>().collider, "start");
 }
 
 } // namespace Collision

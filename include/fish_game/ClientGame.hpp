@@ -1,7 +1,8 @@
 #pragma once
 
 #include "AssetManager.hpp"
-#include "fish_game/NetworkClient.hpp"
+#include "Map.hpp"
+#include "NetworkClient.hpp"
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
@@ -18,7 +19,7 @@ class ClientGame {
 		return instance;
 	}
 
-	SDL_Event getEvent() { return game_event; }
+	SDL_Event getEvent() const { return game_event; }
 
 	void init(fs::path mp, bool combat);
 
@@ -28,15 +29,18 @@ class ClientGame {
 
 	void update();
 
-	void render();
+	void render() const;
 
 	void createOwnPlayer();
+
+	void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
+	                     const std::vector<Entity *> &existingWeapons);
 
 	void spawnWeapons();
 
 	void showIP(SDL_Texture *mTexture, int width, int height);
 
-	uint8_t updateMainMenu();
+	uint8_t updateMainMenu() const;
 
 	std::string joinInterface();
 
@@ -46,7 +50,7 @@ class ClientGame {
 
 	bool hasStarted();
 
-	bool running();
+	bool running() const;
 
 	void stop();
 
@@ -58,10 +62,10 @@ class ClientGame {
 
 	Manager *getManager();
 
-	static SDL_Renderer *renderer;
-	static SDL_Event game_event;
-	static SDL_Rect camera;
-	static AssetManager *assets;
+	inline static SDL_Renderer *renderer = nullptr;
+	inline static SDL_Event game_event;
+	inline static AssetManager *assets;
+	inline static SDL_Rect camera;
 
 	NetworkClient networkClient;
 
@@ -85,8 +89,10 @@ class ClientGame {
 
 	bool initialized;
 
+	Manager clientManager;
 	Entity *ownPlayer;
 
+	Map *map = nullptr;
 	fs::path mapPath;
 	int numPlayers = 6;
 	bool isRunning;

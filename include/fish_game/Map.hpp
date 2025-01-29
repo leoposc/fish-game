@@ -53,7 +53,7 @@ class Map {
 	 * @brief: checks if the player is on the specifies layer
 	 * @details: the map is divided into layers, the map needs a layer which matches the provided layerName
 	 */
-	bool checkLayer(SDL_Rect *collider, std::string layerName);
+	bool checkLayer(const SDL_Rect *collider, const std::string layerName) const;
 
 	/**
 	 * @brief: check if the player is in water

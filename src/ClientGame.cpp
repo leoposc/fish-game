@@ -28,15 +28,6 @@ namespace FishEngine {
 constexpr int SCREEN_WIDTH = 2048;
 constexpr int SCREEN_HEIGHT = 1024;
 
-SDL_Renderer *ClientGame::renderer = nullptr;
-SDL_Event ClientGame::game_event;
-SDL_Rect ClientGame::camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-
-Manager clientManager;
-AssetManager *ClientGame::assets = new AssetManager(&clientManager);
-
-Map *clientMap;
-
 // ================== helper functions ==================
 
 void toggleWindowMode(SDL_Window *win, bool *windowed) {
@@ -87,6 +78,7 @@ ClientGame::ClientGame()
 	}
 
 	// load textures
+	assets = new AssetManager(this->getManager());
 	assets->addTexture("pistol", "../../assets/PistolSmall.png");
 	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
 	assets->addTexture("present", "../../assets/present.png");
@@ -112,8 +104,8 @@ void ClientGame::init(fs::path mp, bool combat) {
 
 	// ================ init clientMap ==================
 	mapPath = mp;
-	clientMap = new Map();
-	clientMap->loadMap(fs::path("../../maps") / mapPath);
+	map = new Map();
+	map->loadMap(fs::path("../../maps") / mapPath);
 
 	// ================== init weapons ==================
 	if (combat) {
@@ -170,13 +162,13 @@ void ClientGame::update() {
 	clientManager.update();
 
 	// check for collisions
-	Collision::isInWater(&clientManager.getGroup(groupLabels::groupPlayers), clientMap);
-	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupColliders), clientMap);
+	Collision::isInWater(&clientManager.getGroup(groupLabels::groupPlayers), map);
+	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupColliders), map);
 	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupPlayers),
 	                           &clientManager.getGroup(groupLabels::groupProjectiles));
 
 	// // animate the map
-	clientMap->updateAnimations();
+	map->updateAnimations();
 
 	// check if game is over TODO: just handle it in the server
 	if (clientManager.getGroup(groupLabels::groupPlayers).empty()) {
@@ -185,21 +177,21 @@ void ClientGame::update() {
 	}
 }
 
-void ClientGame::render() {
+void ClientGame::render() const {
 	SDL_RenderClear(renderer);
 
-	clientMap->drawMap();
+	map->drawMap();
 	// clientManager.draw();
 
-	for (auto &t : clientManager.getGroup(groupLabels::groupPlayers)) {
+	for (auto &t : clientManager.getGroup_c(groupLabels::groupPlayers)) {
 		t->draw();
 	}
 
-	for (auto &t : clientManager.getGroup(groupLabels::groupWeapons)) {
+	for (auto &t : clientManager.getGroup_c(groupLabels::groupWeapons)) {
 		t->draw();
 	}
 
-	for (auto &t : clientManager.getGroup(groupLabels::groupProjectiles)) {
+	for (auto &t : clientManager.getGroup_c(groupLabels::groupProjectiles)) {
 		t->draw();
 	}
 
@@ -210,13 +202,13 @@ void ClientGame::render() {
 
 void ClientGame::createOwnPlayer() {
 	ownPlayer = &clientManager.addEntity();
-	auto initPos = clientMap->getPlayerSpawnpoints(1).at(0);
+	auto initPos = map->getPlayerSpawnpoints(1).at(0);
 	ClientGenerator::forPlayer(*ownPlayer, initPos, ++fishSpriteID);
 	ownPlayerID = ownPlayer->getID();
 }
 
-void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
-                     const std::vector<Entity *> &existingWeapons) {
+void ClientGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
+                                 const std::vector<Entity *> &existingWeapons) {
 
 	// check for collision with existing weapons
 	for (auto &weapon : existingWeapons) {
@@ -237,7 +229,7 @@ void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
 
 void ClientGame::spawnWeapons() {
 	// ================== init weapons ==================
-	auto spawnpoints = clientMap->loadWeaponSpawnpoints();
+	auto spawnpoints = map->loadWeaponSpawnpoints();
 
 	if (spawnpoints != nullptr) {
 
@@ -256,8 +248,8 @@ Manager *ClientGame::getManager() {
 
 std::string ClientGame::joinInterface() {
 
-	clientMap = new Map();
-	clientMap->loadMap(fs::path("../../maps/joinLobby.tmj"));
+	map = new Map();
+	map->loadMap(fs::path("../../maps/joinLobby.tmj"));
 	spdlog::get("console")->info("Map loaded");
 
 	FontManager gInputTextTexture(renderer, "../../assets/zd-bold.ttf");
@@ -345,7 +337,7 @@ std::string ClientGame::joinInterface() {
 			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderer);
 
-			clientMap->drawMap();
+			map->drawMap();
 			gPromptTextTexture.render((SCREEN_WIDTH - gPromptTextTexture.getWidth()) / 2, SCREEN_HEIGHT / 3 + 30);
 			gInputTextTexture.render((SCREEN_WIDTH - gInputTextTexture.getWidth()) / 2,
 			                         SCREEN_HEIGHT / 3 + 30 + gPromptTextTexture.getHeight());
@@ -439,86 +431,75 @@ void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
 	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
 }
 
-uint8_t ClientGame::updateMainMenu() {
+uint8_t ClientGame::updateMainMenu() const {
 
-	if (Collision::checkBack(ownPlayer, clientMap))
+	if (Collision::checkBack(*ownPlayer, *map))
 		return 0;
 
-	if (Collision::checkJoin(ownPlayer, clientMap))
+	if (Collision::checkJoin(*ownPlayer, *map))
 		return 1;
 
-	if (Collision::checkHost(ownPlayer, clientMap))
+	if (Collision::checkHost(*ownPlayer, *map))
 		return 2;
 
-	if (Collision::checkStart(ownPlayer, clientMap))
+	if (Collision::checkStart(*ownPlayer, *map))
 		return 3;
 
 	return -1;
 }
 
-bool ClientGame::hasStarted() {
-
-	mapPath = "map03.tmj";
-	return true;
-
-	// TODO: check if the game is started
-	// fetch the number of players from the server and map
-	// sth. like server->fetchState(struct with &mapPath, &numPlayers, &started);
-	// return started;
-}
-
-bool ClientGame::running() {
+bool ClientGame::running() const {
 	return isRunning;
 }
 
 void ClientGame::stop() {
 	clientManager.destroyEntities();
 	entityGroups.clear();
-	delete clientMap;
-	clientMap = nullptr;
+	delete map;
+	map = nullptr;
 	isRunning = false;
 }
 
 // todo: does not work yet - prob pretty wrong
-void ClientGame::zoomIn() {
-	// Get the most outer players
-	std::vector<Entity *> &players = clientManager.getGroup(groupLabels::groupPlayers);
-	if (players.empty())
-		return;
+// void ClientGame::zoomIn() {
+// 	// Get the most outer players
+// 	std::vector<Entity *> &players = clientManager.getGroup(groupLabels::groupPlayers);
+// 	if (players.empty())
+// 		return;
 
-	int minX = players[0]->getComponent<TransformComponent>().position.getX();
-	int minY = players[0]->getComponent<TransformComponent>().position.getY();
-	int maxX = minX, maxY = minY;
+// 	int minX = players[0]->getComponent<TransformComponent>().position.getX();
+// 	int minY = players[0]->getComponent<TransformComponent>().position.getY();
+// 	int maxX = minX, maxY = minY;
 
-	for (auto &player : players) {
-		TransformComponent &transform = player->getComponent<TransformComponent>();
-		int x = transform.position.getX();
-		int y = transform.position.getY();
-		minX = std::min(minX, x);
-		minY = std::min(minY, y);
-		maxX = std::max(maxX, x);
-		maxY = std::max(maxY, y);
-	}
+// 	for (auto &player : players) {
+// 		TransformComponent &transform = player->getComponent<TransformComponent>();
+// 		int x = transform.position.getX();
+// 		int y = transform.position.getY();
+// 		minX = std::min(minX, x);
+// 		minY = std::min(minY, y);
+// 		maxX = std::max(maxX, x);
+// 		maxY = std::max(maxY, y);
+// 	}
 
-	// int minWidth = std :
+// 	// int minWidth = std :
 
-	minX = std::max(0, minX - 100);
-	minY = std::max(0, minY - 100);
-	maxX = std::min(SCREEN_WIDTH, maxX + 100);
-	maxY = std::min(SCREEN_HEIGHT, maxY + 100);
+// 	minX = std::max(0, minX - 100);
+// 	minY = std::max(0, minY - 100);
+// 	maxX = std::min(SCREEN_WIDTH, maxX + 100);
+// 	maxY = std::min(SCREEN_HEIGHT, maxY + 100);
 
-	int width = (maxX - minX);
-	int height = (maxY - minY);
+// 	int width = (maxX - minX);
+// 	int height = (maxY - minY);
 
-	// create a minimum size for the camera
-	width = std::max(width, SCREEN_WIDTH);
-	height = std::max(height, SCREEN_HEIGHT);
+// 	// create a minimum size for the camera
+// 	width = std::max(width, SCREEN_WIDTH);
+// 	height = std::max(height, SCREEN_HEIGHT);
 
-	camera = {minX, minY, width, height};
-	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
+// 	camera = {minX, minY, width, height};
+// 	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
 
-	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
-}
+// 	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
+// }
 
 void ClientGame::startLoadingBar() {
 	progressUpdate = 0;

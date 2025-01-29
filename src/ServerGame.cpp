@@ -27,19 +27,14 @@
 
 namespace FishEngine {
 
-SDL_Event ServerGame::game_event;
-
-Manager serverManager;
-AssetManager *ServerGame::assets = new AssetManager(&serverManager); // todo: need it?
-
 ServerGame::ServerGame() : isRunning(false) {}
 
 void ServerGame::printManager() {
-	serverManager.print();
+	manager.print();
 }
 
 void ServerGame::init(fs::path mapPath) {
-	// assert(serverManager.checkEmpty());
+	// assert(manager.checkEmpty());
 	// assert(serverMap == nullptr);
 	// assert(numPlayers > 0);
 	// assert(players.empty());
@@ -69,21 +64,21 @@ void ServerGame::handleEvents() {
 
 void ServerGame::update() {
 	// delete dead entities
-	serverManager.refresh();
+	manager.refresh();
 
 	// update the entities
-	serverManager.update();
+	manager.update();
 
 	// check collision
-	Collision::isInWater(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
-	Collision::checkCollisions(&serverManager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
+	Collision::isInWater(&manager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
+	Collision::checkCollisions(&manager.getGroup(ClientGame::groupLabels::groupPlayers), serverMap);
 }
 
 uint8_t ServerGame::createPlayer() {
 	// update server state
 
-	auto &player(serverManager.addEntity());
-	serverManager.addToGroup(&player, groupLabels::groupPlayers);
+	auto &player(manager.addEntity());
+	manager.addToGroup(&player, groupLabels::groupPlayers);
 	ServerGenerator::forPlayer(player, serverMap->getPlayerSpawnpoints(players.size() + 1).at(players.size()));
 
 	players.push_back(Player(player.getID()));
@@ -95,9 +90,9 @@ uint8_t ServerGame::createPlayer() {
 uint8_t ServerGame::createPlayer(int id) {
 	// update server state
 
-	auto &player(serverManager.addEntity(id));
+	auto &player(manager.addEntity(id));
 
-	serverManager.addToGroup(&player, groupLabels::groupPlayers);
+	manager.addToGroup(&player, groupLabels::groupPlayers);
 	ServerGenerator::forPlayer(player, serverMap->getPlayerSpawnpoints(players.size() + 1).at(players.size()));
 	entityGroups.insert(std::make_pair(player.getID(), groupLabels::groupPlayers));
 
@@ -144,8 +139,8 @@ void ServerGame::updatePlayerEvent() {
 	// TODO handle event
 	// update the event inside the component of the player entity
 	try {
-		serverManager.print();
-		ServerComponent &serCom = serverManager.getEntity(id).getComponent<ServerComponent>();
+		manager.print();
+		ServerComponent &serCom = manager.getEntity(id).getComponent<ServerComponent>();
 		serCom.setEvent(event);
 	} catch (...) {
 		spdlog::get("network_logger")->debug("Received event too late");
@@ -168,23 +163,23 @@ void ServerGame::sendGameState() {
 
 		// if projectile, send the direction
 		if (group == groupLabels::groupProjectiles) {
-			ar(serverManager.getEntity(id).getComponent<TransformComponent>().faceRight);
+			ar(manager.getEntity(id).getComponent<TransformComponent>().faceRight);
 		}
 
 		// serialize components of the entity
-		ar(serverManager.getEntity(id));
+		ar(manager.getEntity(id));
 	}
 
 	auto serializedString = os.str();
 	this->networkHost.updateState(serializedString);
 }
 
-bool ServerGame::running() {
+bool ServerGame::running() const {
 	return isRunning;
 }
 
 void ServerGame::stop() {
-	serverManager.destroyEntities();
+	manager.destroyEntities();
 	entityGroups.clear();
 	delete serverMap;
 	serverMap = nullptr;

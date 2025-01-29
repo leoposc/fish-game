@@ -7,10 +7,9 @@
 #include "../include/fish_game/ServerGame.hpp"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
-#include <SDL2/SDL_mixer.h>
-#include <iostream>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include <arpa/inet.h>
 #include <cereal/archives/json.hpp>

@@ -11,13 +11,9 @@
 #include <string>
 #include <vector>
 
-// class AssetManager;
 class ColliderComponent;
 
 namespace FishEngine {
-
-// class AssetManager;
-// class ColliderComponent;
 
 class ServerGame {
 
@@ -45,20 +41,17 @@ class ServerGame {
 
 	void updatePlayerEvent();
 
-	void startGame();
-
 	void sendGameState();
 
-	bool running();
+	bool running() const;
 
 	void stop();
 
 	bool checkCollisions(Entity *player);
 
-	static SDL_Renderer *renderer;
-	static SDL_Event game_event;
+	inline static SDL_Renderer *renderer = nullptr;
+	inline static SDL_Event game_event;
 	static SDL_Rect camera;
-	static AssetManager *assets;
 
 	enum groupLabels : std::size_t { groupMap, groupPlayers, groupEnemies, groupColliders, groupProjectiles };
 
@@ -70,8 +63,7 @@ class ServerGame {
 	ServerGame(const ServerGame &) = delete;
 	ServerGame &operator=(const ServerGame &) = delete;
 
-	// fs::path mapPath;
-	// bool started;
+	Manager manager;
 
 	bool isRunning;
 	SDL_Window *window;

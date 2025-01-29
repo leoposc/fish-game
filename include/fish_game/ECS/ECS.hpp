@@ -312,6 +312,8 @@ class Manager {
 
 	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
 
+	const std::vector<Entity *> &getGroup_c(Group group) const { return groupedEntities[group]; }
+
 	Entity &addEntity() {
 		return this->addEntity(generateEntityID());
 		std::cout << "Entity added. size now: " << entities.size() << std::endl;
