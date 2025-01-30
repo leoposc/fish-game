@@ -39,6 +39,7 @@ void EventHandlerComponent::init() {
 void EventHandlerComponent::update() {
 
 	if (health->isAlive()) {
+
 		if (event_ptr->type == SDL_KEYDOWN) {
 
 			if (event_ptr->key.keysym.sym == SDLK_w) {
@@ -53,22 +54,24 @@ void EventHandlerComponent::update() {
 			if (event_ptr->key.keysym.sym == SDLK_d) {
 				move->right();
 			}
-			if (event_ptr->key.keysym.sym == SDLK_j) {
-				if (isServer)
-					spdlog::get("console")->debug("Server: J pressed");
-				equip->processCommand();
-			}
-			if (event_ptr->key.keysym.sym == SDLK_k) {
-				equip->shoot();
-				if (isServer)
-					spdlog::get("console")->debug("Server: K pressed");
-				equip->processCommand();
+			if (isServer) {
+				if (event_ptr->key.keysym.sym == SDLK_j) {
+					equip->processCommand();
+				}
+				if (event_ptr->key.keysym.sym == SDLK_k) {
+					equip->shoot();
+				}
 			}
 
 			// send the event to the server
 			if (!isServer) {
 				spdlog::get("console")->debug("Sending event to server {}", event_ptr->key.keysym.sym);
 				clientComponent->sendEvent(*event_ptr);
+			} else {
+				// reset the event - otherwise the event will be processed multiple times
+				// on the server side, since the server does not poll and therefore override
+				// the event
+				serverComponent->setEvent(SDL_Event());
 			}
 		}
 
@@ -90,15 +93,14 @@ void EventHandlerComponent::update() {
 			// send the event to the server
 			if (!isServer) {
 				clientComponent->sendEvent(*event_ptr);
+			} else {
+				// reset the event - otherwise the event will be processed multiple times
+				// on the server side, since the server does not poll and therefore override
+				// the event
+				serverComponent->setEvent(SDL_Event());
 			}
 		}
 	}
 }
 
 } // namespace FishEngine
-
-#include <cereal/archives/binary.hpp>
-#include <cereal/types/polymorphic.hpp>
-
-CEREAL_REGISTER_TYPE(FishEngine::EventHandlerComponent)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(FishEngine::Component, FishEngine::EventHandlerComponent)

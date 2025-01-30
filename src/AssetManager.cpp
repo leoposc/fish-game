@@ -21,7 +21,7 @@ AssetManager::~AssetManager() {
 	}
 }
 
-void AssetManager::addTexture(std::string id, fs::path path) {
+void AssetManager::addTexture(const std::string id, const fs::path path) {
 	if (textures.find(id) != textures.end()) {
 		spdlog::get("console")->info("Texture {} already loaded!", id);
 		return;
@@ -31,7 +31,7 @@ void AssetManager::addTexture(std::string id, fs::path path) {
 	textures[id] = TextureManager::loadTexture(path);
 }
 
-FontManager *AssetManager::loadFont(fs::path path, int fontSize) {
+FontManager *AssetManager::loadFont(const fs::path path, const int fontSize) {
 	std::string id = path.string() + std::to_string(fontSize);
 	if (fonts.find(id) != fonts.end()) {
 		return fonts[id];
@@ -40,8 +40,8 @@ FontManager *AssetManager::loadFont(fs::path path, int fontSize) {
 	return fonts[id];
 }
 
-FontManager *AssetManager::loadFromRenderedText(std::string textureText, fs::path path, int fontSize,
-                                                SDL_Color textColor) {
+FontManager *AssetManager::loadFromRenderedText(const std::string textureText, const fs::path path, const int fontSize,
+                                                const SDL_Color textColor) {
 	std::string id = path.string() + std::to_string(fontSize);
 	if (fonts.find(id) == fonts.end()) {
 		fonts[id] = new FontManager(ClientGame::renderer, path.c_str(), fontSize);
@@ -57,8 +57,13 @@ void AssetManager::renderFonts() {
 	}
 }
 
-SDL_Texture *AssetManager::getTexture(std::string id) {
-	return textures[id];
+SDL_Texture *AssetManager::getTexture(const std::string id) const {
+	auto it = textures.find(id);
+	if (it != textures.end()) {
+		return it->second;
+	}
+	spdlog::get("stderr")->info("Texture {} not found!", id);
+	return nullptr;
 }
 
 } // namespace FishEngine

@@ -22,15 +22,15 @@ void ColliderComponent::init() {
 	lastPosition = transform->getPosition();
 	collider.x = static_cast<int>(transform->getX());
 	collider.y = static_cast<int>(transform->getY());
-	collider.w = transform->width * transform->scale;
-	collider.h = transform->height * transform->scale;
+	collider.w = transform->getWidth() * transform->getScale();
+	collider.h = transform->getHeight() * transform->getScale();
 }
 
 void ColliderComponent::update() {
 	collider.x = static_cast<int>(transform->getX());
 	collider.y = static_cast<int>(transform->getY());
-	collider.w = transform->width * transform->scale;
-	collider.h = transform->height * transform->scale;
+	collider.w = transform->getWidth() * transform->getScale();
+	collider.h = transform->getHeight() * transform->getScale();
 
 	lastPosition = transform->getPosition();
 }

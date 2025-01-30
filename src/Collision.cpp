@@ -19,14 +19,14 @@ bool checkCollisionsAux(Entity *player, Map *map) {
 	bool collided = map->checkCollisions(&player->getComponent<ColliderComponent>().collider);
 	if (collided) {
 		// check if player is moving downwards
-		if (player->getComponent<TransformComponent>().velocity.getY() > 0) {
+		if (player->getComponent<TransformComponent>().getVelocity().getY() > 0) {
 			player->getComponent<GravityComponent>().touchGround();
 			// if (player->hasComponent<MoveComponent>())
 			// 	player->getComponent<MoveComponent>().stopY();
 		}
 		SDL_Rect *collider = &player->getComponent<ColliderComponent>().collider;
-		player->getComponent<TransformComponent>().position = {static_cast<float>(collider->x),
-		                                                       static_cast<float>(collider->y)};
+		player->getComponent<TransformComponent>().setPosition(
+		    {static_cast<float>(collider->x), static_cast<float>(collider->y)});
 	}
 	return collided;
 }
@@ -36,12 +36,12 @@ void checkCollisions(std::vector<Entity *> *entities, Map *map) {
 		if (map->checkCollisions(&entity->getComponent<ColliderComponent>().collider)) {
 
 			// check if entity is moving downwards
-			if (entity->getComponent<TransformComponent>().velocity.getY() > 0) {
+			if (entity->getComponent<TransformComponent>().getVelocity().getY() > 0) {
 				entity->getComponent<GravityComponent>().touchGround();
 			}
 			SDL_Rect *collider = &entity->getComponent<ColliderComponent>().collider;
-			entity->getComponent<TransformComponent>().position = {static_cast<float>(collider->x),
-			                                                       static_cast<float>(collider->y)};
+			entity->getComponent<TransformComponent>().setPosition(
+			    {static_cast<float>(collider->x), static_cast<float>(collider->y)});
 
 			// destroy if entity is a projectile
 			if (entity->hasComponent<ProjectileComponent>())

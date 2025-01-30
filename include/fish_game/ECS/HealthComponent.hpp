@@ -39,7 +39,7 @@ class HealthComponent : public Component {
 
 	void takeDamage();
 
-	bool isAlive() { return alive; }
+	bool isAlive() const { return alive; }
 };
 
 } // namespace FishEngine

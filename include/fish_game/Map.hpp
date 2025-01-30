@@ -67,7 +67,7 @@ class Map {
 	 */
 	bool isOnPlattform(SDL_Rect *collider);
 
-	std::vector<std::pair<uint16_t, uint16_t>> getPlayerSpawnpoints(size_t numPlayers);
+	std::vector<std::pair<uint16_t, uint16_t>> getPlayerSpawnpoints();
 
 	std::vector<std::pair<uint16_t, uint16_t>> *loadWeaponSpawnpoints();
 

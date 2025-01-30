@@ -322,14 +322,15 @@ bool Map::checkLayer(const SDL_Rect *collider, const std::string layerName) cons
 	return false;
 }
 
-std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints(size_t numPlayers) {
+std::vector<std::pair<uint16_t, uint16_t>> Map::getPlayerSpawnpoints() {
 	tson::Layer *spawnpoints = currentMap->getLayer("playerSpawnpoints");
+	int n_spawnpoints = spawnpoints->getTileObjects().size();
 
 	std::vector<std::pair<std::uint16_t, std::uint16_t>> spawnpointsVec;
-	spawnpointsVec.reserve(numPlayers);
+	spawnpointsVec.reserve(n_spawnpoints);
 
 	auto it = spawnpoints->getTileObjects().begin();
-	for (int i = 0; i < numPlayers; ++i) {
+	for (int i = 0; i < n_spawnpoints; ++i) {
 		auto &[pos, tileObject] = *it;
 		tson::Vector2f position = tileObject.getPosition();
 		spawnpointsVec.emplace_back(static_cast<uint16_t>(position.x), static_cast<uint16_t>(position.y));

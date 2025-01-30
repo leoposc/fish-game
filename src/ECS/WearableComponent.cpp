@@ -32,16 +32,17 @@ void WearableComponent::update() {
 	if (attached) {
 		// copy the values of the attached entity to the entity
 		TransformComponent *attached_transform = &attachedEntity->getComponent<TransformComponent>();
-		transform->position = attached_transform->position;
-		transform->velocity = attached_transform->velocity;
-		transform->faceRight = attached_transform->faceRight;
+		transform->setPosition(attached_transform->getPosition());
+		transform->setVelocity(attached_transform->getVelocity());
+		transform->setFaceRight(attached_transform->isFacingRight());
 
 		// offset the position to the center of the entity
-		transform->position.setX(attached_transform->position.getX() + attached_transform->width / 3);
-		transform->position.setY(attached_transform->position.getY() + attached_transform->height / 3);
+		float x = attached_transform->getPosition().getX() + attached_transform->getWidth() / 3;
+		float y = attached_transform->getPosition().getY() + attached_transform->getHeight() / 3;
+		transform->setPosition({x, y});
 	} else {
 		momentum -= momentum * FRICTION;
-		transform->position += momentum;
+		transform->setPosition(transform->getPosition() + momentum);
 	}
 }
 
@@ -58,8 +59,8 @@ void WearableComponent::attach(Entity *entity) {
 	if (this->entity->hasComponent<SpriteComponent>()) {
 		this->entity->getComponent<SpriteComponent>().setTexture("pistol");
 	}
-	this->entity->getComponent<TransformComponent>().width = 18;
-	this->entity->getComponent<TransformComponent>().height = 13;
+	this->entity->getComponent<TransformComponent>().setWidth(18);
+	this->entity->getComponent<TransformComponent>().setHeight(13);
 }
 
 void WearableComponent::detach() {
@@ -80,24 +81,20 @@ void WearableComponent::detach() {
 	needsUpdate = true;
 }
 
+// code is only executed on the server side
 void WearableComponent::shoot() {
-	static int i = 50;
-
 	if (ammunition > 0) {
 		spdlog::get("console")->debug("WearableComponent - shoot");
+
 		Manager &manager = *entity->getManager();
-		MusicPlayer::getInstance().playShootSound();
-		Entity &projectile(manager.addEntity(i++));
-		std::pair<std::uint16_t, std::uint16_t> pos(transform->position.getX(), transform->position.getY());
-		ClientGenerator::forProjectile(projectile, pos, transform->faceRight);
+		Entity &projectile(manager.addEntity());
+		ServerGame::getInstance().insertToEntityGroups(projectile.getID(), groupLabels::groupProjectiles);
+		std::pair<std::uint16_t, std::uint16_t> pos(transform->getPosition().getX(), transform->getPosition().getY());
+		ServerGenerator::forProjectile(projectile, pos, transform->isFacingRight());
 
 		// decrease the ammunition
 		ammunition--;
 	}
-}
-
-void WearableComponent::setForce(float f) {
-	entity->getComponent<TransformComponent>() = f;
 }
 
 } // namespace FishEngine

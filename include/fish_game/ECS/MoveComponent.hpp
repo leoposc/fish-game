@@ -48,6 +48,18 @@ class MoveComponent : public Component {
 	void stopY();
 
 	void collisionStop();
+
+	bool isInWater() const;
+
+	void setInWater(bool inWater);
+
+	float getJumpForce() const;
+
+	void setJumpForce(float jumpForce);
+
+	Vector2D getVelocity() const;
+
+	void setVelocity(const Vector2D velocity);
 };
 
 } // namespace FishEngine

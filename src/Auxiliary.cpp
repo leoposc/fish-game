@@ -1,6 +1,6 @@
 #include <string>
 
-bool isValidIPv4(std::string ip) {
+bool isValidIPv4(const std::string ip) {
 	int num = 0;
 	int dots = 0;
 

@@ -19,15 +19,16 @@ class AssetManager {
 	AssetManager(Manager *man);
 	~AssetManager();
 
-	void addTexture(std::string id, fs::path path);
+	void addTexture(const std::string id, const fs::path path);
 
-	FontManager *loadFont(fs::path path, int fontSize);
+	FontManager *loadFont(const fs::path path, const int fontSize);
 
-	FontManager *loadFromRenderedText(std::string textureText, fs::path path, int fontSize, SDL_Color textColor);
+	FontManager *loadFromRenderedText(const std::string textureText, const fs::path path, const int fontSize,
+	                                  const SDL_Color textColor);
 
 	void renderFonts();
 
-	SDL_Texture *getTexture(std::string id);
+	SDL_Texture *getTexture(const std::string id) const;
 
   private:
 	Manager *manager;

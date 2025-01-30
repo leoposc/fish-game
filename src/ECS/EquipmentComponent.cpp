@@ -1,5 +1,6 @@
 #include "../../include/fish_game/ECS/EquipmentComponent.hpp"
 #include "../../include/fish_game/ECS/ColliderComponent.hpp"
+#include "../../include/fish_game/ECS/ComponentsGenerator.hpp"
 #include "../../include/fish_game/ECS/ECS.hpp"
 #include "../../include/fish_game/ECS/MoveComponent.hpp"
 #include "../../include/fish_game/ECS/WearableComponent.hpp"
@@ -19,10 +20,12 @@ void EquipmentComponent::processCommand() {
 		unequip();
 	} else {
 		Manager *manager = entity->getManager();
-		std::vector<Entity *> weapons = manager->getGroup(ClientGame::groupWeapons);
+		std::vector<Entity *> weapons = manager->getGroup(groupWeapons);
 		SDL_Rect col = collider->collider;
+		// check if there is a weapon for the player to pick up
 		for (auto weapon : weapons) {
 			if (SDL_HasIntersection(&col, &weapon->getComponent<ColliderComponent>().collider)) {
+				// check if the weapon is already attached
 				if (weapon->getComponent<WearableComponent>().isAttached()) {
 					spdlog::info("Weapon already attached!");
 				} else {

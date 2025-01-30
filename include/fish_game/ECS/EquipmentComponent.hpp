@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ECS.hpp"
-// #include "ColliderComponent.hpp"
-// #include "WearableComponent.hpp"
 
 #include <vector>
 

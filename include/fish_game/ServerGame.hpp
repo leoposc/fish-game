@@ -2,6 +2,7 @@
 
 // #include "ECS/Components.hpp"
 #include "AssetManager.hpp"
+#include "fish_game/ECS/ComponentsGenerator.hpp"
 #include "fish_game/Map.hpp"
 #include "fish_game/NetworkHost.hpp"
 #include "fish_game/Player.hpp"
@@ -11,9 +12,9 @@
 #include <string>
 #include <vector>
 
-class ColliderComponent;
-
 namespace FishEngine {
+
+enum groupLabels : std::size_t;
 
 class ServerGame {
 
@@ -37,11 +38,22 @@ class ServerGame {
 
 	uint8_t createPlayer(int id);
 
+	std::pair<std::uint16_t, std::uint16_t> getPlayerSpawnpoint();
+
 	uint8_t handleJoinRequests();
 
-	void updatePlayerEvent();
+	void receivePlayerEvents();
 
 	void sendGameState();
+
+	void spawnWeapons();
+
+	void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
+	                     const std::vector<Entity *> &existingWeapons);
+
+	void insertToEntityGroups(uint8_t id, groupLabels label);
+
+	void removeEntity(uint8_t id) { entityGroups.erase(id); }
 
 	bool running() const;
 
@@ -53,17 +65,17 @@ class ServerGame {
 	inline static SDL_Event game_event;
 	static SDL_Rect camera;
 
-	enum groupLabels : std::size_t { groupMap, groupPlayers, groupEnemies, groupColliders, groupProjectiles };
+	// enum groupLabels : std::size_t { groupPlayers, groupEnemies, groupColliders, groupProjectiles, groupWeapons };
 
 	NetworkHost networkHost;
-	Map *serverMap;
+	Map *map;
+
+	Manager manager;
 
   private:
 	ServerGame();
 	ServerGame(const ServerGame &) = delete;
 	ServerGame &operator=(const ServerGame &) = delete;
-
-	Manager manager;
 
 	bool isRunning;
 	SDL_Window *window;
@@ -71,6 +83,7 @@ class ServerGame {
 	std::vector<Player> players;
 
 	std::map<uint8_t, groupLabels> entityGroups;
+	std::vector<std::pair<uint16_t, uint16_t>> playerSpawnpoints;
 
 	const unsigned int updateRate_ms = 150;
 	unsigned int nextUpdate = 0;

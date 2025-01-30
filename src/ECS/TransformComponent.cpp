@@ -7,18 +7,13 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/types/polymorphic.hpp>
 
-// #include "ECS.hpp"
-
 namespace FishEngine {
 
 void TransformComponent::init() {
-	// spdlog::get("console")->debug( "TRANSFORM COMPONENT INIT" );
-	velocity.setX(0);
-	velocity.setY(0);
+	velocity = {0, 0};
 }
 
 void TransformComponent::update() {
-	// spdlog::get("console")->debug("Transform - before updating position - velocity Y: {}", velocity.getY());
 	position += velocity;
 	velocity = {0, 0};
 }

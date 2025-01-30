@@ -24,7 +24,7 @@ class GravityComponent : public Component {
 
 	void applyForce(float f) { force += f; }
 
-	void copyForceFrom(Entity *e);
+	void applyForceTo(Entity *e) const;
 };
 
 } // namespace FishEngine

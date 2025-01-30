@@ -19,8 +19,7 @@ void MoveComponent::init() {
 	}
 	transform = &entity->getComponent<TransformComponent>();
 	gravityC = &entity->getComponent<GravityComponent>();
-	transform->velocity.setX(0);
-	transform->velocity.setY(0);
+	transform->setVelocity({0, 0});
 
 	// init sprite component if client
 	if (entity->hasComponent<SpriteComponent>()) {
@@ -35,7 +34,7 @@ void MoveComponent::update() {
 	if (inWater) {
 		canJump = true;
 	}
-	transform->velocity += velocity;
+	transform->setVelocity(transform->getVelocity() + velocity);
 }
 
 void MoveComponent::up() {
@@ -62,7 +61,7 @@ void MoveComponent::down() {
 }
 
 void MoveComponent::left() {
-	transform->faceRight = false;
+	transform->setFaceRight(false);
 
 	if (inWater) {
 		velocity.setX(-4);
@@ -76,7 +75,7 @@ void MoveComponent::left() {
 }
 
 void MoveComponent::right() {
-	transform->faceRight = true;
+	transform->setFaceRight(true);
 
 	if (inWater) {
 		velocity.setX(4);
@@ -111,6 +110,30 @@ void MoveComponent::stopY() {
 void MoveComponent::collisionStop() {
 	velocity.setX(0);
 	velocity.setY(0);
+}
+
+bool MoveComponent::isInWater() const {
+	return inWater;
+}
+
+void MoveComponent::setInWater(bool inWater) {
+	inWater = inWater;
+}
+
+float MoveComponent::getJumpForce() const {
+	return jumpForce;
+}
+
+void MoveComponent::setJumpForce(float jumpForce) {
+	this->jumpForce = jumpForce;
+}
+
+Vector2D MoveComponent::getVelocity() const {
+	return velocity;
+}
+
+void MoveComponent::setVelocity(const Vector2D velocity) {
+	this->velocity = velocity;
 }
 
 } // namespace FishEngine

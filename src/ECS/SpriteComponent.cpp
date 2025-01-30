@@ -21,9 +21,9 @@ SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isA
 	setTexture(id);
 }
 
-SpriteComponent::~SpriteComponent() {
-	// SDL_DestroyTexture(texture);
-}
+// SpriteComponent::~SpriteComponent() {
+// SDL_DestroyTexture(texture);
+// }
 
 void SpriteComponent::setTexture(std::string id) {
 	texture = ClientGame::assets->getTexture(id);
@@ -37,8 +37,8 @@ void SpriteComponent::init() {
 	}
 
 	srcRect.x = srcRect.y = 0;
-	srcRect.w = static_cast<int>(transform->width * transform->scale);
-	srcRect.h = static_cast<int>(transform->height * transform->scale);
+	srcRect.w = static_cast<int>(transform->getWidth() * transform->getScale());
+	srcRect.h = static_cast<int>(transform->getHeight() * transform->getScale());
 }
 
 void SpriteComponent::update() {
@@ -46,20 +46,20 @@ void SpriteComponent::update() {
 	if (animated) {
 		currentFrame = (SDL_GetTicks() / speed) % frames;
 		srcRect.x = currentFrame * srcRect.w;
-		srcRect.y = animationIndex * transform->height;
+		srcRect.y = animationIndex * transform->getHeight();
 		// spdlog::get("console")->debug("SpriteComponent: {} {} {}", id, currentFrame, srcRect.x);
 	} else {
 		srcRect.x = 0;
 		srcRect.y = 0;
 	}
-	spriteFlip = transform->faceRight ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+	spriteFlip = transform->isFacingRight() ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 }
 
 void SpriteComponent::draw() {
 	dstRect.x = (int)transform->getX();
 	dstRect.y = (int)transform->getY();
-	dstRect.w = transform->width;
-	dstRect.h = transform->height;
+	dstRect.w = transform->getWidth();
+	dstRect.h = transform->getHeight();
 	TextureManager::draw(texture, srcRect, dstRect, spriteFlip);
 }
 

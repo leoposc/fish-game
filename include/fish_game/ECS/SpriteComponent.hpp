@@ -21,38 +21,30 @@ struct Animation {
 
 class SpriteComponent : public Component {
 	TransformComponent *transform;
+
+	SDL_RendererFlip spriteFlip = SDL_FLIP_NONE;
 	SDL_Texture *texture;
 	SDL_Rect srcRect, dstRect;
-
-	bool animated = false;
-	int frames = 1;
-	int speed = 100; // ms
-	int currentFrame = 0;
-
 	std::string id;
 
 	// animation meta data
 	const Animation fishIdle = Animation(0, 20, 100);
 	const Animation fishSwim = Animation(1, 12, 100);
 	const Animation fishDead = Animation(2, 1, 100);
-
 	std::map<std::string, Animation> animations = {
 	    {"fishSwim", fishSwim}, {"fishIdle", fishIdle}, {"fishDead", fishDead}};
 
-  public:
+	bool animated = false;
+	int currentFrame = 0;
 	int animationIndex = 0;
-	// std::map<const char *, Animation> animations;
+	int speed = 100;
+	int frames = 1;
 
-	SDL_RendererFlip spriteFlip = SDL_FLIP_NONE;
-
+  public:
 	SpriteComponent() = default;
-	// ~SpriteComponent() = default;
-
 	SpriteComponent(std::string id);
-
 	SpriteComponent(std::string id, bool isAnimated);
-
-	~SpriteComponent();
+	~SpriteComponent() = default;
 
 	void setTexture(std::string id);
 
@@ -63,6 +55,8 @@ class SpriteComponent : public Component {
 	void draw() override;
 
 	void play(const char *animName);
+
+	void flipSprite(bool flip) { spriteFlip = flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE; }
 };
 
 } // namespace FishEngine

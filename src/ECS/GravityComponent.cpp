@@ -27,10 +27,10 @@ void GravityComponent::update() {
 		// do not apply force if the fish is in water, but let it sink for a little bit
 		force -= force > 0 ? force * 0.1 : 0;
 	}
-	transform->velocity += Vector2D(0, force);
+	transform->setVelocity(transform->getVelocity() + Vector2D(0, force));
 }
 
-void GravityComponent::copyForceFrom(Entity *e) {
+void GravityComponent::applyForceTo(Entity *e) const {
 	// transfer the force to the entity
 	e->getComponent<GravityComponent>().applyForce(force);
 }

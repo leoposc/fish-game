@@ -1,4 +1,5 @@
 #include "../include/fish_game/ClientGame.hpp"
+#include "../include/fish_game/ECS/ComponentsGenerator.hpp"
 #include "../include/fish_game/FontManager.hpp"
 #include "../include/fish_game/GameInputEvents.hpp"
 #include "../include/fish_game/MusicPlayer.hpp"
@@ -48,35 +49,6 @@ std::mutex serverMutex;
 std::condition_variable serverCv;
 bool serverRunning = false;
 
-void serverLoop() {
-	const int updates_per_second = 60;
-	const int loopDelay = 1000 / updates_per_second;
-	uint32_t start;
-	int loopTime;
-
-	while (serverRunning) {
-		start = SDL_GetTicks();
-		std::unique_lock<std::mutex> lock(serverMutex);
-		serverCv.wait(lock, [] { return serverRunning; });
-
-		server->handleJoinRequests();
-		server->sendGameState();
-		server->updatePlayerEvent();
-		server->update();
-
-		lock.unlock();
-		loopTime = SDL_GetTicks() - start;
-		if (loopDelay > loopTime) {
-			SDL_Delay(loopDelay - loopTime);
-		}
-	}
-}
-
-void startServerThread() {
-	serverRunning = true;
-	serverThread = std::thread(serverLoop);
-}
-
 void stopServerThread() {
 	{
 		std::lock_guard<std::mutex> lock(serverMutex);
@@ -86,6 +58,43 @@ void stopServerThread() {
 	if (serverThread.joinable()) {
 		serverThread.join();
 	}
+}
+
+void serverLoop() {
+
+	const int updates_per_second = 60;
+	const int loopDelay = 1000 / updates_per_second;
+	uint32_t start;
+	int loopTime;
+
+	auto w = server->manager.getGroup(FishEngine::groupLabels::groupWeapons);
+	for (auto &weapon : w) {
+		spdlog::get("console")->info("Weapon: {}", weapon->getID());
+	}
+
+	while (serverRunning) {
+		start = SDL_GetTicks();
+		std::unique_lock<std::mutex> lock(serverMutex);
+		serverCv.wait(lock, [] { return serverRunning; });
+
+		server->handleJoinRequests();
+		server->receivePlayerEvents();
+		server->update();
+		server->sendGameState();
+
+		lock.unlock();
+		loopTime = SDL_GetTicks() - start;
+		if (loopDelay > loopTime) {
+			SDL_Delay(loopDelay - loopTime);
+		}
+	}
+
+	// stopServerThread();
+}
+
+void startServerThread() {
+	serverRunning = true;
+	serverThread = std::thread(serverLoop);
 }
 
 FuncPtr combat(bool isHost) {
@@ -99,6 +108,7 @@ FuncPtr combat(bool isHost) {
 
 	if (isHost) {
 		server->init("map04.tmj");
+		server->spawnWeapons();
 		startServerThread();
 	}
 	client->init("map04.tmj", true);

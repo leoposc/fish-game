@@ -29,7 +29,7 @@ class ServerComponent : public Component {
 	 * private SDL_Event event
 	 * @details: The event is stored in a file called event.json
 	 */
-	void setEvent(SDL_Event event);
+	void setEvent(const SDL_Event event);
 };
 
 } // namespace FishEngine

@@ -19,6 +19,8 @@
 
 namespace FishEngine {
 
+enum groupLabels : std::size_t { groupPlayers, groupEnemies, groupColliders, groupProjectiles, groupWeapons };
+
 namespace ClientGenerator {
 
 void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos, size_t fishSpriteID);
@@ -36,6 +38,8 @@ namespace ServerGenerator {
 void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
 void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos, bool faceRight);
+
+void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
 } // namespace ServerGenerator
 
