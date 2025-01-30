@@ -100,7 +100,7 @@ void ClientGame::init(fs::path mp, bool combat) {
 	isRunning = true;
 
 	// ============ control if game was reset ===========
-	assert(clientManager.checkEmpty());
+	assert(manager.checkEmpty());
 
 	// ================ init clientMap ==================
 	mapPath = mp;
@@ -109,8 +109,11 @@ void ClientGame::init(fs::path mp, bool combat) {
 
 	// ================== init weapons ==================
 	if (combat) {
-		spawnWeapons();
+		// spawnWeapons();
 	}
+
+	// reset entityGroups
+	entityGroups.clear();
 
 	// load assets
 	fishSpriteID = 0;
@@ -155,23 +158,23 @@ void ClientGame::handleEvents() {
 
 void ClientGame::update() {
 	// delete dead entities
-	clientManager.refresh();
+	manager.refresh<ClientGame>();
 
 	// // update the entities
 	// spdlog::get("console")->debug("Updating entities");
-	clientManager.update();
+	manager.update();
 
 	// check for collisions
-	Collision::isInWater(&clientManager.getGroup(groupLabels::groupPlayers), map);
-	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupColliders), map);
-	Collision::checkCollisions(&clientManager.getGroup(groupLabels::groupPlayers),
-	                           &clientManager.getGroup(groupLabels::groupProjectiles));
+	Collision::isInWater(&manager.getGroup(groupLabels::groupPlayers), map);
+	Collision::checkCollisions(&manager.getGroup(groupLabels::groupColliders), map);
+	Collision::checkCollisions(&manager.getGroup(groupLabels::groupPlayers),
+	                           &manager.getGroup(groupLabels::groupProjectiles));
 
 	// // animate the map
 	map->updateAnimations();
 
 	// check if game is over TODO: just handle it in the server
-	if (clientManager.getGroup(groupLabels::groupPlayers).empty()) {
+	if (manager.getGroup(groupLabels::groupPlayers).empty()) {
 		spdlog::get("console")->info("Game over - stopping game");
 		isRunning = false;
 	}
@@ -181,17 +184,17 @@ void ClientGame::render() const {
 	SDL_RenderClear(renderer);
 
 	map->drawMap();
-	// clientManager.draw();
+	// manager.draw();
 
-	for (auto &t : clientManager.getGroup_c(groupLabels::groupPlayers)) {
+	for (auto &t : manager.getGroup_c(groupLabels::groupPlayers)) {
 		t->draw();
 	}
 
-	for (auto &t : clientManager.getGroup_c(groupLabels::groupWeapons)) {
+	for (auto &t : manager.getGroup_c(groupLabels::groupWeapons)) {
 		t->draw();
 	}
 
-	for (auto &t : clientManager.getGroup_c(groupLabels::groupProjectiles)) {
+	for (auto &t : manager.getGroup_c(groupLabels::groupProjectiles)) {
 		t->draw();
 	}
 
@@ -201,8 +204,8 @@ void ClientGame::render() const {
 }
 
 void ClientGame::createOwnPlayer() {
-	ownPlayer = &clientManager.addEntity();
-	auto initPos = map->getPlayerSpawnpoints(1).at(0);
+	ownPlayer = &manager.addEntity();
+	auto initPos = map->getPlayerSpawnpoints().at(0);
 	ClientGenerator::forPlayer(*ownPlayer, initPos, ++fishSpriteID);
 	ownPlayerID = ownPlayer->getID();
 }
@@ -223,7 +226,7 @@ void ClientGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &
 	}
 
 	// spawn the weapon
-	auto &weapon(clientManager.addEntity());
+	auto &weapon(manager.addEntity());
 	ClientGenerator::forWeapon(weapon, spawnpoint);
 }
 
@@ -234,7 +237,7 @@ void ClientGame::spawnWeapons() {
 	if (spawnpoints != nullptr) {
 
 		// do no spawn weapons when existing weapon was not picked up
-		auto &existingWeapons(clientManager.getGroup(groupLabels::groupWeapons));
+		auto &existingWeapons(manager.getGroup(groupLabels::groupWeapons));
 
 		for (auto &spawnpoint : *spawnpoints) {
 			spawnWeaponsAux(spawnpoint, existingWeapons);
@@ -243,7 +246,7 @@ void ClientGame::spawnWeapons() {
 }
 
 Manager *ClientGame::getManager() {
-	return &clientManager;
+	return &manager;
 }
 
 std::string ClientGame::joinInterface() {
@@ -258,6 +261,10 @@ std::string ClientGame::joinInterface() {
 
 	SDL_Color textColor = {0, 0, 0, 255};
 	SDL_Event event;
+
+	// remove all SDL_Events which occured during loading from the queue
+	SDL_PumpEvents();
+	SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 	SDL_StartTextInput();
 	spdlog::get("console")->info("started input");
 
@@ -338,9 +345,9 @@ std::string ClientGame::joinInterface() {
 			SDL_RenderClear(renderer);
 
 			map->drawMap();
-			gPromptTextTexture.render((SCREEN_WIDTH - gPromptTextTexture.getWidth()) / 2, SCREEN_HEIGHT / 3 + 30);
+			gPromptTextTexture.render((SCREEN_WIDTH - gPromptTextTexture.getWidth()) / 2, SCREEN_HEIGHT / 3 + 55);
 			gInputTextTexture.render((SCREEN_WIDTH - gInputTextTexture.getWidth()) / 2,
-			                         SCREEN_HEIGHT / 3 + 30 + gPromptTextTexture.getHeight());
+			                         SCREEN_HEIGHT / 3 + 65 + gPromptTextTexture.getHeight());
 
 			SDL_RenderPresent(renderer);
 		}
@@ -357,6 +364,11 @@ void ClientGame::sendJoinRequest(std::string ip, std::string username) {
 
 void ClientGame::receiveGameState() {
 
+	spdlog::get("console")->info("IDs inside entityGroups: ");
+	for (auto &id : entityGroups) {
+		spdlog::get("console")->info("ID: {}", id.first);
+	}
+
 	if (!this->networkClient.hasUpdate()) {
 		// spdlog::get("console")->debug("skipped, no update received");
 		return;
@@ -367,12 +379,13 @@ void ClientGame::receiveGameState() {
 	cereal::BinaryInputArchive ar(is);
 
 	// fetch the number of the entities
+	std::map<uint8_t, groupLabels> new_entityGroups;
 	size_t numEntities;
 	ar(numEntities);
 
 	// first time while joining clear all entities
 	if (!connected) {
-		this->getManager()->destroyEntities();
+		this->getManager()->destroyEntities<ClientGame>();
 		spdlog::get("console")->debug("First join detected detruction");
 	}
 
@@ -380,19 +393,24 @@ void ClientGame::receiveGameState() {
 	for (size_t i = 0; i < numEntities; ++i) {
 		// read entity meta data from stream
 		uint8_t id;
-		ClientGame::groupLabels group;
+		groupLabels group;
 		ar(id, group);
 
 		if (entityGroups.count(id)) {
-			// case: entity already in clientManager
-			// spdlog::get("console")->debug("Entity {} already in clientManager", id);
+			// case: entity already in manager
+			new_entityGroups.insert(std::make_pair(id, group));
+			// ...and remove from old list
+			entityGroups.erase(id);
+			// spdlog::get("console")->debug("Entity {} already in manager", id);
 		} else {
+			spdlog::get("console")->info("Entity {} of type not in manager", id);
+			// spdlog::get("console")->info("Group: ")
 			// create the entity
-			auto &entity = clientManager.addEntity(id);
+			auto &entity = manager.addEntity(id);
 
 			// create the entity with the correct components
 			switch (group) {
-			case ClientGame::groupLabels::groupPlayers:
+			case groupLabels::groupPlayers:
 				// TODO: when joining combat its already connected -> no new eventhandler is created
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
@@ -403,23 +421,35 @@ void ClientGame::receiveGameState() {
 					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
 				}
 				break;
-			case ClientGame::groupLabels::groupWeapons:
+			case groupLabels::groupWeapons:
 				ClientGenerator::forWeapon(entity, {0, 0});
 				break;
-			case ClientGame::groupLabels::groupProjectiles:
+			case groupLabels::groupProjectiles:
+				spdlog::get("console")->info("Creating projectile");
 				bool faceRight;
 				ar(faceRight);
 				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
 				break;
 			}
 
-			// add the entity to the clientManager
-			entityGroups.insert(std::make_pair(id, group));
+			// add the entity to the manager
+			new_entityGroups.insert(std::make_pair(id, group));
 		}
 
 		// update the values of the entity
-		ar(clientManager.getEntity(id));
+		spdlog::get("console")->info("Calling getEntity inside receiveGameState!");
+		spdlog::get("console")->info("ID: {}", id);
+		spdlog::get("console")->info("Inside entityGroups: {}", entityGroups.count(id));
+		ar(manager.getEntity(id));
+		spdlog::get("console")->info("Returned from it!");
 	}
+
+	// destroy all entities which are not in the update
+	for (auto &entity : entityGroups) {
+		manager.getEntity(entity.first).destroy();
+	}
+	entityGroups = new_entityGroups;
+
 	this->connected = true;
 }
 
@@ -453,7 +483,7 @@ bool ClientGame::running() const {
 }
 
 void ClientGame::stop() {
-	clientManager.destroyEntities();
+	manager.destroyEntities<ClientGame>();
 	entityGroups.clear();
 	delete map;
 	map = nullptr;
@@ -463,7 +493,7 @@ void ClientGame::stop() {
 // todo: does not work yet - prob pretty wrong
 // void ClientGame::zoomIn() {
 // 	// Get the most outer players
-// 	std::vector<Entity *> &players = clientManager.getGroup(groupLabels::groupPlayers);
+// 	std::vector<Entity *> &players = manager.getGroup(groupLabels::groupPlayers);
 // 	if (players.empty())
 // 		return;
 

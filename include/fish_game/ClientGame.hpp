@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetManager.hpp"
+#include "ECS/ComponentsGenerator.hpp"
 #include "Map.hpp"
 #include "NetworkClient.hpp"
 
@@ -10,6 +11,8 @@
 #include <vector>
 
 namespace FishEngine {
+
+enum groupLabels : std::size_t;
 
 class ClientGame {
 
@@ -56,6 +59,8 @@ class ClientGame {
 
 	void zoomIn();
 
+	void removeEntity(uint8_t id) { entityGroups.erase(id); }
+
 	void startLoadingBar();
 
 	void renderLoadingBar();
@@ -69,15 +74,6 @@ class ClientGame {
 
 	NetworkClient networkClient;
 
-	enum groupLabels : std::size_t {
-		groupMap,
-		groupPlayers,
-		groupEnemies,
-		groupColliders,
-		groupProjectiles,
-		groupWeapons
-	};
-
 	uint8_t ownPlayerID;
 
   private:
@@ -89,7 +85,7 @@ class ClientGame {
 
 	bool initialized;
 
-	Manager clientManager;
+	Manager manager;
 	Entity *ownPlayer;
 
 	Map *map = nullptr;
@@ -103,7 +99,7 @@ class ClientGame {
 	bool windowed = true;
 
 	std::unordered_map<uint8_t, Entity *> players;
-	std::map<uint8_t, ClientGame::groupLabels> entityGroups;
+	std::map<uint8_t, groupLabels> entityGroups;
 
 	const char *title;
 	int xpos;

@@ -34,6 +34,11 @@ class EventHandlerComponent;
 class TransformComponent;
 class HealthComponent;
 
+constexpr std::size_t maxGroups = 32;
+constexpr std::size_t maxComponents = 32;
+using ComponentBitSet = std::bitset<maxComponents>;
+using GroupBitSet = std::bitset<maxGroups>;
+using ComponentArray = std::array<Component *, maxComponents>;
 using ComponentID = std::size_t;
 using Group = std::size_t;
 
@@ -52,12 +57,6 @@ inline ComponentID getComponentTypeID() noexcept {
 	static ComponentID typeID = generateComponentID();
 	return typeID;
 }
-
-constexpr std::size_t maxGroups = 32;
-constexpr std::size_t maxComponents = 32;
-using ComponentBitSet = std::bitset<maxComponents>;
-using GroupBitSet = std::bitset<maxGroups>;
-using ComponentArray = std::array<Component *, maxComponents>;
 
 class Component {
   public:
@@ -87,7 +86,7 @@ class Component {
 
 class Entity {
 	Manager &manager;
-	int8_t id;
+	const uint8_t id;
 	bool active = true;
 	std::vector<std::shared_ptr<Component>> components;
 
@@ -96,26 +95,9 @@ class Entity {
 	GroupBitSet groupBitSet;
 
   public:
-	// template <class Archive>
-	// void serialize(Archive &ar) {
-	// 	ar(entityIDs);
-
-	// 	ar(active, getComponent<TransformComponent>(), getComponent<ColliderComponent>());
-
-	// 	if (hasComponent<EventHandlerComponent>()) {
-	// 		ar(getComponent<EventHandlerComponent>());
-	// 	}
-	// 	if (hasComponent<WearableComponent>()) {
-	// 		ar(getComponent<WearableComponent>());
-	// 	}
-	// 	if (hasComponent<EquipmentComponent>()) {
-	// 		ar(getComponent<EquipmentComponent>());
-	// 	}
-	// }
-
 	template <class Archive>
 	void serialize(Archive &ar) {
-		ar(id, active, getComponent<TransformComponent>());
+		ar(active, getComponent<TransformComponent>());
 
 		// ========== serialize optional components ==========
 		if (hasComponent<WearableComponent>()) {
@@ -131,17 +113,15 @@ class Entity {
 		}
 	}
 
-	Entity(Manager &man) : manager(man) {}
+	Entity(Manager &p_manager, uint8_t p_id);
 
-	Manager *getManager() { return &manager; }
+	Manager *getManager();
 
-	uint8_t getID() { return id; }
+	uint8_t getID();
 
-	void setID(uint8_t p_id) { id = p_id; }
+	void addGroup(const Group group);
 
-	void addGroup(Group group);
-
-	bool checkEmpty() { return components.empty(); }
+	bool checkEmpty();
 
 	/**
 	 * @brief: update all components which belong to a instance of an entity
@@ -149,12 +129,7 @@ class Entity {
 	 * of adding components to an entity. The very first component added is updated first.
 	 * The ComponentID is NOT used to determine the order of updating components.
 	 */
-	void update() {
-		for (auto &c : components) {
-			// spdlog::get("console")->debug("Component Type: {}", typeid(*c).name());
-			c->update();
-		}
-	}
+	void update();
 
 	/**
 	 * @brief: draw all components which belong to a instance of an entity
@@ -162,23 +137,20 @@ class Entity {
 	 * of adding components to an entity. The very first component added is updated first.
 	 * The ComponentID is NOT used to determine the order of updating components.
 	 */
-	void draw() {
-		for (auto &c : components)
-			c->draw();
-	}
+	void draw();
 
-	bool isActive() const { return active; }
+	bool isActive() const;
 
-	void destroy() { active = false; }
+	void destroy();
 
 	template <typename T>
 	bool hasComponent() const {
 		return componentBitSet[getComponentTypeID<T>()];
 	}
 
-	bool hasGroup(Group group) const { return groupBitSet[group]; }
+	bool hasGroup(Group group) const;
 
-	void delGroup(Group group) { groupBitSet[group] = false; }
+	void delGroup(Group group);
 
 	template <typename T, typename... TArgs>
 	T &addComponent(TArgs &&...mArgs) {
@@ -240,52 +212,34 @@ class Entity {
 };
 
 class Manager {
-	std::map<uint8_t, std::unique_ptr<Entity>> entities;
+	std::map<const uint8_t, std::unique_ptr<Entity>> entities;
 	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
 	// std::map<uint8_t, std::unique_ptr<Entity>> entityIDs;
 
   public:
-	std::map<uint8_t, std::unique_ptr<Entity>> &getEntities() { return entities; }
+	std::map<const uint8_t, std::unique_ptr<Entity>> &getEntities();
 
-	bool entityExists(uint8_t id) { return entities.find(id) != entities.end(); }
+	bool entityExists(uint8_t id);
 
-	Entity &getEntity(uint8_t id) const {
-		auto it = entities.find(id);
-		if (it == entities.end()) {
-			throw std::runtime_error("Entity not found");
-		}
-		return *it->second;
-	}
+	Entity &getEntity(uint8_t id) const;
 
-	void update() {
-		for (auto &e : entities) {
-			// std::cout << "ECS - Updating entities" << std::endl;
-			e.second->update();
-		}
-	}
+	void update();
 
-	void draw() {
-		for (auto &e : entities)
-			e.second->draw();
-	}
+	void draw();
 
+	template <class T>
 	void destroyEntities() {
 		for (auto &e : entities)
 			e.second->destroy();
-		refresh();
+		refresh<T>();
 		assert(checkEmpty());
 	}
 
-	bool checkEmpty() {
-		for (auto &e : entities) {
-			if (!e.second->checkEmpty()) {
-				return false;
-			}
-		}
-		return entities.empty();
-	}
+	bool checkEmpty();
 
+	template <class T>
 	void refresh() {
+		int tmp_size = entities.size();
 		for (auto i(0u); i < maxGroups; i++) {
 			auto &v(groupedEntities[i]);
 			v.erase(std::remove_if(std::begin(v), std::end(v),
@@ -300,77 +254,32 @@ class Manager {
 
 		for (auto it = entities.begin(); it != entities.end();) {
 			if (!it->second->isActive()) {
+				uint8_t id = it->second->getID();
+				spdlog::get("console")->info("Destroying entity with ID: {}", static_cast<int>(id));
+				assert(id == it->first);
+				T::getInstance().removeEntity(id);
 				it = entities.erase(it);
 			} else {
 				++it;
 			}
 		}
+		if (tmp_size != entities.size()) {
+			std::cout << "Entities destroyed. size now: " << entities.size() << std::endl;
+		}
 	}
 
 	// void addToGroup(Entity *entity, Group group) {}
-	void addToGroup(Entity *entity, Group group) { groupedEntities[group].emplace_back(entity); }
+	void addToGroup(Entity *entity, Group group);
 
-	std::vector<Entity *> &getGroup(Group group) { return groupedEntities[group]; }
+	std::vector<Entity *> &getGroup(Group group);
 
-	const std::vector<Entity *> &getGroup_c(Group group) const { return groupedEntities[group]; }
+	const std::vector<Entity *> &getGroup_c(Group group) const;
 
-	Entity &addEntity() {
-		return this->addEntity(generateEntityID());
-		std::cout << "Entity added. size now: " << entities.size() << std::endl;
-	}
+	Entity &addEntity();
 
-	void print() const {
-		for (const auto &pair : entities) {
-			const auto &entity = pair.second;
-			entity->print();
-		}
-	}
+	Entity &addEntity(const uint8_t id);
 
-	Entity &addEntity(uint8_t id) {
-		// Check if the entity with the given ID already exists
-		auto it = entities.find(id);
-		if (it != entities.end()) {
-			// Remove the existing entity
-			entities.erase(it);
-			spdlog::get("console")->info("Existing entity with ID {} removed", static_cast<int>(id));
-		}
-
-		// Create a new entity
-		Entity *e = new Entity(*this);
-		spdlog::get("console")->info("Creating new entity with ID {}", static_cast<int>(id));
-		e->setID(id);
-
-		// Add the new entity to the map
-		std::unique_ptr<Entity> uPtr(e);
-		entities.emplace(id, std::move(uPtr));
-		spdlog::get("console")->info("New entity with ID {} added", static_cast<int>(id));
-
-		return *e;
-	}
+	void print() const;
 };
 
 } // namespace FishEngine
-
-// ================ CEREAL HELPER FUNCTIONS ================
-
-// template <class Archive>
-// void serialize(Archive &ar, SDL_Rect &rect) {
-// 	ar((rect.x), CEREAL_NVP(rect.y), CEREAL_NVP(rect.w), CEREAL_NVP(rect.h));
-// }
-
-// template <class Archive>
-// void serialize(Archive &ar, FishEngine::Vector2D &vec) {
-// 	ar(CEREAL_NVP(vec.getX()), CEREAL_NVP(vec.getY()));
-// }
-
-// id synchronizaiton? maybe not needed if manager is always kept in synch, with cereal we can only update the changing
-// variables
-//
-// if i created the object it might not match with the id of the host should i just prepend my username to all ids, and
-// strip it when upacking? What if i get a whole new object? How do i match that?
-//
-// Other option: get all components and entities from server when joining -> all ids would auto match
-//
-//
-// protocol: array of messages; if update: - update
-//                              if new:    - generate Component, needed arguemnts given
