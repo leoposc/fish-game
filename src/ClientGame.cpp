@@ -92,6 +92,15 @@ ClientGame::~ClientGame() {
 	spdlog::get("console")->info("ClientGame deconstructed");
 }
 
+void ClientGame::reset() {
+	stop();
+	networkClient.~NetworkClient();       // Explicitly call the destructor
+	new (&networkClient) NetworkClient(); // Placement new to construct a new instance in the same memory location
+
+	players.clear();
+	connected = false;
+}
+
 void ClientGame::init(fs::path mp, bool combat) {
 	size_t progressUpdate = 0;
 	auto future = std::async(std::launch::async, &FishEngine::ClientGame::startLoadingBar, this);
@@ -172,7 +181,7 @@ void ClientGame::update() {
 	// check if game is over TODO: just handle it in the server
 	if (manager.getGroup(groupLabels::groupPlayers).empty()) {
 		spdlog::get("console")->info("Game over - stopping game");
-		isRunning = false;
+		/* isRunning = false; */
 	}
 }
 
@@ -407,6 +416,7 @@ void ClientGame::receiveGameState() {
 					this->ownPlayerID = id;
 					this->ownPlayer = &entity;
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
+					this->ownPlayer = &entity;
 				} else if (connected && id == this->ownPlayerID) {
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 				} else {

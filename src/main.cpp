@@ -54,9 +54,9 @@ FuncPtr combat(bool isHost) {
 	u_int32_t frameStart;
 	int frameTime;
 	auto client = &FishEngine::ClientGame::getInstance();
-	auto server = &FishEngine::ServerGame::getInstance();
 
 	if (isHost) {
+		auto server = &FishEngine::ServerGame::getInstance();
 		server->init("map04.tmj");
 		server->spawnWeapons();
 	}
@@ -83,11 +83,14 @@ FuncPtr combat(bool isHost) {
 
 	client->stop();
 	if (isHost) {
+		auto server = &FishEngine::ServerGame::getInstance();
 		server->stop();
 	}
 
 	spdlog::get("console")->info("Leaving combat...");
 
+	FishEngine::ServerGame::resetInstance();
+	client->reset();
 	return mainMenu();
 	return hostLobby(isHost, false);
 }
@@ -112,16 +115,15 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 	int frameTime;
 
 	auto client = &FishEngine::ClientGame::getInstance();
-	auto server = &FishEngine::ServerGame::getInstance();
 
 	if (isHost) {
-		server = &FishEngine::ServerGame::getInstance();
+		auto server = &FishEngine::ServerGame::getInstance();
 		client->networkClient.init("127.0.0.1", "host player");
 		server->init("hostLobby.tmj");
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	client->init("hostLobby.tmj", false);
-	// client->createOwnPlayer();
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
@@ -139,17 +141,17 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		case 0:
 			client->stop();
 			if (isHost) {
+				auto server = &FishEngine::ServerGame::getInstance();
 				server->stop();
 			}
 			FishEngine::ServerGame::resetInstance();
-			client->networkClient.~NetworkClient(); // Explicitly call the destructor
-			new (&client->networkClient)
-			    NetworkClient(); // Placement new to construct a new instance in the same memory location
+			client->reset();
 			return mainMenu();
 			break;
 		case 3:
 			client->stop();
 			if (isHost) {
+				auto server = &FishEngine::ServerGame::getInstance();
 				server->stop();
 			}
 			return combat(isHost);
@@ -166,6 +168,7 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 
 	client->stop();
 	if (isHost) {
+		auto server = &FishEngine::ServerGame::getInstance();
 		server->stop();
 	}
 	return nullptr;

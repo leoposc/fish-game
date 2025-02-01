@@ -26,6 +26,8 @@ class ClientGame {
 
 	void init(fs::path mp, bool combat);
 
+	void reset();
+
 	void loadFishSprites();
 
 	void handleEvents();
@@ -92,7 +94,6 @@ class ClientGame {
 	fs::path mapPath;
 	int numPlayers = 6;
 	bool isRunning;
-	bool started;
 	bool connected = false;
 
 	SDL_Window *window;
