@@ -27,7 +27,7 @@ void AssetManager::addTexture(const std::string id, const fs::path path) {
 		return;
 	}
 
-	spdlog::get("console")->debug("Loading texture from: {}", path.string());
+	spdlog::get("console")->info("Loading texture from: {}", path.string());
 	textures[id] = TextureManager::loadTexture(path);
 }
 

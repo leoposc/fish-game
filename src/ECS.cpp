@@ -70,7 +70,6 @@ Entity &Manager::getEntity(uint8_t id) const {
 
 void Manager::update() {
 	for (auto &e : entities) {
-		// std::cout << "ECS - Updating entities" << std::endl;
 		e.second->update();
 	}
 }
@@ -130,7 +129,7 @@ const std::vector<Entity *> &Manager::getGroup_c(Group group) const {
 
 Entity &Manager::addEntity() {
 	return this->addEntity(generateEntityID());
-	std::cout << "Entity added. size now: " << entities.size() << std::endl;
+	spdlog::get("console")->info("Entity added. size now: {}", entities.size());
 }
 
 Entity &Manager::addEntity(const uint8_t id) {

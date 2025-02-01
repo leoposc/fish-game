@@ -15,6 +15,13 @@ void EquipmentComponent::init() {
 	collider = &entity->getComponent<ColliderComponent>();
 }
 
+void EquipmentComponent::update() {
+	spdlog::get("cb")->debug("Equipment - position: {} {} - serverside: {}",
+	                         static_cast<int>(entity->getComponent<TransformComponent>().getPosition().getX()),
+	                         static_cast<int>(entity->getComponent<TransformComponent>().getPosition().getY()),
+	                         entity->hasComponent<ServerComponent>());
+}
+
 void EquipmentComponent::processCommand() {
 	if (isEquipped) {
 		unequip();

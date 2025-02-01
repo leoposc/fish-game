@@ -29,14 +29,15 @@ class ServerGame {
 	}
 
 	static void resetInstance() {
-		spdlog::get("console")->info("ServerGame resetInstance");
+		spdlog::get("console")->info("========== ServerGame resetInstance ============");
+		ServerGame::getInstance().stop();
 		instance.reset(new ServerGame());
 		old_clients.clear();
 	}
 
 	SDL_Event getEvent() { return game_event; }
 
-	void init(fs::path mapPath);
+	void init(fs::path mapPath, bool combat = false);
 
 	void update();
 
@@ -71,7 +72,7 @@ class ServerGame {
 
 	bool checkCollisions(Entity *player);
 
-	void printAllEntityIDs();
+	void printEntityMetaData();
 
 	inline static SDL_Renderer *renderer = nullptr;
 	inline static SDL_Event game_event;
@@ -81,6 +82,8 @@ class ServerGame {
 	NetworkHost networkHost;
 	Map *map;
 	Manager manager;
+
+	~ServerGame();
 
   private:
 	ServerGame();

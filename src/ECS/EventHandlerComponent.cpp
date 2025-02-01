@@ -13,7 +13,6 @@
 namespace FishEngine {
 
 void EventHandlerComponent::init() {
-	spdlog::get("console")->debug("EVENT HANDLER COMPONENT INTI");
 	if (!entity->hasComponent<MoveComponent>()) {
 		spdlog::get("err_logger")->debug("Event Handler Component: no MoveComponent found.");
 	} else {
@@ -59,14 +58,14 @@ void EventHandlerComponent::update() {
 					equip->processCommand();
 				}
 				if (event_ptr->key.keysym.sym == SDLK_k) {
-					spdlog::get("stderr")->info("Event-handler: Shooting");
+					spdlog::get("console")->info("Eventhandler: Shooting");
 					equip->shoot();
 				}
 			}
 
 			// send the event to the server
 			if (!isServer) {
-				spdlog::get("console")->debug("Sending event to server {}", event_ptr->key.keysym.sym);
+				spdlog::get("network_logger")->debug("Sending event to server {}", event_ptr->key.keysym.sym);
 				clientComponent->sendEvent(*event_ptr);
 			} else {
 				// reset the event - otherwise the event will be processed multiple times

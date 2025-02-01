@@ -12,7 +12,6 @@
 namespace FishEngine {
 
 void ClientComponent::init() {
-	spdlog::get("console")->info("Client Component Initialized");
 	transform = &entity->getComponent<TransformComponent>();
 }
 

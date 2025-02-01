@@ -36,15 +36,11 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	*windowed = !*windowed;
 	if (*windowed) {
 		int i = SDL_GetWindowDisplayIndex(win);
-		// screenWidth = 1280;
-		// screenHeight = 720;
 		SDL_SetWindowFullscreen(win, 0);
 	} else {
 		int i = SDL_GetWindowDisplayIndex(win);
 		SDL_Rect j;
 		SDL_GetDisplayBounds(i, &j);
-		// screenWidth = j.w;
-		// screenHeight = j.h;
 		SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	}
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
@@ -84,20 +80,18 @@ ClientGame::ClientGame()
 }
 
 ClientGame::~ClientGame() {
-	/* networkClient.~NetworkClient(); */
-	spdlog::get("console")->info("Deconstruciton of GameClient starts");
+	spdlog::get("console")->info(" ============= ClientGame deconstruction ==============");
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-	spdlog::get("console")->info("ClientGame deconstructed");
 }
 
 void ClientGame::reset() {
+	spdlog::get("console")->info("============ ClientGame - Resetting =============");
 	stop();
 	networkClient.~NetworkClient();       // Explicitly call the destructor
 	new (&networkClient) NetworkClient(); // Placement new to construct a new instance in the same memory location
 
-	players.clear();
 	ownPlayer = nullptr;
 	connected = false;
 }
@@ -153,7 +147,6 @@ void ClientGame::handleEvents() {
 		// case F11 is pressed
 	case SDL_KEYDOWN:
 		if (game_event.key.keysym.sym == SDLK_F11) {
-			spdlog::get("console")->debug(windowed);
 			toggleWindowMode(window, &windowed);
 		}
 	default:
@@ -182,8 +175,8 @@ void ClientGame::update() {
 
 	// check if game is over TODO: just handle it in the server
 	if (manager.getGroup(groupLabels::groupPlayers).empty()) {
-		spdlog::get("console")->info("Game over - stopping game");
-		/* isRunning = false; */
+		spdlog::get("console")->info("Client Game - Game over");
+		isRunning = false;
 	}
 }
 
@@ -260,11 +253,9 @@ std::string ClientGame::joinInterface() {
 
 	map = new Map();
 	map->loadMap(fs::path("../../maps/joinLobby.tmj"));
-	spdlog::get("console")->info("Map loaded");
 
 	FontManager gInputTextTexture(renderer, "../../assets/zd-bold.ttf");
 	FontManager gPromptTextTexture(renderer, "../../assets/zd-bold.ttf", 26);
-	spdlog::get("console")->info("loaded textures");
 
 	SDL_Color textColor = {0, 0, 0, 255};
 	SDL_Event event;
@@ -273,7 +264,6 @@ std::string ClientGame::joinInterface() {
 	SDL_PumpEvents();
 	SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 	SDL_StartTextInput();
-	spdlog::get("console")->info("started input");
 
 	std::string inputText = "xxx.xxx.xxx.xxx";
 	gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
@@ -388,25 +378,27 @@ void ClientGame::receiveGameState() {
 	// first time while joining clear all entities - TODO: why not in init?
 	if (!connected) {
 		this->getManager()->destroyEntities<ClientGame>();
-		spdlog::get("console")->debug("First join detected detruction");
+		spdlog::get("console")->info("Client Game - Receiving game state with {} players for the first time!",
+		                             numEntities);
 	}
 
 	// check if the entities are already loaded
 	for (size_t i = 0; i < numEntities; ++i) {
 		// read entity meta data from stream
-		uint8_t _id;
+		uint8_t id;
 		groupLabels group;
-		ar(_id, group);
-		const uint8_t id = _id;
+		ar(id, group);
 		if (entityGroups.count(id)) {
 			// case: entity already in manager
 			new_entityGroups.insert(std::make_pair(id, group));
 			// ...and remove from old list
 			entityGroups.erase(id);
-			// spdlog::get("console")->debug("Entity {} already in manager", id);
+
+			assert(&manager.getEntity(id) != nullptr);
 		} else {
-			spdlog::get("console")->info("Entity {} of type not in manager", id);
-			// spdlog::get("console")->info("Group: ")
+			spdlog::get("console")->info("Entity {} of type {} not in manager. Creating now", id,
+			                             static_cast<int>(group));
+
 			// create the entity
 			auto &entity = manager.addEntity(id);
 
@@ -442,12 +434,12 @@ void ClientGame::receiveGameState() {
 		}
 
 		// update the values of the entity
+		assert(&manager.getEntity(id) != nullptr);
 		ar(manager.getEntity(id));
 	}
 
 	// destroy all entities which are not in the update
 	for (auto &entity : entityGroups) {
-		spdlog::get("console")->info("Destroying entity with ID: {}", static_cast<int>(entity.first));
 		manager.getEntity(entity.first).destroy();
 	}
 	entityGroups = new_entityGroups;
@@ -489,6 +481,7 @@ bool ClientGame::running() const {
 }
 
 void ClientGame::stop() {
+	spdlog::get("console")->info("=============== stopping ClientGame ===============");
 	manager.destroyEntities<ClientGame>();
 	entityGroups.clear();
 	delete map;
@@ -559,6 +552,18 @@ void ClientGame::renderLoadingBar() {
 	}
 
 	delete loadingScreen;
+}
+
+void ClientGame::printEntityMetaData() {
+
+	spdlog::get("console")->debug("ClientGame - ownPlayerID: {}", ownPlayerID);
+	spdlog::get("console")->debug("ClientGame - entityGroups size: {}", entityGroups.size());
+	spdlog::get("console")->debug("ClientGame - entities in manager: {}", manager.getEntities().size());
+	spdlog::get("console")->debug("ClientGame - Map path: {}\n\n", mapPath.string());
+
+	for (auto &entity : manager.getEntities()) {
+		assert(entityGroups.count(entity.first));
+	}
 }
 
 } // namespace FishEngine

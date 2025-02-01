@@ -239,7 +239,6 @@ class Manager {
 
 	template <class T>
 	void refresh() {
-		int tmp_size = entities.size();
 		for (auto i(0u); i < maxGroups; i++) {
 			auto &v(groupedEntities[i]);
 			v.erase(std::remove_if(std::begin(v), std::end(v),
@@ -255,16 +254,13 @@ class Manager {
 		for (auto it = entities.begin(); it != entities.end();) {
 			if (!it->second->isActive()) {
 				uint8_t id = it->second->getID();
-				spdlog::get("console")->info("Destroying entity with ID: {}", static_cast<int>(id));
+				spdlog::get("console")->info("ECS refresh - Destroying entity with ID: {}", static_cast<int>(id));
 				assert(id == it->first);
 				T::getInstance().removeEntity(id);
 				it = entities.erase(it);
 			} else {
 				++it;
 			}
-		}
-		if (tmp_size != entities.size()) {
-			std::cout << "Entities destroyed. size now: " << entities.size() << std::endl;
 		}
 	}
 

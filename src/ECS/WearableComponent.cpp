@@ -29,6 +29,9 @@ void WearableComponent::init() {
 }
 
 void WearableComponent::update() {
+	spdlog::get("cb")->debug(
+	    "WearableComponent - position: {} {} ----- serverside: {}", static_cast<int>(transform->getPosition().getX()),
+	    static_cast<int>(transform->getPosition().getY()), entity->hasComponent<SpriteComponent>());
 	if (attached) {
 		// copy the values of the attached entity to the entity
 		TransformComponent *attached_transform = &attachedEntity->getComponent<TransformComponent>();
@@ -47,6 +50,11 @@ void WearableComponent::update() {
 }
 
 void WearableComponent::attach(Entity *entity) {
+	if (entity == nullptr) {
+		spdlog::get("console")->error("WearableComponent - attach - entity is nullptr");
+		return;
+	}
+
 	spdlog::get("console")->debug("WearableComponent - attach");
 	attachedEntity = entity;
 	attachedID = entity->getID();
@@ -64,6 +72,13 @@ void WearableComponent::attach(Entity *entity) {
 }
 
 void WearableComponent::detach() {
+	if (attachedEntity == nullptr) {
+		spdlog::get("console")->error(
+		    "WearableComponent - detach - attachedEntity is nullptr. This happend on the server: {}",
+		    entity->hasComponent<ServerComponent>());
+		return;
+	}
+
 	spdlog::get("console")->debug("WearableComponent - detach : velocity: {} {}",
 	                              attachedEntity->getComponent<MoveComponent>().velocity.getX(),
 	                              attachedEntity->getComponent<MoveComponent>().velocity.getY());
@@ -85,20 +100,13 @@ void WearableComponent::detach() {
 void WearableComponent::shoot() {
 	if (ammunition > 0) {
 
-		spdlog::get("console")->debug("WearableComponent - shoot");
-
 		Manager &manager = *entity->getManager();
 		Entity &projectile(manager.addEntity());
 		std::pair<std::uint16_t, std::uint16_t> pos(transform->getPosition().getX(), transform->getPosition().getY());
 		ServerGenerator::forProjectile(projectile, pos, transform->isFacingRight());
-		spdlog::get("console")->error("WearableComponent - shoot - projectile ID: {}", projectile.getID());
+		spdlog::get("console")->info("WearableComponent - shoot - projectile ID: {}", projectile.getID());
 		// decrease the ammunition
 		ammunition--;
-		static int xx = 100;
-		if (xx == 101) {
-			xx = 101;
-		};
-		xx++;
 	}
 }
 

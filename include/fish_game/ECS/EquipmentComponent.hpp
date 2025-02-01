@@ -49,7 +49,7 @@ class EquipmentComponent : public Component {
 
 	void init() override;
 
-	void update() override {}
+	void update() override;
 
 	/**
 	 * @brief: pick up or drop the item

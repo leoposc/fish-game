@@ -30,11 +30,17 @@ std::unique_ptr<ServerGame> ServerGame::instance = nullptr;
 
 ServerGame::ServerGame() : isRunning(false) {}
 
+ServerGame::~ServerGame() {
+	spdlog::get("console")->info("========== ServerGame deconstruction ==========");
+	delete map;
+	map = nullptr;
+	printEntityMetaData();
+}
 void ServerGame::printManager() {
 	manager.print();
 }
 
-void ServerGame::init(fs::path mapPath) {
+void ServerGame::init(fs::path mapPath, bool combat) {
 	// assert(manager.checkEmpty());
 	// assert(map == nullptr);
 	// assert(numPlayers > 0);
@@ -51,9 +57,19 @@ void ServerGame::init(fs::path mapPath) {
 		this->createPlayer(player.getEntityId());
 	}
 
-	serverThread = std::thread(&ServerGame::serverLoop, this);
+	// spawn eventually weapons
+	if (combat) {
+		spawnWeapons();
+	}
 
 	spdlog::get("console")->info("ServerGame - init done");
+
+	printEntityMetaData();
+
+	spdlog::get("console")->info("ServerGame - Starting server loop");
+
+	// start the server loop
+	serverThread = std::thread(&ServerGame::serverLoop, this);
 }
 
 void ServerGame::update() {
@@ -145,9 +161,9 @@ uint8_t ServerGame::handleJoinRequests() {
 	// send playerID to client
 	auto clients = this->networkHost.getClients();
 	if (old_clients.size() != clients.size()) {
-		spdlog::get("console")->info("ServerGame - New client detected");
+		spdlog::get("console")->info("ServerGame - New client detected - list of all clients: ");
 		for (const auto &client : clients) {
-			std::cout << client << std::endl;
+			spdlog::get("console")->info("client: {}", client);
 		}
 
 		// create new player
@@ -171,8 +187,8 @@ void ServerGame::receivePlayerEvents() {
 		std::istringstream is(unpackedAction);
 		cereal::BinaryInputArchive archive(is);
 		archive(id, event.key.keysym.sym, event.type);
-		spdlog::get("console")->debug("Parsed event: id: {}, event sym: {}, event type: {}", id, event.key.keysym.sym,
-		                              event.type);
+		spdlog::get("network_logger")
+		    ->debug("Parsed event: id: {}, event sym: {}, event type: {}", id, event.key.keysym.sym, event.type);
 
 		// TODO handle event
 		// update the event inside the component of the player entity
@@ -199,10 +215,8 @@ void ServerGame::sendGameState() {
 	ar(entityGroups.size());
 	// spdlog::get("console")->debug("Sending game state with {} players", entityGroups.size());
 
-	spdlog::get("stderr")->debug("ServerGame - Number of entities: {}", entityGroups.size());
-	spdlog::get("stderr")->debug("ServerGame - Number of players: {}", manager.getEntities().size());
 	assert(entityGroups.size() == manager.getEntities().size());
-	spdlog::get("stderr")->debug("ServerGame - Number of entities: {}", entityGroups.size());
+
 	for (auto &[id, group] : entityGroups) {
 		assert(id == manager.getEntity(id).getID());
 		assert(id > 0);
@@ -234,10 +248,12 @@ void ServerGame::spawnWeapons() {
 		// do no spawn weapons when existing weapon was not picked up
 		auto &existingWeapons(manager.getGroup(groupLabels::groupWeapons));
 
-		for (auto &spawnpoint : *spawnpoints) {
-			spawnWeaponsAux(spawnpoint, existingWeapons);
-			spdlog::get("console")->info("Weapon spawned at: {} {}", spawnpoint.first, spawnpoint.second);
-		}
+		// for (auto &spawnpoint : *spawnpoints) {
+		// 	spawnWeaponsAux(spawnpoint, existingWeapons);
+		// 	spdlog::get("console")->info("Weapon spawned at: {} {}", spawnpoint.first, spawnpoint.second);
+		// }
+
+		spawnWeaponsAux(spawnpoints->at(0), existingWeapons);
 	}
 }
 
@@ -270,6 +286,7 @@ bool ServerGame::running() const {
 }
 
 void ServerGame::stop() {
+	spdlog::get("console")->info("=============== stopping ServerGame ===============");
 	{
 		std::lock_guard<std::mutex> lock(serverMutex);
 		isRunning = false;
@@ -289,16 +306,21 @@ bool ServerGame::checkCollisions(Entity *e) {
 	return map->checkCollisions(&e->getComponent<ColliderComponent>().collider);
 }
 
-void ServerGame::printAllEntityIDs() {
+void ServerGame::printEntityMetaData() {
 
-	spdlog::get("stderr")->info("IDs inside entityGroups: ");
+	spdlog::get("console")->info("\n-------------------------------------------------");
+	spdlog::get("console")->info("ServerGame - Entity Meta Data: ");
+	spdlog::get("console")->info("Number of entities: {}", entityGroups.size());
+	spdlog::get("console")->info("Number of entities in manager: {}", manager.getEntities().size());
+
+	spdlog::get("console")->info("IDs inside entityGroups: ");
 	for (auto &id : entityGroups) {
-		spdlog::get("stderr")->info("ID: {}", id.first);
+		spdlog::get("console")->info("ID: {}", id.first);
 	}
 
-	spdlog::get("stderr")->info("IDs inside manager: ");
+	spdlog::get("console")->info("IDs inside manager: ");
 	for (const auto &pair : manager.getEntities()) {
-		spdlog::get("stderr")->info("ID: {}", pair.first);
+		spdlog::get("console")->info("ID: {}", pair.first);
 	}
 }
 

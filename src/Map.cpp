@@ -22,7 +22,7 @@ void Map::loadMap(fs::path path, bool hasBackground) {
 	currentMap = map.get();
 
 	if (map->getStatus() == tson::ParseStatus::OK) {
-		spdlog::get("console")->debug("Map loaded successfully!");
+		spdlog::get("console")->info("Map {} loaded successfully!", path.string());
 	} else {
 		spdlog::get("stderr")->error("Map loading failed!");
 		return;

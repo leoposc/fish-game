@@ -47,7 +47,7 @@ FuncPtr joinLobby();
 
 FuncPtr combat(bool isHost) {
 	std::this_thread::sleep_for(std::chrono::seconds(1));
-	const int FPS = 200;
+	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 
 	MusicPlayer::getInstance().playCombatMusic();
@@ -57,8 +57,7 @@ FuncPtr combat(bool isHost) {
 
 	if (isHost) {
 		auto server = &FishEngine::ServerGame::getInstance();
-		server->init("map04.tmj");
-		server->spawnWeapons();
+		server->init("map04.tmj", true);
 	}
 	client->init("map04.tmj", true);
 
@@ -105,7 +104,7 @@ FuncPtr joinLobby() {
 	}
 
 	client->sendJoinRequest(ip, "join user");
-	std::this_thread::sleep_for(std::chrono::seconds(2));
+	// std::this_thread::sleep_for(std::chrono::seconds(2));
 	return hostLobby(false);
 }
 
@@ -224,12 +223,13 @@ int main(int argc, char *argv[]) {
 	auto err_logger = spdlog::stderr_color_mt("stderr");
 	auto network_logger = spdlog::stdout_color_mt("network_logger");
 	auto socket_logger = spdlog::stdout_color_mt("socket_logger");
-	auto pollEvent = spdlog::stdout_color_mt("pollEvent");
+	auto current_bug = spdlog::stdout_color_mt("cb");
+
 	socket_logger->set_level(spdlog::level::off);
-	network_logger->set_level(spdlog::level::off);
-	console->set_level(spdlog::level::debug);
+	network_logger->set_level(spdlog::level::info);
+	console->set_level(spdlog::level::info);
 	err_logger->set_level(spdlog::level::debug);
-	pollEvent->set_level(spdlog::level::off);
+	current_bug->set_level(spdlog::level::debug);
 
 	auto &player = MusicPlayer::getInstance();
 

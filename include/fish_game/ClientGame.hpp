@@ -53,8 +53,6 @@ class ClientGame {
 
 	void receiveGameState();
 
-	bool hasStarted();
-
 	bool running() const;
 
 	void stop();
@@ -66,6 +64,8 @@ class ClientGame {
 	void startLoadingBar();
 
 	void renderLoadingBar();
+
+	void printEntityMetaData();
 
 	Manager *getManager();
 
@@ -89,18 +89,16 @@ class ClientGame {
 
 	Manager manager;
 	Entity *ownPlayer;
-
-	Map *map = nullptr;
-	fs::path mapPath;
+	std::map<uint8_t, groupLabels> entityGroups;
 	int numPlayers = 6;
 	bool isRunning;
 	bool connected = false;
 
-	SDL_Window *window;
-	bool windowed = true;
+	Map *map = nullptr;
+	fs::path mapPath;
 
-	std::unordered_map<uint8_t, Entity *> players;
-	std::map<uint8_t, groupLabels> entityGroups;
+	SDL_Window *window;
+	bool windowed = false;
 
 	const char *title;
 	int xpos;
