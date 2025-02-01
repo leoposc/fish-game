@@ -44,12 +44,6 @@ FuncPtr joinLobby();
 // std::thread serverThread;
 // std::mutex serverMutex;
 // std::condition_variable serverCv;
-bool serverRunning = false;
-
-// void startServerThread() {
-// 	serverRunning = true;
-// 	serverThread = std::thread(serverLoop);
-// }
 
 FuncPtr combat(bool isHost) {
 	std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -148,6 +142,7 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 				server->stop();
 			}
 			FishEngine::ServerGame::resetInstance();
+			FishEngine::ClientGame::resetInstance();
 			return mainMenu();
 			break;
 		case 3:
@@ -228,7 +223,7 @@ int main(int argc, char *argv[]) {
 	auto pollEvent = spdlog::stdout_color_mt("pollEvent");
 	socket_logger->set_level(spdlog::level::off);
 	network_logger->set_level(spdlog::level::off);
-	console->set_level(spdlog::level::off);
+	console->set_level(spdlog::level::debug);
 	err_logger->set_level(spdlog::level::debug);
 	pollEvent->set_level(spdlog::level::off);
 

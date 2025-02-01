@@ -28,7 +28,6 @@ class ServerGame {
 		return *instance;
 	}
 
-	// Method to reset the instance of the singleton
 	static void resetInstance() { instance.reset(new ServerGame()); }
 
 	SDL_Event getEvent() { return game_event; }

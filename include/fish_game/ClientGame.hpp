@@ -18,9 +18,13 @@ class ClientGame {
 
   public:
 	static ClientGame &getInstance() {
-		static ClientGame instance; // Guaranteed to be destroyed and instantiated on first use
-		return instance;
+		if (!instance) {
+			instance.reset(new ClientGame());
+		}
+		return *instance;
 	}
+
+	static void resetInstance() { instance.reset(new ClientGame()); }
 
 	SDL_Event getEvent() const { return game_event; }
 
@@ -75,13 +79,13 @@ class ClientGame {
 	NetworkClient networkClient;
 
 	uint8_t ownPlayerID;
+	~ClientGame();
 
   private:
 	// Singelton
 	ClientGame();
 	ClientGame(const ClientGame &) = delete;
 	ClientGame &operator=(const ClientGame &) = delete;
-	~ClientGame();
 
 	bool initialized;
 
@@ -111,6 +115,7 @@ class ClientGame {
 	// increment this for each new fish sprite and reset at init
 	size_t fishSpriteID = 0;
 	size_t progressUpdate = 0;
+	static std::unique_ptr<ClientGame> instance;
 };
 
 } // namespace FishEngine
