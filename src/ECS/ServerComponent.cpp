@@ -3,7 +3,6 @@
 #include "../../include/fish_game/ECS/ServerComponent.hpp"
 #include "../../include/fish_game/Auxiliary.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
-#include "../../include/fish_game/MockServer.hpp"
 #include "fish_game/ServerGame.hpp"
 
 #include <cereal/archives/json.hpp>
