@@ -405,6 +405,7 @@ void ClientGame::receiveGameState() {
 				// TODO: when joining combat its already connected -> no new eventhandler is created
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
+					this->ownPlayer = &entity;
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 				} else if (connected && id == this->ownPlayerID) {
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
@@ -451,6 +452,10 @@ void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
 }
 
 uint8_t ClientGame::updateMainMenu() const {
+	if (this->ownPlayer == nullptr) {
+		spdlog::get("console")->warn("Client Game - No Player from server assigned yet!");
+		return 0;
+	}
 
 	if (Collision::checkBack(*ownPlayer, *map))
 		return 0;

@@ -200,7 +200,7 @@ void ServerGame::sendGameState() {
 	// spdlog::get("console")->debug("Sending game state with {} players", entityGroups.size());
 
 	assert(entityGroups.size() == manager.getEntities().size());
-	spdlog::get("stderr")->info("ServerGame - Number of entities: {}", entityGroups.size());
+	spdlog::get("stderr")->debug("ServerGame - Number of entities: {}", entityGroups.size());
 	for (auto &[id, group] : entityGroups) {
 		assert(id == manager.getEntity(id).getID());
 		assert(id > 0);

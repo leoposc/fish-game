@@ -121,7 +121,7 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 	}
 
 	client->init("hostLobby.tmj", false);
-	client->createOwnPlayer();
+	// client->createOwnPlayer();
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
