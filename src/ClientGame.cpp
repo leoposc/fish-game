@@ -10,7 +10,6 @@
 #include "../include/fish_game/ECS/WearableComponent.hpp"
 #include "../include/fish_game/FontManager.hpp"
 #include "../include/fish_game/Map.hpp"
-#include "../include/fish_game/MockServer.hpp"
 #include "../include/fish_game/TextureManager.hpp"
 #include "../include/fish_game/Vector2D.hpp"
 

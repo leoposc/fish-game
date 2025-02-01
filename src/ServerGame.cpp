@@ -12,7 +12,6 @@
 #include "../include/fish_game/ECS/TransformComponent.hpp"
 #include "../include/fish_game/ECS/WearableComponent.hpp"
 #include "../include/fish_game/Map.hpp"
-#include "../include/fish_game/MockServer.hpp"
 #include "../include/fish_game/NetworkHost.hpp"
 #include "../include/fish_game/Player.hpp"
 #include "../include/fish_game/TextureManager.hpp"
@@ -51,14 +50,6 @@ void ServerGame::init(fs::path mapPath) {
 	}
 
 	spdlog::get("console")->info("ServerGame - init done");
-}
-
-void ServerGame::handleEvents() {
-	if (MockServer::getInstance().pollEvent()) {
-		if (game_event.type == SDL_QUIT) {
-			isRunning = false;
-		}
-	}
 }
 
 void ServerGame::update() {

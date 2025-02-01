@@ -28,8 +28,6 @@ class ServerGame {
 
 	void init(fs::path mapPath);
 
-	void handleEvents();
-
 	void update();
 
 	void printManager();

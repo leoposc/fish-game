@@ -1,7 +1,6 @@
 #include "../../include/fish_game/ECS/ClientComponent.hpp"
 #include "../../include/fish_game/Auxiliary.hpp"
 #include "../../include/fish_game/ECS/TransformComponent.hpp"
-#include "../../include/fish_game/MockServer.hpp"
 #include "fish_game/ClientGame.hpp"
 #include "fish_game/NetworkHost.hpp"
 
