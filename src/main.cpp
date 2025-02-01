@@ -119,8 +119,8 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 
 	if (isHost) {
 		server = &FishEngine::ServerGame::getInstance();
-		server->init("hostLobby.tmj");
 		client->networkClient.init("127.0.0.1", "host player");
+		server->init("hostLobby.tmj");
 	}
 
 	client->init("hostLobby.tmj", false);
