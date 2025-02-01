@@ -369,11 +369,6 @@ void ClientGame::sendJoinRequest(std::string ip, std::string username) {
 
 void ClientGame::receiveGameState() {
 
-	spdlog::get("console")->info("IDs inside entityGroups: ");
-	for (auto &id : entityGroups) {
-		spdlog::get("console")->info("ID: {}", id.first);
-	}
-
 	if (!this->networkClient.hasUpdate()) {
 		// spdlog::get("console")->debug("skipped, no update received");
 		return;
@@ -394,7 +389,6 @@ void ClientGame::receiveGameState() {
 		spdlog::get("console")->debug("First join detected detruction");
 	}
 
-	spdlog::get("stderr")->info("ClientGame Number of entities: {}", numEntities);
 	// check if the entities are already loaded
 	for (size_t i = 0; i < numEntities; ++i) {
 		// read entity meta data from stream
@@ -431,14 +425,12 @@ void ClientGame::receiveGameState() {
 				ClientGenerator::forWeapon(entity, {0, 0});
 				break;
 			case groupLabels::groupProjectiles:
-				spdlog::get("console")->info("Creating projectile");
 				bool faceRight;
 				// ar(faceRight);
 				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
 				break;
 			default:
-				spdlog::get("stderr")->error("Unknown group type");
-				throw std::runtime_error("Server is equesting to create an unknown group type.");
+				throw std::runtime_error("Server is requesting to create an unknown group type.");
 				break;
 			}
 
@@ -447,11 +439,7 @@ void ClientGame::receiveGameState() {
 		}
 
 		// update the values of the entity
-		spdlog::get("console")->info("Calling getEntity inside receiveGameState!");
-		spdlog::get("console")->info("ID: {}", id);
-		spdlog::get("console")->info("Inside entityGroups: {}", entityGroups.count(id));
 		ar(manager.getEntity(id));
-		spdlog::get("console")->info("Returned from it!\n");
 	}
 
 	// destroy all entities which are not in the update
