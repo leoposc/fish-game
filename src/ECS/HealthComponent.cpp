@@ -27,19 +27,22 @@ void HealthComponent::takeDamage() {
 
 void HealthComponent::update() {
 
+	// case when the entity is not alive anymore and the timer has expired
 	if (!alive && SDL_GetTicks() - startTimer > 3000) {
 
 		spdlog::get("console")->debug("HealthComponent - entity {} destroyed, not alive anymore", entity->getID());
 		this->entity->destroy();
+
+		// case when the entity is not alive anymore and the timer has not expired
 
 	} else if (transform->getY() > SCREEN_HEIGHT + 50 || (transform->getX() > SCREEN_WIDTH + 50)
 	           || (transform->getX() < -50)) {
 
 		takeDamage();
 
-		// another way of checking if this code is executed on the client side which has to update the sprite
-		if (entity->hasComponent<SpriteComponent>())
-			entity->getComponent<SpriteComponent>().play("fishDead");
+	} else if (!alive && entity->hasComponent<SpriteComponent>()) {
+
+		entity->getComponent<SpriteComponent>().play("fishDead");
 	}
 }
 

@@ -107,11 +107,6 @@ void ClientGame::init(fs::path mp, bool combat) {
 	map = new Map();
 	map->loadMap(fs::path("../../maps") / mapPath);
 
-	// ================== init weapons ==================
-	if (combat) {
-		// spawnWeapons();
-	}
-
 	// reset entityGroups
 	entityGroups.clear();
 
@@ -169,6 +164,8 @@ void ClientGame::update() {
 	Collision::checkCollisions(&manager.getGroup(groupLabels::groupColliders), map);
 	Collision::checkCollisions(&manager.getGroup(groupLabels::groupPlayers),
 	                           &manager.getGroup(groupLabels::groupProjectiles));
+
+	manager.refresh<ClientGame>();
 
 	// // animate the map
 	map->updateAnimations();
@@ -389,7 +386,7 @@ void ClientGame::receiveGameState() {
 		spdlog::get("console")->debug("First join detected detruction");
 	}
 
-	spdlog::get("stderr")->info("Number of entities: {}", numEntities);
+	spdlog::get("stderr")->info("ClientGame Number of entities: {}", numEntities);
 	// check if the entities are already loaded
 	for (size_t i = 0; i < numEntities; ++i) {
 		// read entity meta data from stream
@@ -428,7 +425,7 @@ void ClientGame::receiveGameState() {
 			case groupLabels::groupProjectiles:
 				spdlog::get("console")->info("Creating projectile");
 				bool faceRight;
-				ar(faceRight);
+				// ar(faceRight);
 				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
 				break;
 			default:

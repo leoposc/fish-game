@@ -74,6 +74,8 @@ void ServerGame::update() {
 	Collision::checkCollisions(&manager.getGroup(groupLabels::groupPlayers),
 	                           &manager.getGroup(groupLabels::groupProjectiles));
 
+	manager.refresh<ServerGame>();
+
 	if (manager.getGroup(groupLabels::groupPlayers).empty()) {
 		spdlog::get("console")->info("ServerGame - Game over");
 		isRunning = false;
@@ -100,9 +102,14 @@ uint8_t ServerGame::createPlayer(int id) {
 }
 
 std::pair<std::uint16_t, std::uint16_t> ServerGame::getPlayerSpawnpoint() {
-	std::pair<std::uint16_t, std::uint16_t> spawnpoint;
 	int n_spawnpoints = playerSpawnpoints.size();
 
+	// handle the lobby case, where all players spawn at the same point
+	if (n_spawnpoints == 1) {
+		return playerSpawnpoints.at(0);
+	}
+
+	std::pair<std::uint16_t, std::uint16_t> spawnpoint;
 	int randomIndex = rand() % n_spawnpoints;
 	// todo: check why it is always the same spawnpoint
 	spdlog::get("console")->info("Server Game - Random PlayerSpawnpoint index: {}", randomIndex);
@@ -184,10 +191,10 @@ void ServerGame::sendGameState() {
 		ar(id, group);
 
 		// if projectile, send the direction
-		if (group == groupLabels::groupProjectiles) {
-			spdlog::get("console")->info("ServerGame - Sending projectile direction");
-			ar(manager.getEntity(id).getComponent<TransformComponent>().faceRight);
-		}
+		// if (group == groupLabels::groupProjectiles) {
+		// 	spdlog::get("console")->info("ServerGame - Sending projectile direction");
+		// 	ar(manager.getEntity(id).getComponent<TransformComponent>().faceRight);
+		// }
 
 		// serialize components of the entity
 		ar(manager.getEntity(id));

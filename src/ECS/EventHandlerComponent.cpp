@@ -59,6 +59,7 @@ void EventHandlerComponent::update() {
 					equip->processCommand();
 				}
 				if (event_ptr->key.keysym.sym == SDLK_k) {
+					spdlog::get("stderr")->info("Event-handler: Shooting");
 					equip->shoot();
 				}
 			}

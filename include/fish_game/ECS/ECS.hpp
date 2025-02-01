@@ -99,7 +99,7 @@ class Entity {
 	void serialize(Archive &ar) {
 		ar(active, getComponent<TransformComponent>());
 
-		// ========== serialize optional components ==========
+		// // ========== serialize optional components ==========
 		if (hasComponent<WearableComponent>()) {
 			ar(getComponent<WearableComponent>());
 		}

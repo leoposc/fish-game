@@ -26,9 +26,9 @@ class HealthComponent : public Component {
 	void load(Archive &ar) {
 		ar(alive);
 
-		if (!alive) {
-			takeDamage();
-		}
+		// if (!alive) {
+		// 	takeDamage();
+		// }
 	}
 
 	HealthComponent() : alive(true) {}
