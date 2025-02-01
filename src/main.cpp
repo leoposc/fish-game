@@ -77,9 +77,17 @@ void serverLoop() {
 		std::unique_lock<std::mutex> lock(serverMutex);
 		serverCv.wait(lock, [] { return serverRunning; });
 
+		spdlog::get("stderr")->error("\nBefore Join Requests");
+		// server->printAllEntityIDs();
 		server->handleJoinRequests();
+		// spdlog::get("stderr")->error("Before receive Player Events");
+		// server->printAllEntityIDs();
 		server->receivePlayerEvents();
+		// spdlog::get("stderr")->error("Before update");
+		// server->printAllEntityIDs();
 		server->update();
+		// spdlog::get("stderr")->error("Before sendGameState");
+		// server->printAllEntityIDs();
 		server->sendGameState();
 
 		lock.unlock();
@@ -271,8 +279,8 @@ int main(int argc, char *argv[]) {
 	auto pollEvent = spdlog::stdout_color_mt("pollEvent");
 	socket_logger->set_level(spdlog::level::off);
 	network_logger->set_level(spdlog::level::off);
-	console->set_level(spdlog::level::info);
-	err_logger->set_level(spdlog::level::off);
+	console->set_level(spdlog::level::off);
+	err_logger->set_level(spdlog::level::debug);
 	pollEvent->set_level(spdlog::level::off);
 
 	auto &player = MusicPlayer::getInstance();

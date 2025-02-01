@@ -21,7 +21,8 @@ class ProjectileComponent : public Component {
 	}
 
 	ProjectileComponent() = default;
-	~ProjectileComponent() = default;
+	// ~ProjectileComponent() = default;
+	~ProjectileComponent();
 	ProjectileComponent(int rng, int sp, Vector2D vel);
 
 	void init() override;

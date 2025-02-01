@@ -383,19 +383,20 @@ void ClientGame::receiveGameState() {
 	size_t numEntities;
 	ar(numEntities);
 
-	// first time while joining clear all entities
+	// first time while joining clear all entities - TODO: why not in init?
 	if (!connected) {
 		this->getManager()->destroyEntities<ClientGame>();
 		spdlog::get("console")->debug("First join detected detruction");
 	}
 
+	spdlog::get("stderr")->info("Number of entities: {}", numEntities);
 	// check if the entities are already loaded
 	for (size_t i = 0; i < numEntities; ++i) {
 		// read entity meta data from stream
-		uint8_t id;
+		uint8_t _id;
 		groupLabels group;
-		ar(id, group);
-
+		ar(_id, group);
+		const uint8_t id = _id;
 		if (entityGroups.count(id)) {
 			// case: entity already in manager
 			new_entityGroups.insert(std::make_pair(id, group));
@@ -430,6 +431,10 @@ void ClientGame::receiveGameState() {
 				ar(faceRight);
 				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
 				break;
+			default:
+				spdlog::get("stderr")->error("Unknown group type");
+				throw std::runtime_error("Server is equesting to create an unknown group type.");
+				break;
 			}
 
 			// add the entity to the manager
@@ -441,7 +446,7 @@ void ClientGame::receiveGameState() {
 		spdlog::get("console")->info("ID: {}", id);
 		spdlog::get("console")->info("Inside entityGroups: {}", entityGroups.count(id));
 		ar(manager.getEntity(id));
-		spdlog::get("console")->info("Returned from it!");
+		spdlog::get("console")->info("Returned from it!\n");
 	}
 
 	// destroy all entities which are not in the update

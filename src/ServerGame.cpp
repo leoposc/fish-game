@@ -83,7 +83,6 @@ void ServerGame::update() {
 uint8_t ServerGame::createPlayer() {
 	auto &player(manager.addEntity());
 	players.push_back(Player(player.getID()));
-	entityGroups.insert(std::make_pair(player.getID(), groupLabels::groupPlayers));
 
 	// fetch a random spawnpoint and create player
 	ServerGenerator::forPlayer(player, this->getPlayerSpawnpoint());
@@ -93,7 +92,6 @@ uint8_t ServerGame::createPlayer() {
 
 uint8_t ServerGame::createPlayer(int id) {
 	auto &player(manager.addEntity(id));
-	entityGroups.insert(std::make_pair(player.getID(), groupLabels::groupPlayers));
 
 	// fetch a random spawnpoint and create player
 	ServerGenerator::forPlayer(player, this->getPlayerSpawnpoint());
@@ -165,21 +163,29 @@ void ServerGame::receivePlayerEvents() {
 
 void ServerGame::sendGameState() {
 
+	manager.refresh<ServerGame>();
+
+	// serialize the game state
 	std::ostringstream os;
 	cereal::BinaryOutputArchive ar(os);
 
 	// inform client about the number of the entities
-
 	ar(entityGroups.size());
 	// spdlog::get("console")->debug("Sending game state with {} players", entityGroups.size());
 
+	assert(entityGroups.size() == manager.getEntities().size());
+	spdlog::get("stderr")->info("ServerGame - Number of entities: {}", entityGroups.size());
 	for (auto &[id, group] : entityGroups) {
+		assert(id == manager.getEntity(id).getID());
+		assert(id > 0);
+		assert(group >= 0 && group < 5);
 
 		// inform the client about the current entities
 		ar(id, group);
 
 		// if projectile, send the direction
 		if (group == groupLabels::groupProjectiles) {
+			spdlog::get("console")->info("ServerGame - Sending projectile direction");
 			ar(manager.getEntity(id).getComponent<TransformComponent>().faceRight);
 		}
 
@@ -225,7 +231,6 @@ void ServerGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &
 	// spawn the weapon
 	auto &weapon(manager.addEntity());
 	ServerGenerator::forWeapon(weapon, spawnpoint);
-	entityGroups.insert(std::make_pair(weapon.getID(), groupLabels::groupWeapons));
 }
 
 void ServerGame::insertToEntityGroups(uint8_t id, groupLabels label) {
@@ -246,6 +251,19 @@ void ServerGame::stop() {
 
 bool ServerGame::checkCollisions(Entity *e) {
 	return map->checkCollisions(&e->getComponent<ColliderComponent>().collider);
+}
+
+void ServerGame::printAllEntityIDs() {
+
+	spdlog::get("stderr")->info("IDs inside entityGroups: ");
+	for (auto &id : entityGroups) {
+		spdlog::get("stderr")->info("ID: {}", id.first);
+	}
+
+	spdlog::get("stderr")->info("IDs inside manager: ");
+	for (const auto &pair : manager.getEntities()) {
+		spdlog::get("stderr")->info("ID: {}", pair.first);
+	}
 }
 
 } // namespace FishEngine

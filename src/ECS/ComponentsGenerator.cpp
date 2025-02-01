@@ -52,6 +52,8 @@ void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> c
 	projectile.addComponent<ProjectileComponent>(500, 10, velocity);
 	projectile.addGroup(groupLabels::groupProjectiles);
 	projectile.addGroup(groupLabels::groupColliders);
+
+	// hear shots from all players
 	MusicPlayer::getInstance().playShootSound();
 }
 
@@ -70,9 +72,11 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 	player.addComponent<EventHandlerComponent, 0>(true);
 	player.addGroup(groupLabels::groupPlayers);
 	player.addGroup(groupLabels::groupColliders);
+	ServerGame::getInstance().insertToEntityGroups(player.getID(), groupLabels::groupPlayers);
 }
 
 void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos, bool faceRight) {
+	spdlog::get("console")->info("ServerGenerator::forProjectile");
 	Vector2D velocity = faceRight ? Vector2D(-10, 0) : Vector2D(10, 0);
 	int projectileOffset = faceRight ? 40 : -50;
 	projectile.addComponent<TransformComponent>(pos.first + projectileOffset, pos.second, 5, 5, 1.0);
@@ -80,6 +84,7 @@ void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> c
 	projectile.addComponent<ProjectileComponent>(500, 10, velocity);
 	projectile.addGroup(groupLabels::groupProjectiles);
 	projectile.addGroup(groupLabels::groupColliders);
+	ServerGame::getInstance().insertToEntityGroups(projectile.getID(), groupLabels::groupProjectiles);
 }
 
 void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &pos) {
@@ -89,6 +94,7 @@ void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &po
 	weapon.addComponent<GravityComponent>();
 	weapon.addGroup(groupLabels::groupWeapons);
 	weapon.addGroup(groupLabels::groupColliders);
+	ServerGame::getInstance().insertToEntityGroups(weapon.getID(), groupLabels::groupWeapons);
 }
 } // namespace ServerGenerator
 

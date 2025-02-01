@@ -84,16 +84,21 @@ void WearableComponent::detach() {
 // code is only executed on the server side
 void WearableComponent::shoot() {
 	if (ammunition > 0) {
+
 		spdlog::get("console")->debug("WearableComponent - shoot");
 
 		Manager &manager = *entity->getManager();
 		Entity &projectile(manager.addEntity());
-		ServerGame::getInstance().insertToEntityGroups(projectile.getID(), groupLabels::groupProjectiles);
 		std::pair<std::uint16_t, std::uint16_t> pos(transform->getPosition().getX(), transform->getPosition().getY());
 		ServerGenerator::forProjectile(projectile, pos, transform->isFacingRight());
-
+		spdlog::get("console")->error("WearableComponent - shoot - projectile ID: {}", projectile.getID());
 		// decrease the ammunition
 		ammunition--;
+		static int xx = 100;
+		if (xx == 101) {
+			xx = 101;
+		};
+		xx++;
 	}
 }
 

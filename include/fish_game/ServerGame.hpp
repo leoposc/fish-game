@@ -61,15 +61,14 @@ class ServerGame {
 
 	bool checkCollisions(Entity *player);
 
+	void printAllEntityIDs();
+
 	inline static SDL_Renderer *renderer = nullptr;
 	inline static SDL_Event game_event;
 	static SDL_Rect camera;
 
-	// enum groupLabels : std::size_t { groupPlayers, groupEnemies, groupColliders, groupProjectiles, groupWeapons };
-
 	NetworkHost networkHost;
 	Map *map;
-
 	Manager manager;
 
   private:

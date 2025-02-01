@@ -9,7 +9,12 @@ namespace FishEngine {
 
 ProjectileComponent::ProjectileComponent(int rng, int sp, Vector2D vel) : range(rng), speed(sp), velocity(vel) {}
 
+ProjectileComponent::~ProjectileComponent() {
+	// spdlog::get("console")->info("ProjectileComponent - destructor - entity ID: {}", entity->getID());
+}
+
 void ProjectileComponent::init() {
+	spdlog::get("console")->info("ProjectileComponent - init - entity ID: {}", entity->getID());
 	transform = &entity->getComponent<TransformComponent>();
 }
 
@@ -19,7 +24,7 @@ void ProjectileComponent::update() {
 
 	if (distance > range) {
 		spdlog::get("console")->debug("Projectile out of range");
-		entity->destroy();
+		// entity->destroy();
 	}
 }
 
