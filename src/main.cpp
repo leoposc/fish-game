@@ -142,7 +142,9 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 				server->stop();
 			}
 			FishEngine::ServerGame::resetInstance();
-			FishEngine::ClientGame::resetInstance();
+			client->networkClient.~NetworkClient(); // Explicitly call the destructor
+			new (&client->networkClient)
+			    NetworkClient(); // Placement new to construct a new instance in the same memory location
 			return mainMenu();
 			break;
 		case 3:
@@ -229,7 +231,7 @@ int main(int argc, char *argv[]) {
 
 	auto &player = MusicPlayer::getInstance();
 
-	player.setMusicVolume(MIX_MAX_VOLUME / 10);
+	player.setMusicVolume(0);
 
 	// joinLobby();
 	// combat();

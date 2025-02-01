@@ -27,8 +27,6 @@ namespace FishEngine {
 constexpr int SCREEN_WIDTH = 2048;
 constexpr int SCREEN_HEIGHT = 1024;
 
-std::unique_ptr<ClientGame> ClientGame::instance = nullptr;
-
 // ================== helper functions ==================
 
 void toggleWindowMode(SDL_Window *win, bool *windowed) {
