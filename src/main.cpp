@@ -37,9 +37,6 @@ using sG = FishEngine::ServerGame;
 
 typedef void (*FuncPtr)();
 
-cG *client = nullptr;
-sG *server = nullptr;
-
 FuncPtr mainMenu();
 FuncPtr hostLobby(bool isHost, bool needInit = true);
 FuncPtr joinLobby();
@@ -62,6 +59,8 @@ FuncPtr combat(bool isHost) {
 	MusicPlayer::getInstance().playCombatMusic();
 	u_int32_t frameStart;
 	int frameTime;
+	auto client = &FishEngine::ClientGame::getInstance();
+	auto server = &FishEngine::ServerGame::getInstance();
 
 	if (isHost) {
 		server->init("map04.tmj");
@@ -102,6 +101,7 @@ FuncPtr combat(bool isHost) {
 // todo: implement joinLobby
 FuncPtr joinLobby() {
 	std::string ip;
+	auto client = &FishEngine::ClientGame::getInstance();
 	ip = client->joinInterface();
 	if (ip.empty()) {
 		return mainMenu();
@@ -116,6 +116,9 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 	const int frameDelay = 1000 / FPS;
 	uint32_t frameStart;
 	int frameTime;
+
+	auto client = &FishEngine::ClientGame::getInstance();
+	auto server = &FishEngine::ServerGame::getInstance();
 
 	if (isHost) {
 		server = &FishEngine::ServerGame::getInstance();
@@ -178,6 +181,9 @@ FuncPtr mainMenu() {
 	int frameTime;
 	MusicPlayer::getInstance().playLobbyMusic();
 
+	auto client = &FishEngine::ClientGame::getInstance();
+	auto server = &FishEngine::ServerGame::getInstance();
+
 	client->init("mainMenu.tmj", false);
 	client->createOwnPlayer();
 
@@ -230,7 +236,6 @@ int main(int argc, char *argv[]) {
 
 	player.setMusicVolume(MIX_MAX_VOLUME / 10);
 
-	client = &FishEngine::ClientGame::getInstance();
 	// joinLobby();
 	// combat();
 	mainMenu();
