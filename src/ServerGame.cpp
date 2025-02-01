@@ -26,6 +26,8 @@
 
 namespace FishEngine {
 
+std::unique_ptr<ServerGame> ServerGame::instance = nullptr;
+
 ServerGame::ServerGame() : isRunning(false) {}
 
 void ServerGame::printManager() {
@@ -71,7 +73,7 @@ void ServerGame::update() {
 
 	if (manager.getGroup(groupLabels::groupPlayers).empty()) {
 		spdlog::get("console")->info("ServerGame - Game over");
-		isRunning = false;
+		/* isRunning = false; */
 	}
 }
 

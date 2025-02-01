@@ -144,6 +144,7 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 			if (isHost) {
 				server->stop();
 			}
+			FishEngine::ServerGame::resetInstance();
 			return mainMenu();
 			break;
 		case 3:

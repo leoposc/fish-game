@@ -22,9 +22,14 @@ class ServerGame {
 
   public:
 	static ServerGame &getInstance() {
-		static ServerGame instance;
-		return instance;
+		if (!instance) {
+			instance.reset(new ServerGame());
+		}
+		return *instance;
 	}
+
+	// Method to reset the instance of the singleton
+	static void resetInstance() { instance.reset(new ServerGame()); }
 
 	SDL_Event getEvent() { return game_event; }
 
@@ -76,7 +81,7 @@ class ServerGame {
   private:
 	ServerGame();
 	ServerGame(const ServerGame &) = delete;
-	ServerGame &operator=(const ServerGame &) = delete;
+	ServerGame &operator=(const ServerGame &other) = delete;
 
 	bool isRunning;
 	SDL_Window *window;
@@ -93,6 +98,8 @@ class ServerGame {
 	std::thread serverThread;
 	std::mutex serverMutex;
 	std::condition_variable serverCv;
+
+	static std::unique_ptr<ServerGame> instance;
 };
 
 } // namespace FishEngine
