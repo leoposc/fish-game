@@ -409,7 +409,6 @@ void ClientGame::receiveGameState() {
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
-					this->ownPlayer = &entity;
 				} else if (connected && id == this->ownPlayerID) {
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 				} else {
@@ -431,6 +430,13 @@ void ClientGame::receiveGameState() {
 
 			// add the entity to the manager
 			new_entityGroups.insert(std::make_pair(id, group));
+
+			if (i == 0) {
+				// moved it down here, so that each player has the host as ownPlayer
+				// so that if the host starts the game, all clients will notice the
+				// map change
+				this->ownPlayer = &entity;
+			}
 		}
 
 		// update the values of the entity
