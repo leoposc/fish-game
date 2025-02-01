@@ -105,6 +105,7 @@ FuncPtr joinLobby() {
 	}
 
 	client->sendJoinRequest(ip, "join user");
+	std::this_thread::sleep_for(std::chrono::seconds(2));
 	return hostLobby(false);
 }
 
