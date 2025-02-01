@@ -98,6 +98,7 @@ void ClientGame::reset() {
 	new (&networkClient) NetworkClient(); // Placement new to construct a new instance in the same memory location
 
 	players.clear();
+	ownPlayer = nullptr;
 	connected = false;
 }
 
@@ -106,6 +107,7 @@ void ClientGame::init(fs::path mp, bool combat) {
 	auto future = std::async(std::launch::async, &FishEngine::ClientGame::startLoadingBar, this);
 
 	isRunning = true;
+	ownPlayer = nullptr;
 
 	// ============ control if game was reset ===========
 	assert(manager.checkEmpty());
@@ -414,7 +416,6 @@ void ClientGame::receiveGameState() {
 				// TODO: when joining combat its already connected -> no new eventhandler is created
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
-					this->ownPlayer = &entity;
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 					this->ownPlayer = &entity;
 				} else if (connected && id == this->ownPlayerID) {
@@ -446,6 +447,7 @@ void ClientGame::receiveGameState() {
 
 	// destroy all entities which are not in the update
 	for (auto &entity : entityGroups) {
+		spdlog::get("console")->info("Destroying entity with ID: {}", static_cast<int>(entity.first));
 		manager.getEntity(entity.first).destroy();
 	}
 	entityGroups = new_entityGroups;

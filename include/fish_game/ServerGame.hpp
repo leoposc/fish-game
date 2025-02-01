@@ -28,7 +28,11 @@ class ServerGame {
 		return *instance;
 	}
 
-	static void resetInstance() { instance.reset(new ServerGame()); }
+	static void resetInstance() {
+		spdlog::get("console")->info("ServerGame resetInstance");
+		instance.reset(new ServerGame());
+		old_clients.clear();
+	}
 
 	SDL_Event getEvent() { return game_event; }
 
@@ -71,6 +75,7 @@ class ServerGame {
 
 	inline static SDL_Renderer *renderer = nullptr;
 	inline static SDL_Event game_event;
+	inline static std::vector<std::string> old_clients;
 	static SDL_Rect camera;
 
 	NetworkHost networkHost;

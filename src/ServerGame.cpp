@@ -141,11 +141,11 @@ std::pair<std::uint16_t, std::uint16_t> ServerGame::getPlayerSpawnpoint() {
 }
 
 uint8_t ServerGame::handleJoinRequests() {
-	static std::vector<std::string> old_clients;
+
 	// send playerID to client
 	auto clients = this->networkHost.getClients();
 	if (old_clients.size() != clients.size()) {
-		std::cout << "NEW CLIENT DETECTED" << std::endl;
+		spdlog::get("console")->info("ServerGame - New client detected");
 		for (const auto &client : clients) {
 			std::cout << client << std::endl;
 		}
@@ -199,6 +199,8 @@ void ServerGame::sendGameState() {
 	ar(entityGroups.size());
 	// spdlog::get("console")->debug("Sending game state with {} players", entityGroups.size());
 
+	spdlog::get("stderr")->debug("ServerGame - Number of entities: {}", entityGroups.size());
+	spdlog::get("stderr")->debug("ServerGame - Number of players: {}", manager.getEntities().size());
 	assert(entityGroups.size() == manager.getEntities().size());
 	spdlog::get("stderr")->debug("ServerGame - Number of entities: {}", entityGroups.size());
 	for (auto &[id, group] : entityGroups) {

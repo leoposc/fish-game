@@ -141,18 +141,16 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		case 0:
 			client->stop();
 			if (isHost) {
-				auto server = &FishEngine::ServerGame::getInstance();
-				server->stop();
+				FishEngine::ServerGame::getInstance().stop();
+				FishEngine::ServerGame::resetInstance();
 			}
-			FishEngine::ServerGame::resetInstance();
 			client->reset();
 			return mainMenu();
 			break;
 		case 3:
 			client->stop();
 			if (isHost) {
-				auto server = &FishEngine::ServerGame::getInstance();
-				server->stop();
+				FishEngine::ServerGame::getInstance().stop();
 			}
 			return combat(isHost);
 			break;
