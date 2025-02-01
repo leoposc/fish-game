@@ -415,6 +415,7 @@ void ClientGame::receiveGameState() {
 				if (!connected && i == numEntities - 1) {
 					this->ownPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
+					this->ownPlayer = &entity;
 				} else if (connected && id == this->ownPlayerID) {
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 				} else {

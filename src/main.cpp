@@ -120,10 +120,10 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		auto server = &FishEngine::ServerGame::getInstance();
 		client->networkClient.init("127.0.0.1", "host player");
 		server->init("hostLobby.tmj");
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	client->init("hostLobby.tmj", false);
-	client->createOwnPlayer();
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();
