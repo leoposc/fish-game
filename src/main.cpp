@@ -71,7 +71,7 @@ FuncPtr combat(bool isHost) {
 
 		spdlog::get("console")->debug("Client Manager:");
 		client->getManager()->print();
-		spdlog::get("console")->debug("my player id: {}", client->ownPlayerID);
+		spdlog::get("console")->debug("my player id: {}", client->hostPlayerID);
 
 		frameTime = SDL_GetTicks() - frameStart;
 
@@ -135,7 +135,7 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 
 		spdlog::get("network_logger")->debug("Client Manager:");
 		client->getManager()->print();
-		spdlog::get("network_logger")->debug("my player id: {}", client->ownPlayerID);
+		spdlog::get("network_logger")->debug("my player id: {}", client->hostPlayerID);
 
 		switch (client->updateMainMenu()) {
 		case 0:
@@ -183,7 +183,7 @@ FuncPtr mainMenu() {
 	auto server = &FishEngine::ServerGame::getInstance();
 
 	client->init("mainMenu.tmj", false);
-	client->createOwnPlayer();
+	client->createHostPlayer();
 
 	while (client->running()) {
 		frameStart = SDL_GetTicks();

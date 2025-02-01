@@ -36,7 +36,7 @@ class ClientGame {
 
 	void render() const;
 
-	void createOwnPlayer();
+	void createHostPlayer();
 
 	void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
 	                     const std::vector<Entity *> &existingWeapons);
@@ -76,7 +76,7 @@ class ClientGame {
 
 	NetworkClient networkClient;
 
-	uint8_t ownPlayerID;
+	uint8_t hostPlayerID;
 
   private:
 	// Singelton
@@ -88,7 +88,7 @@ class ClientGame {
 	bool initialized;
 
 	Manager manager;
-	Entity *ownPlayer;
+	Entity *hostPlayer;
 	std::map<uint8_t, groupLabels> entityGroups;
 	int numPlayers = 6;
 	bool isRunning;

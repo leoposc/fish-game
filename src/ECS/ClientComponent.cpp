@@ -17,7 +17,7 @@ void ClientComponent::init() {
 
 void ClientComponent::sendEvent(SDL_Event &event) {
 	// serilize the event and send it to the server
-	uint8_t id = ClientGame::getInstance().ownPlayerID;
+	uint8_t id = ClientGame::getInstance().hostPlayerID;
 	spdlog::get("network_logger")->debug("ID before sending Event: {}", id);
 	std::ostringstream os;
 	cereal::BinaryOutputArchive archive(os);

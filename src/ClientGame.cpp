@@ -92,7 +92,7 @@ void ClientGame::reset() {
 	networkClient.~NetworkClient();       // Explicitly call the destructor
 	new (&networkClient) NetworkClient(); // Placement new to construct a new instance in the same memory location
 
-	ownPlayer = nullptr;
+	hostPlayer = nullptr;
 	connected = false;
 }
 
@@ -101,7 +101,7 @@ void ClientGame::init(fs::path mp, bool combat) {
 	auto future = std::async(std::launch::async, &FishEngine::ClientGame::startLoadingBar, this);
 
 	isRunning = true;
-	ownPlayer = nullptr;
+	hostPlayer = nullptr;
 
 	// ============ control if game was reset ===========
 	assert(manager.checkEmpty());
@@ -203,11 +203,11 @@ void ClientGame::render() const {
 	SDL_RenderPresent(renderer);
 }
 
-void ClientGame::createOwnPlayer() {
-	ownPlayer = &manager.addEntity();
+void ClientGame::createHostPlayer() {
+	hostPlayer = &manager.addEntity();
 	auto initPos = map->getPlayerSpawnpoints().at(0);
-	ClientGenerator::forPlayer(*ownPlayer, initPos, ++fishSpriteID);
-	ownPlayerID = ownPlayer->getID();
+	ClientGenerator::forPlayer(*hostPlayer, initPos, ++fishSpriteID);
+	hostPlayerID = hostPlayer->getID();
 }
 
 void ClientGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
@@ -407,9 +407,9 @@ void ClientGame::receiveGameState() {
 			case groupLabels::groupPlayers:
 				// TODO: when joining combat its already connected -> no new eventhandler is created
 				if (!connected && i == numEntities - 1) {
-					this->ownPlayerID = id;
+					this->hostPlayerID = id;
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
-				} else if (connected && id == this->ownPlayerID) {
+				} else if (connected && id == this->hostPlayerID) {
 					ClientGenerator::forPlayer(entity, {0, 0}, ++fishSpriteID);
 				} else {
 					ClientGenerator::forEnemy(entity, {0, 0}, ++fishSpriteID);
@@ -432,10 +432,10 @@ void ClientGame::receiveGameState() {
 			new_entityGroups.insert(std::make_pair(id, group));
 
 			if (i == 0) {
-				// moved it down here, so that each player has the host as ownPlayer
+				// moved it down here, so that each player has the host as hostPlayer
 				// so that if the host starts the game, all clients will notice the
 				// map change
-				this->ownPlayer = &entity;
+				this->hostPlayer = &entity;
 			}
 		}
 
@@ -462,21 +462,21 @@ void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
 }
 
 uint8_t ClientGame::updateMainMenu() const {
-	if (this->ownPlayer == nullptr) {
+	if (this->hostPlayer == nullptr) {
 		spdlog::get("console")->warn("Client Game - No Player from server assigned yet!");
 		return 0;
 	}
 
-	if (Collision::checkBack(*ownPlayer, *map))
+	if (Collision::checkBack(*hostPlayer, *map))
 		return 0;
 
-	if (Collision::checkJoin(*ownPlayer, *map))
+	if (Collision::checkJoin(*hostPlayer, *map))
 		return 1;
 
-	if (Collision::checkHost(*ownPlayer, *map))
+	if (Collision::checkHost(*hostPlayer, *map))
 		return 2;
 
-	if (Collision::checkStart(*ownPlayer, *map))
+	if (Collision::checkStart(*hostPlayer, *map))
 		return 3;
 
 	return -1;
@@ -562,7 +562,7 @@ void ClientGame::renderLoadingBar() {
 
 void ClientGame::printEntityMetaData() {
 
-	spdlog::get("console")->debug("ClientGame - ownPlayerID: {}", ownPlayerID);
+	spdlog::get("console")->debug("ClientGame - hostPlayerID: {}", hostPlayerID);
 	spdlog::get("console")->debug("ClientGame - entityGroups size: {}", entityGroups.size());
 	spdlog::get("console")->debug("ClientGame - entities in manager: {}", manager.getEntities().size());
 	spdlog::get("console")->debug("ClientGame - Map path: {}\n\n", mapPath.string());
