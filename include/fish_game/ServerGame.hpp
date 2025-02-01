@@ -8,8 +8,10 @@
 #include "fish_game/Player.hpp"
 
 #include <SDL2/SDL.h>
+#include <mutex>
 #include <stdio.h>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace FishEngine {
@@ -29,6 +31,8 @@ class ServerGame {
 	void init(fs::path mapPath);
 
 	void update();
+
+	void serverLoop();
 
 	void printManager();
 
@@ -84,6 +88,11 @@ class ServerGame {
 
 	const unsigned int updateRate_ms = 150;
 	unsigned int nextUpdate = 0;
+
+	// server thread attributes
+	std::thread serverThread;
+	std::mutex serverMutex;
+	std::condition_variable serverCv;
 };
 
 } // namespace FishEngine

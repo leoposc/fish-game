@@ -49,6 +49,8 @@ void ServerGame::init(fs::path mapPath) {
 		this->createPlayer(player.getEntityId());
 	}
 
+	serverThread = std::thread(&ServerGame::serverLoop, this);
+
 	spdlog::get("console")->info("ServerGame - init done");
 }
 
@@ -70,6 +72,30 @@ void ServerGame::update() {
 	if (manager.getGroup(groupLabels::groupPlayers).empty()) {
 		spdlog::get("console")->info("ServerGame - Game over");
 		isRunning = false;
+	}
+}
+
+void ServerGame::serverLoop() {
+	const int updates_per_second = 60;
+	const int loopDelay = 1000 / updates_per_second;
+	uint32_t start;
+	int loopTime;
+
+	while (isRunning) {
+		start = SDL_GetTicks();
+		std::unique_lock<std::mutex> lock(serverMutex);
+		serverCv.wait(lock, [this] { return isRunning; });
+
+		handleJoinRequests();
+		receivePlayerEvents();
+		update();
+		sendGameState();
+
+		lock.unlock();
+		loopTime = SDL_GetTicks() - start;
+		if (loopDelay > loopTime) {
+			SDL_Delay(loopDelay - loopTime);
+		}
 	}
 }
 
@@ -240,11 +266,19 @@ bool ServerGame::running() const {
 }
 
 void ServerGame::stop() {
+	{
+		std::lock_guard<std::mutex> lock(serverMutex);
+		isRunning = false;
+	}
+	serverCv.notify_all();
+	if (serverThread.joinable()) {
+		serverThread.join();
+	}
+
 	manager.destroyEntities<ServerGame>();
 	entityGroups.clear();
 	delete map;
 	map = nullptr;
-	isRunning = false;
 }
 
 bool ServerGame::checkCollisions(Entity *e) {

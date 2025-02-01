@@ -42,8 +42,8 @@ void EquipmentComponent::equip(Entity *entity) {
 	needsUpdate = true;
 	isEquipped = true;
 	equippedID = entity->getID();
-	wearable = entity->getComponentSmartPtr<WearableComponent>();
-	// wearable = &entity->getComponent<WearableComponent>();
+	// wearable = entity->getComponentSmartPtr<WearableComponent>();
+	wearable = &entity->getComponent<WearableComponent>();
 
 	// attach the weapon to the player
 	assert(wearable != nullptr);

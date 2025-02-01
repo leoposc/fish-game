@@ -44,66 +44,15 @@ FuncPtr mainMenu();
 FuncPtr hostLobby(bool isHost, bool needInit = true);
 FuncPtr joinLobby();
 
-std::thread serverThread;
-std::mutex serverMutex;
-std::condition_variable serverCv;
+// std::thread serverThread;
+// std::mutex serverMutex;
+// std::condition_variable serverCv;
 bool serverRunning = false;
 
-void stopServerThread() {
-	{
-		std::lock_guard<std::mutex> lock(serverMutex);
-		serverRunning = false;
-	}
-	serverCv.notify_all();
-	if (serverThread.joinable()) {
-		serverThread.join();
-	}
-}
-
-void serverLoop() {
-
-	const int updates_per_second = 60;
-	const int loopDelay = 1000 / updates_per_second;
-	uint32_t start;
-	int loopTime;
-
-	auto w = server->manager.getGroup(FishEngine::groupLabels::groupWeapons);
-	for (auto &weapon : w) {
-		spdlog::get("console")->info("Weapon: {}", weapon->getID());
-	}
-
-	while (serverRunning) {
-		start = SDL_GetTicks();
-		std::unique_lock<std::mutex> lock(serverMutex);
-		serverCv.wait(lock, [] { return serverRunning; });
-
-		spdlog::get("stderr")->error("\nBefore Join Requests");
-		// server->printAllEntityIDs();
-		server->handleJoinRequests();
-		// spdlog::get("stderr")->error("Before receive Player Events");
-		// server->printAllEntityIDs();
-		server->receivePlayerEvents();
-		// spdlog::get("stderr")->error("Before update");
-		// server->printAllEntityIDs();
-		server->update();
-		// spdlog::get("stderr")->error("Before sendGameState");
-		// server->printAllEntityIDs();
-		server->sendGameState();
-
-		lock.unlock();
-		loopTime = SDL_GetTicks() - start;
-		if (loopDelay > loopTime) {
-			SDL_Delay(loopDelay - loopTime);
-		}
-	}
-
-	// stopServerThread();
-}
-
-void startServerThread() {
-	serverRunning = true;
-	serverThread = std::thread(serverLoop);
-}
+// void startServerThread() {
+// 	serverRunning = true;
+// 	serverThread = std::thread(serverLoop);
+// }
 
 FuncPtr combat(bool isHost) {
 	std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -117,7 +66,6 @@ FuncPtr combat(bool isHost) {
 	if (isHost) {
 		server->init("map04.tmj");
 		server->spawnWeapons();
-		startServerThread();
 	}
 	client->init("map04.tmj", true);
 
@@ -142,7 +90,6 @@ FuncPtr combat(bool isHost) {
 
 	client->stop();
 	if (isHost) {
-		stopServerThread();
 		server->stop();
 	}
 
@@ -174,7 +121,6 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		server = &FishEngine::ServerGame::getInstance();
 		server->init("hostLobby.tmj");
 		client->networkClient.init("127.0.0.1", "host player");
-		startServerThread();
 	}
 
 	client->init("hostLobby.tmj", false);
@@ -196,16 +142,13 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		case 0:
 			client->stop();
 			if (isHost) {
-				stopServerThread();
 				server->stop();
 			}
-
 			return mainMenu();
 			break;
 		case 3:
 			client->stop();
 			if (isHost) {
-				stopServerThread();
 				server->stop();
 			}
 			return combat(isHost);
@@ -222,7 +165,6 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 
 	client->stop();
 	if (isHost) {
-		stopServerThread();
 		server->stop();
 	}
 	return nullptr;

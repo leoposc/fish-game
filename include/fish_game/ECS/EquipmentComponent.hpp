@@ -15,8 +15,8 @@ class EquipmentComponent : public Component {
 	bool isEquipped = false;
 	mutable bool needsUpdate = false;
 	uint8_t equippedID = -1;
-	std::shared_ptr<WearableComponent> wearable = nullptr;
-	// WearableComponent *wearable = nullptr;
+	// std::shared_ptr<WearableComponent> wearable = nullptr;
+	WearableComponent *wearable = nullptr;
 	ColliderComponent *collider = nullptr;
 
   public:
