@@ -27,8 +27,6 @@ namespace FishEngine {
 constexpr int SCREEN_WIDTH = 2048;
 constexpr int SCREEN_HEIGHT = 1024;
 
-std::unique_ptr<ClientGame> ClientGame::instance = nullptr;
-
 // ================== helper functions ==================
 
 void toggleWindowMode(SDL_Window *win, bool *windowed) {
@@ -58,7 +56,6 @@ ClientGame::ClientGame()
 
 	int flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
 
-	spdlog::get("console")->info("Construction ClientGame started");
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
 		// log init
 		window = SDL_CreateWindow(title, xpos, ypos, SCREEN_WIDTH, SCREEN_HEIGHT, flags);
