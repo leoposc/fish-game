@@ -2,7 +2,7 @@
 
 #include "spdlog/spdlog.h"
 
-SocketManager::SocketManager() : addrlen(sizeof(address)) {
+SocketManager::SocketManager() {
 	spdlog::get("socket_logger")->debug("SocketManager initialized");
 }
 
@@ -73,48 +73,59 @@ void SocketManager::setupServer(int port) {
 		exit(EXIT_FAILURE);
 	}
 
-	this->server_thread = std::thread([this]() {
-		fd_set readfds;
-		struct timeval timeout;
+	this->server_thread = std::thread(&SocketManager::serverThreadFunction, this);
+}
 
-		while (!stopThread) {
-			FD_ZERO(&readfds);
-			FD_SET(server_fd, &readfds);
+void SocketManager::serverThreadFunction() {
+	fd_set readfds;
+	struct timeval timeout;
 
-			// Set timeout to 1 second
-			timeout.tv_sec = 1;
-			timeout.tv_usec = 0;
+	while (!stopThread) {
+		FD_ZERO(&readfds);
+		FD_SET(server_fd, &readfds);
 
-			int activity = select(server_fd + 1, &readfds, nullptr, nullptr, &timeout);
+		// Set timeout to 1 second
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
 
-			if (activity < 0 && errno != EINTR) {
-				perror("select");
-				close(server_fd);
-				exit(EXIT_FAILURE);
-			}
+		int activity = select(server_fd + 1, &readfds, nullptr, nullptr, &timeout);
 
-			if (activity == 0) {
-				// Timeout occurred, check if we need to stop the thread
-				continue;
-			}
-
-			if (FD_ISSET(server_fd, &readfds)) {
-				int client_socket;
-				if ((client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
-					perror("accept");
-					close(server_fd);
-					exit(EXIT_FAILURE);
-				}
-				{
-					spdlog::get("socket_logger")->debug("client got");
-					std::lock_guard<std::mutex> lock(mtx);
-					client_sockets.push_back(client_socket);
-				}
-				client_threads.emplace_back(&SocketManager::run, this, client_socket);
-				spdlog::get("socket_logger")->debug("Client received finished");
-			}
+		if (activity < 0) {
+			perror("select");
+			close(server_fd);
+			exit(EXIT_FAILURE);
 		}
-	});
+
+		if (activity == 0) {
+			// Timeout occurred, check if we need to stop the thread
+			continue;
+		}
+
+		acceptClient(readfds);
+	}
+}
+
+void SocketManager::acceptClient(fd_set &readfds) {
+	if (FD_ISSET(server_fd, &readfds)) {
+		int client_socket;
+		auto addrlen = sizeof(address);
+		if ((client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
+			perror("accept");
+			close(server_fd);
+			exit(EXIT_FAILURE);
+		}
+		handleNewClient(client_socket);
+	}
+}
+
+void SocketManager::handleNewClient(int client_socket) {
+	spdlog::get("socket_logger")->debug("client got");
+	{
+		std::lock_guard<std::mutex> lock(mtx);
+		client_sockets.push_back(client_socket);
+	}
+	client_threads.emplace_back(&SocketManager::run, this, client_socket);
+	spdlog::get("socket_logger")->debug("Client received finished");
 }
 
 void SocketManager::setupClient(int port, std::string ip) {
@@ -155,7 +166,7 @@ void SocketManager::run(int client_socket) {
 
 		int activity = select(client_socket + 1, &readfds, nullptr, nullptr, &timeout);
 
-		if (activity < 0 && errno != EINTR) {
+		if (activity < 0) {
 			spdlog::get("socket_logger")->debug("select error");
 			break;
 		}
@@ -169,46 +180,53 @@ void SocketManager::run(int client_socket) {
 		}
 
 		if (FD_ISSET(client_socket, &readfds)) {
-			char buffer[BUFFER_SIZE] = {0};
-
-			spdlog::get("socket_logger")->debug("waiting for read");
-			int valread = read(client_socket, buffer, BUFFER_SIZE);
-			spdlog::get("socket_logger")->debug("read finished");
-
-			std::lock_guard<std::mutex> lock(mtx);
-			if (valread < 0) {
-				spdlog::get("socket_logger")->debug("Problem while reading");
-				// exit(EXIT_FAILURE);
-			} else if (valread == 0) {
-				spdlog::get("socket_logger")->debug("Client disconnected");
-				spdlog::get("socket_logger")->debug("All messages:");
-
-				for (const auto &message : messages) {
-					spdlog::get("socket_logger")->debug(message.message);
-				}
-				this->sendMessage("Someone disconnected");
-				close(client_socket);
-				return;
-			}
-
-			// Split the buffer on null-termination sign
-			char *start = buffer;
-			while (start < buffer + valread) {
-				char *end = strchr(start, '\0');
-				if (end == nullptr) {
-					end = buffer + valread;
-				}
-				std::string message(start, end);
-				messages.push_back(IncomingMessage{client_socket, message});
-				spdlog::get("socket_logger")->debug("Received: {}", message);
-
-				start = end + 1;
-			}
+			readFromClient(client_socket);
 		}
 
 		if (stopThread) {
 			return;
 		}
+	}
+}
+
+void SocketManager::readFromClient(int client_socket) {
+	char buffer[BUFFER_SIZE] = {0};
+
+	spdlog::get("socket_logger")->debug("waiting for read");
+	int valread = read(client_socket, buffer, BUFFER_SIZE);
+	spdlog::get("socket_logger")->debug("read finished");
+
+	std::lock_guard<std::mutex> lock(mtx);
+	if (valread < 0) {
+		spdlog::get("socket_logger")->debug("Problem while reading");
+	} else if (valread == 0) {
+		spdlog::get("socket_logger")->debug("Client disconnected");
+		spdlog::get("socket_logger")->debug("All messages:");
+
+		for (const auto &message : messages) {
+			spdlog::get("socket_logger")->debug(message.message);
+		}
+		this->sendMessage("Someone disconnected");
+		close(client_socket);
+		return;
+	}
+
+	processClientMessage(buffer, valread, client_socket);
+}
+
+void SocketManager::processClientMessage(char *buffer, int valread, int client_socket) {
+	// Split the buffer on null-termination sign
+	char *start = buffer;
+	while (start < buffer + valread) {
+		char *end = strchr(start, '\0');
+		if (end == nullptr) {
+			end = buffer + valread;
+		}
+		std::string message(start, end);
+		messages.push_back(IncomingMessage{client_socket, message});
+		spdlog::get("socket_logger")->debug("Received: {}", message);
+
+		start = end + 1;
 	}
 }
 

@@ -32,6 +32,12 @@ class SocketManager {
 	void setupServer(int port);
 	void setupClient(int port, std::string ip);
 	void run(int client_socket);
+	void serverThreadFunction();
+	void acceptClient(fd_set &readfds);
+	void handleNewClient(int client_socket);
+
+	void readFromClient(int client_socket);
+	void processClientMessage(char *buffer, int valread, int client_socket);
 
 	int server_fd, socket_id;
 	struct sockaddr_in address;
