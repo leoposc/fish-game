@@ -2,10 +2,6 @@
 
 #include "spdlog/spdlog.h"
 
-SocketManager::SocketManager() {
-	spdlog::get("socket_logger")->debug("SocketManager initialized");
-}
-
 void SocketManager::init(int port, std::string ip, bool host) {
 	this->host = host;
 	if (host) {
@@ -21,26 +17,20 @@ SocketManager::~SocketManager() {
 		std::lock_guard<std::mutex> lock(mtx);
 		stopThread = true;
 	}
-	spdlog::get("socket_logger")->debug("set stopThread");
 	cv.notify_all();
-	spdlog::get("socket_logger")->debug("notified all");
 	for (auto &thread : client_threads) {
 		if (thread.joinable()) {
 			thread.join();
 		}
 	}
-	spdlog::get("socket_logger")->debug("joinded all threads");
 	for (int client_socket : client_sockets) {
 		close(client_socket);
 	}
 	close(server_fd);
-	spdlog::get("socket_logger")->debug("closed all sockets");
 
-	spdlog::get("socket_logger")->debug("waiting for server thread");
 	if (server_thread.joinable()) {
 		server_thread.join();
 	}
-	spdlog::get("socket_logger")->debug("SocketManager deconstructed finished");
 }
 
 void SocketManager::setupServer(int port) {
@@ -119,7 +109,6 @@ void SocketManager::acceptClient(fd_set &readfds) {
 }
 
 void SocketManager::handleNewClient(int client_socket) {
-	spdlog::get("socket_logger")->debug("client got");
 	{
 		std::lock_guard<std::mutex> lock(mtx);
 		client_sockets.push_back(client_socket);
@@ -192,20 +181,14 @@ void SocketManager::run(int client_socket) {
 void SocketManager::readFromClient(int client_socket) {
 	char buffer[BUFFER_SIZE] = {0};
 
-	spdlog::get("socket_logger")->debug("waiting for read");
 	int valread = read(client_socket, buffer, BUFFER_SIZE);
-	spdlog::get("socket_logger")->debug("read finished");
 
 	std::lock_guard<std::mutex> lock(mtx);
 	if (valread < 0) {
 		spdlog::get("socket_logger")->debug("Problem while reading");
 	} else if (valread == 0) {
 		spdlog::get("socket_logger")->debug("Client disconnected");
-		spdlog::get("socket_logger")->debug("All messages:");
 
-		for (const auto &message : messages) {
-			spdlog::get("socket_logger")->debug(message.message);
-		}
 		this->sendMessage("Someone disconnected");
 		close(client_socket);
 		return;
@@ -241,10 +224,8 @@ IncomingMessage SocketManager::popMessage() {
 }
 
 void SocketManager::sendMessage(std::string message) {
-	spdlog::get("socket_logger")->debug("message sending");
 	char buffer[BUFFER_SIZE] = {0};
 	strncpy(buffer, (message + "\0").c_str(), BUFFER_SIZE - 1);
-	spdlog::get("socket_logger")->debug("message copied");
 
 	for (int client_socket : client_sockets) {
 		ssize_t bytes_sent = send(client_socket, buffer, strlen(buffer), 0);

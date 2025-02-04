@@ -22,7 +22,6 @@ struct IncomingMessage {
 
 class SocketManager {
   public:
-	SocketManager();
 	void init(int port, std::string ip, bool host);
 	~SocketManager();
 	void sendMessage(std::string message);
