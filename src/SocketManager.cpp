@@ -145,7 +145,7 @@ void SocketManager::run(int client_socket) {
 	fd_set readfds;
 	struct timeval timeout;
 
-	while (true) {
+	while (!stopThread) {
 		FD_ZERO(&readfds);
 		FD_SET(client_socket, &readfds);
 
@@ -161,19 +161,11 @@ void SocketManager::run(int client_socket) {
 		}
 
 		if (activity == 0) {
-			// Timeout occurred, check if we need to stop the thread
-			if (stopThread) {
-				return;
-			}
 			continue;
 		}
 
 		if (FD_ISSET(client_socket, &readfds)) {
 			readFromClient(client_socket);
-		}
-
-		if (stopThread) {
-			return;
 		}
 	}
 }
