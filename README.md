@@ -1,6 +1,20 @@
 # Fish Game 🐟
 
+![Combat](./examples/combat.png)
+#### Combat Mode
+
  Fish Game is a fast-paced 2D action-adventure where players take control of a daring fish jumping on plattforms filled with water, landscapes filled with obstacles. Dive deep into various aquatic environments and outsmart your friends! Swim swiftly through danger, pick your weapons and avoid the bullets from your opponents!
+
+![Join Lobby](./examples/joinLobby.png)
+#### Join another host
+
+## Controls
+
+**Players can:**
+- move using **w, a, s, d**
+- pick up weapons pressing **j**
+- shoot up to 5 times pressing **k** 
+- jump one time after leaving the water
 
 ## Build
 
@@ -45,23 +59,8 @@ cmake -B build/Release --preset conan-release
 ./build/Release/fish_game
 ```
 
-## Networking Interface
 
-#### data send to server
-
-Player data:
-
-- position
-- Health/ alive
-- weapon
-
-#### server records
-
--statistics
-
-# Goals
-
-## 1.5 Goals (12 Points total)
+## Specification (12 Points total)
 
 ### 1. Networking (3 points)
 
@@ -118,3 +117,52 @@ Player data:
 
 - Background music, different for main screen and combat map
 - Sound effects (water splash, jumping, shot fired)
+
+## Contributions
+
+
+**Fabian Aster:**
+
+- NetworkClient.hpp/cpp
+- NetworkHost.hpp/cpp
+- SocketManager.hpp/cpp
+- GameInputEvents.hpp/cpp 
+- MusicPlayer.hpp/cpp
+- Player.hpp/cpp
+- main.cpp
+- conanfile.py
+- Music files
+
+**Leopold Schmid:**
+
+- AssetManager.hpp/cpp
+- Auxiliary.hpp/cpp
+- ClientGame.hpp/cpp
+- Collision.hpp/cpp
+- ECS.hpp/cpp
+- FontManager.hpp/cpp
+- Map.hpp/cpp
+- ServerGame.hpp/cpp
+- TextureManager.hpp/cpp
+- Vector2D.hpp/cpp
+- ClientComponent.hpp/cpp
+- ColliderComponent.hpp/cpp
+- ComponentsGenerator.hpp/cpp
+- EquipmentComponent.hpp/cpp
+- EventHandlerComponent.hpp/cpp
+- GravityComponent.hpp/cpp
+- HealthComponent.hpp/cpp
+- MoveComponent.hpp/cpp
+- ProjectileComponent.hpp/cpp
+- ServerComponent.hpp/cpp
+- SpriteComponent.hpp/cpp
+- TransformComponent.hpp/cpp
+- WearableComponent.hpp/cpp
+- main.cpp
+- Maps + assets
+
+**Friedrich Hartmann:**
+
+- MockServer.hpp/cpp
+- ComponentsGenerator.hpp/cpp
+- conanfile_deprecated.txt
