@@ -74,9 +74,9 @@ ClientGame::ClientGame()
 
 	// load textures
 	assets = new AssetManager(this->getManager());
-	assets->addTexture("pistol", "../../assets/PistolSmall.png");
-	assets->addTexture("projectile", "../../assets/ProjectileSmall.png");
-	assets->addTexture("present", "../../assets/present.png");
+	assets->addTexture("pistol", "./assets/PistolSmall.png");
+	assets->addTexture("projectile", "./assets/ProjectileSmall.png");
+	assets->addTexture("present", "./assets/present.png");
 }
 
 ClientGame::~ClientGame() {
@@ -109,7 +109,7 @@ void ClientGame::init(fs::path mp, bool combat) {
 	// ================ init clientMap ==================
 	mapPath = mp;
 	map = new Map();
-	map->loadMap(fs::path("../../maps") / mapPath);
+	map->loadMap(fs::path("./maps") / mapPath);
 
 	// reset entityGroups
 	entityGroups.clear();
@@ -130,7 +130,7 @@ void ClientGame::init(fs::path mp, bool combat) {
 void ClientGame::loadFishSprites() {
 	for (int i = 1; i <= numPlayers; i++) {
 		std::string id = "fish0" + std::to_string(i);
-		assets->addTexture(id, "../../assets/" + id + ".png");
+		assets->addTexture(id, "./assets/" + id + ".png");
 	}
 }
 
@@ -252,10 +252,10 @@ Manager *ClientGame::getManager() {
 std::string ClientGame::joinInterface() {
 
 	map = new Map();
-	map->loadMap(fs::path("../../maps/joinLobby.tmj"));
+	map->loadMap(fs::path("./maps/joinLobby.tmj"));
 
-	FontManager gInputTextTexture(renderer, "../../assets/zd-bold.ttf");
-	FontManager gPromptTextTexture(renderer, "../../assets/zd-bold.ttf", 26);
+	FontManager gInputTextTexture(renderer, "./assets/zd-bold.ttf");
+	FontManager gPromptTextTexture(renderer, "./assets/zd-bold.ttf", 26);
 
 	SDL_Color textColor = {0, 0, 0, 255};
 	SDL_Event event;
@@ -546,7 +546,7 @@ void ClientGame::startLoadingBar() {
 
 void ClientGame::renderLoadingBar() {
 	Map *loadingScreen = new Map();
-	loadingScreen->loadMap(fs::path("../../maps/loadingBar.tmj"), false);
+	loadingScreen->loadMap(fs::path("./maps/loadingBar.tmj"), false);
 
 	size_t progressBarsComplete = SCREEN_HEIGHT / 16;
 

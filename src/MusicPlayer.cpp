@@ -10,12 +10,12 @@ MusicPlayer::MusicPlayer() {
 		std::cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
 	}
 
-	this->CombatMusic = Mix_LoadMUS("../../music/Fight.mp3");
-	this->LobbyMusic = Mix_LoadMUS("../../music/Lobby.mp3");
-	this->ShootSound = Mix_LoadWAV("../../music/shoot.wav");
-	this->SplashSound = Mix_LoadWAV("../../music/splash.wav");
-	this->EquipSound = Mix_LoadWAV("../../music/equip.wav");
-	this->JumpSound = Mix_LoadWAV("../../music/jump.wav");
+	this->CombatMusic = Mix_LoadMUS("./music/Fight.mp3");
+	this->LobbyMusic = Mix_LoadMUS("./music/Lobby.mp3");
+	this->ShootSound = Mix_LoadWAV("./music/shoot.wav");
+	this->SplashSound = Mix_LoadWAV("./music/splash.wav");
+	this->EquipSound = Mix_LoadWAV("./music/equip.wav");
+	this->JumpSound = Mix_LoadWAV("./music/jump.wav");
 
 	if (!(this->CombatMusic && this->LobbyMusic && this->ShootSound && this->SplashSound)) {
 		std::cerr << "Failed to load music! SDL_mixer Error: " << Mix_GetError() << std::endl;

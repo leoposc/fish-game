@@ -153,13 +153,13 @@ void Map::drawLoadingBar(int progressBarsComplete) {
 
 fs::path Map::getImagePath(std::string const &image) {
 	// expect the exe to be in the build/Release or build/Debug directory
-	fs::path fullPath = fs::path("../../maps") / image;
+	fs::path fullPath = fs::path("./maps") / image;
 	return fullPath;
 }
 
 fs::path Map::getImagePath(tson::Tile &tile) {
 	// expect the exe to be in the build/Release or build/Debug directory
-	fs::path fullPath = fs::path("../../maps") / tile.getTileset()->getImagePath().relative_path();
+	fs::path fullPath = fs::path("./maps") / tile.getTileset()->getImagePath().relative_path();
 	return fullPath;
 }
 
@@ -188,7 +188,7 @@ void Map::loadTilesetTextures() {
 		if (tileset.getImagePath().empty()) {
 			continue;
 		}
-		fs::path tilesetPath = fs::path("../../maps") / tileset.getImagePath().relative_path();
+		fs::path tilesetPath = fs::path("./maps") / tileset.getImagePath().relative_path();
 		SDL_Texture *texture = loadTexture(tilesetPath.generic_string());
 		if (texture == nullptr) {
 			continue;

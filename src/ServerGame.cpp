@@ -49,7 +49,7 @@ void ServerGame::init(fs::path mapPath, bool combat) {
 	// ================== init map and assets ==================
 	isRunning = true;
 	map = new Map();
-	map->loadMap(fs::path("../../maps") / mapPath);
+	map->loadMap(fs::path("./maps") / mapPath);
 	playerSpawnpoints = map->getPlayerSpawnpoints();
 
 	// create existing players
