@@ -1,19 +1,22 @@
 # Fish Game 🐟
 
 ![Combat](./examples/combat.png)
+
 #### Combat Mode
 
  Fish Game is a fast-paced 2D action-adventure where players take control of a daring fish jumping on plattforms filled with water, landscapes filled with obstacles. Dive deep into various aquatic environments and outsmart your friends! Swim swiftly through danger, pick your weapons and avoid the bullets from your opponents!
 
 ![Join Lobby](./examples/joinLobby.png)
+
 #### Join another host
 
 ## Controls
 
 **Players can:**
+
 - move using **w, a, s, d**
 - pick up weapons pressing **j**
-- shoot up to 5 times pressing **k** 
+- shoot up to 5 times pressing **k**
 - jump one time after leaving the water
 
 ## Build
@@ -51,6 +54,7 @@ conan install . --build=missing -s build_type=Debug
 ```
 cmake --preset conan-debug
 cmake -B build/Debug --preset conan-debug
+cmake --build --preset conan-debug
 ./build/Debug/fish_game
 
 
@@ -58,7 +62,6 @@ cmake --preset conan-release
 cmake -B build/Release --preset conan-release
 ./build/Release/fish_game
 ```
-
 
 ## Specification (12 Points total)
 
@@ -120,15 +123,16 @@ cmake -B build/Release --preset conan-release
 
 ## Contributions
 
-
 **Fabian Aster:**
 
 - NetworkClient.hpp/cpp
 - NetworkHost.hpp/cpp
 - SocketManager.hpp/cpp
-- GameInputEvents.hpp/cpp 
+- GameInputEvents.hpp/cpp
 - MusicPlayer.hpp/cpp
 - Player.hpp/cpp
+- ServerGame.hpp/cpp
+- ClientGame.hpp/cpp
 - main.cpp
 - conanfile.py
 - Music files
