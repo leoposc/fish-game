@@ -24,9 +24,6 @@
 
 namespace FishEngine {
 
-constexpr int SCREEN_WIDTH = 2048;
-constexpr int SCREEN_HEIGHT = 1024;
-
 // ================== helper functions ==================
 
 void toggleWindowMode(SDL_Window *win, bool *windowed) {
@@ -46,9 +43,7 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
-ClientGame::ClientGame()
-    : title("Fish Game Client"), xpos(SDL_WINDOWPOS_CENTERED), ypos(SDL_WINDOWPOS_CENTERED), width(SCREEN_WIDTH),
-      height(SCREEN_HEIGHT), fullscreen(true) {
+ClientGame::ClientGame() : title("Fish Game Client") {
 
 	int flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
 

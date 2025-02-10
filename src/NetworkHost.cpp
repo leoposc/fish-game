@@ -6,7 +6,7 @@
 #include <tuple>
 #include <vector>
 
-NetworkHost::NetworkHost() : stopThread(false), socket(SocketManager()) {
+NetworkHost::NetworkHost() : socket(SocketManager()) {
 	this->workerThread = std::thread(&NetworkHost::threadFunction, this);
 	this->socket.init(8080, "", true);
 	spdlog::get("network_logger")->info("Thread created \n");

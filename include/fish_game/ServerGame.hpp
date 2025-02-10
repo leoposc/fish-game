@@ -86,11 +86,11 @@ class ServerGame {
 	~ServerGame();
 
   private:
-	ServerGame();
+	ServerGame() {};
 	ServerGame(const ServerGame &) = delete;
 	ServerGame &operator=(const ServerGame &other) = delete;
 
-	bool isRunning;
+	bool isRunning = false;
 	SDL_Window *window;
 
 	std::vector<Player> players;

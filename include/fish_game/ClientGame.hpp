@@ -11,6 +11,8 @@
 #include <vector>
 
 namespace FishEngine {
+constexpr int SCREEN_WIDTH = 2048;
+constexpr int SCREEN_HEIGHT = 1024;
 
 enum groupLabels : std::size_t;
 
@@ -91,7 +93,7 @@ class ClientGame {
 	Entity *hostPlayer;
 	std::map<uint8_t, groupLabels> entityGroups;
 	int numPlayers = 6;
-	bool isRunning;
+	bool isRunning = false;
 	bool connected = false;
 
 	Map *map = nullptr;
@@ -101,11 +103,11 @@ class ClientGame {
 	bool windowed = false;
 
 	const char *title;
-	int xpos;
-	int ypos;
-	int width;
-	int height;
-	bool fullscreen;
+	int xpos = SDL_WINDOWPOS_CENTERED;
+	int ypos = SDL_WINDOWPOS_CENTERED;
+	int width = SCREEN_WIDTH;
+	int height = SCREEN_HEIGHT;
+	bool fullscreen = true;
 
 	// increment this for each new fish sprite and reset at init
 	size_t fishSpriteID = 0;

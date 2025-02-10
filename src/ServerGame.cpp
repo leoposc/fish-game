@@ -28,8 +28,6 @@ namespace FishEngine {
 
 std::unique_ptr<ServerGame> ServerGame::instance = nullptr;
 
-ServerGame::ServerGame() : isRunning(false) {}
-
 ServerGame::~ServerGame() {
 	spdlog::get("console")->info("========== ServerGame deconstruction ==========");
 	delete map;

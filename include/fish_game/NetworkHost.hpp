@@ -49,12 +49,8 @@ class NetworkHost {
 	std::condition_variable cv;
 	std::thread workerThread;
 	std::mutex mtx;
-	bool stopThread;
+	bool stopThread = false;
 	SocketManager socket;
-
-	// TODO: - send that player joined the game
-	//       - method to send new state to all clients (string) (Semi done with updateState)
-	//       - define prefixes to define what function was send: "JOINED:" for join followed by object string
 };
 
 #endif // NETWORK_HOST
