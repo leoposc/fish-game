@@ -62,6 +62,7 @@ class NetworkClient {
 	std::vector<std::tuple<std::string, int>> newUsers;
 	std::string gameState;
 	bool hasUpdateVal = false;
+	bool isJoined = false;
 	bool isRunning = true;
 
 	void handleReceive();

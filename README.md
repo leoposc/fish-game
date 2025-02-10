@@ -60,6 +60,7 @@ cmake --build --preset conan-debug
 
 cmake --preset conan-release
 cmake -B build/Release --preset conan-release
+cmake --build --preset conan-debug
 ./build/Release/fish_game
 ```
 

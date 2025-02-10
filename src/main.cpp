@@ -102,9 +102,10 @@ FuncPtr joinLobby() {
 	if (ip.empty()) {
 		return mainMenu();
 	}
+	spdlog::get("not_waiting")->debug("not retuned to main menue (after join Interface)");
 
 	client->sendJoinRequest(ip, "join user");
-	// std::this_thread::sleep_for(std::chrono::seconds(2));
+	spdlog::get("not_waiting")->debug("after senind join request");
 	return hostLobby(false);
 }
 
@@ -118,8 +119,8 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 
 	if (isHost) {
 		auto server = &FishEngine::ServerGame::getInstance();
-		client->networkClient.init("127.0.0.1", "host player");
 		server->init("hostLobby.tmj");
+		client->networkClient.init("127.0.0.1", "host player");
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
@@ -180,7 +181,6 @@ FuncPtr mainMenu() {
 	MusicPlayer::getInstance().playLobbyMusic();
 
 	auto client = &FishEngine::ClientGame::getInstance();
-	auto server = &FishEngine::ServerGame::getInstance();
 
 	client->init("mainMenu.tmj", false);
 	client->createHostPlayer();
@@ -224,12 +224,14 @@ int main(int argc, char *argv[]) {
 	auto network_logger = spdlog::stdout_color_mt("network_logger");
 	auto socket_logger = spdlog::stdout_color_mt("socket_logger");
 	auto current_bug = spdlog::stdout_color_mt("cb");
+	auto not_waiting_for_login = spdlog::stdout_color_mt("not_waiting");
 
 	socket_logger->set_level(spdlog::level::off);
 	network_logger->set_level(spdlog::level::info);
 	console->set_level(spdlog::level::info);
-	err_logger->set_level(spdlog::level::debug);
-	current_bug->set_level(spdlog::level::debug);
+	err_logger->set_level(spdlog::level::off);
+	current_bug->set_level(spdlog::level::off);
+	not_waiting_for_login->set_level(spdlog::level::debug);
 
 	auto &player = MusicPlayer::getInstance();
 

@@ -41,7 +41,7 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 		int i = SDL_GetWindowDisplayIndex(win);
 		SDL_Rect j;
 		SDL_GetDisplayBounds(i, &j);
-		SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_SetWindowFullscreen(win, 0);
 	}
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
