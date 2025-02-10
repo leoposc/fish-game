@@ -102,10 +102,8 @@ FuncPtr joinLobby() {
 	if (ip.empty()) {
 		return mainMenu();
 	}
-	spdlog::get("not_waiting")->debug("not retuned to main menue (after join Interface)");
 
 	client->sendJoinRequest(ip, "join user");
-	spdlog::get("not_waiting")->debug("after senind join request");
 	return hostLobby(false);
 }
 
@@ -224,14 +222,12 @@ int main(int argc, char *argv[]) {
 	auto network_logger = spdlog::stdout_color_mt("network_logger");
 	auto socket_logger = spdlog::stdout_color_mt("socket_logger");
 	auto current_bug = spdlog::stdout_color_mt("cb");
-	auto not_waiting_for_login = spdlog::stdout_color_mt("not_waiting");
 
 	socket_logger->set_level(spdlog::level::off);
 	network_logger->set_level(spdlog::level::info);
 	console->set_level(spdlog::level::info);
 	err_logger->set_level(spdlog::level::off);
 	current_bug->set_level(spdlog::level::off);
-	not_waiting_for_login->set_level(spdlog::level::debug);
 
 	auto &player = MusicPlayer::getInstance();
 
