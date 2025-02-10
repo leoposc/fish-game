@@ -4,6 +4,7 @@
 #include "./ECS/ECS.hpp"
 #include "./GameInputEvents.hpp"
 #include "./SocketManager.hpp"
+#include <concepts>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -13,6 +14,11 @@
 
 #define JOIN_PREFIX "JOIN:"
 #define UPDATE_PREFIX "UPDATE:"
+
+template <typename T>
+concept HasFoo = requires(T t) {
+	{ t.foo() } -> std::same_as<void>;
+};
 
 class NetworkClient {
   public:
@@ -64,6 +70,10 @@ class NetworkClient {
 	bool hasUpdateVal = false;
 
 	void handleReceive();
+
+	// generate id local to the network client
+	// generate ids for templates that accept objects
+	// combine ids to send to server
 
 	void run();
 };
