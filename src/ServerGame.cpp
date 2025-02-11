@@ -87,7 +87,12 @@ void ServerGame::update() {
 
 	if (manager.getGroup(groupLabels::groupPlayers).empty()) {
 		spdlog::get("console")->info("ServerGame - Game over");
-		/* isRunning = false; */
+	}
+
+	// check if 30s passed
+	if (SDL_GetTicks() - lastSpawnTime > 30000) {
+		lastSpawnTime = SDL_GetTicks();
+		spawnWeapons();
 	}
 }
 
@@ -224,10 +229,9 @@ void ServerGame::sendGameState() {
 		ar(id, group);
 
 		// if projectile, send the direction
-		// if (group == groupLabels::groupProjectiles) {
-		// 	spdlog::get("console")->info("ServerGame - Sending projectile direction");
-		// 	ar(manager.getEntity(id).getComponent<TransformComponent>().faceRight);
-		// }
+		if (group == groupLabels::groupProjectiles) {
+			ar(manager.getEntity(id).getComponent<TransformComponent>().faceRight);
+		}
 
 		// serialize components of the entity
 		ar(manager.getEntity(id));
@@ -246,12 +250,10 @@ void ServerGame::spawnWeapons() {
 		// do no spawn weapons when existing weapon was not picked up
 		auto &existingWeapons(manager.getGroup(groupLabels::groupWeapons));
 
-		// for (auto &spawnpoint : *spawnpoints) {
-		// 	spawnWeaponsAux(spawnpoint, existingWeapons);
-		// 	spdlog::get("console")->info("Weapon spawned at: {} {}", spawnpoint.first, spawnpoint.second);
-		// }
-
-		spawnWeaponsAux(spawnpoints->at(0), existingWeapons);
+		for (auto &spawnpoint : *spawnpoints) {
+			spawnWeaponsAux(spawnpoint, existingWeapons);
+			spdlog::get("console")->info("Weapon spawned at: {} {}", spawnpoint.first, spawnpoint.second);
+		}
 	}
 }
 

@@ -205,41 +205,6 @@ void ClientGame::createHostPlayer() {
 	hostPlayerID = hostPlayer->getID();
 }
 
-void ClientGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
-                                 const std::vector<Entity *> &existingWeapons) {
-
-	// check for collision with existing weapons
-	for (auto &weapon : existingWeapons) {
-
-		auto &colliderA = weapon->getComponent<ColliderComponent>().collider;
-		SDL_Rect colliderB = {spawnpoint.first, spawnpoint.second, 16, 16};
-
-		// stop if there is a collision
-		if (Collision::checkCollisions(colliderA, colliderB)) {
-			return;
-		}
-	}
-
-	// spawn the weapon
-	auto &weapon(manager.addEntity());
-	ClientGenerator::forWeapon(weapon, spawnpoint);
-}
-
-void ClientGame::spawnWeapons() {
-	// ================== init weapons ==================
-	auto spawnpoints = map->loadWeaponSpawnpoints();
-
-	if (spawnpoints != nullptr) {
-
-		// do no spawn weapons when existing weapon was not picked up
-		auto &existingWeapons(manager.getGroup(groupLabels::groupWeapons));
-
-		for (auto &spawnpoint : *spawnpoints) {
-			spawnWeaponsAux(spawnpoint, existingWeapons);
-		}
-	}
-}
-
 Manager *ClientGame::getManager() {
 	return &manager;
 }
@@ -415,7 +380,7 @@ void ClientGame::receiveGameState() {
 				break;
 			case groupLabels::groupProjectiles:
 				bool faceRight;
-				// ar(faceRight);
+				ar(faceRight);
 				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
 				break;
 			default:

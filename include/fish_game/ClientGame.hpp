@@ -40,11 +40,6 @@ class ClientGame {
 
 	void createHostPlayer();
 
-	void spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
-	                     const std::vector<Entity *> &existingWeapons);
-
-	void spawnWeapons();
-
 	void showIP(SDL_Texture *mTexture, int width, int height);
 
 	uint8_t updateMainMenu() const;
