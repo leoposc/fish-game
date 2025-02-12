@@ -16,8 +16,6 @@ void NetworkClient::init(const std::string hostIP, const std::string username) {
 	}
 
 	this->workerThread = std::thread(&NetworkClient::run, this);
-
-	std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 NetworkClient::~NetworkClient() {

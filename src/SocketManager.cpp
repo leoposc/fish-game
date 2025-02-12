@@ -12,7 +12,7 @@ void SocketManager::init(int port, std::string ip, bool host) {
 }
 
 SocketManager::~SocketManager() {
-	spdlog::get("socket_logger")->debug("SocketManager deconstruction started");
+	spdlog::get("console")->info("SocketManager deconstruction started");
 	{
 		std::lock_guard<std::mutex> lock(mtx);
 		stopThread = true;
@@ -31,6 +31,7 @@ SocketManager::~SocketManager() {
 	if (server_thread.joinable()) {
 		server_thread.join();
 	}
+	spdlog::get("console")->info("SocketManager deconstructed");
 }
 
 void SocketManager::setupServer(int port) {

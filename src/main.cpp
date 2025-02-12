@@ -46,7 +46,6 @@ FuncPtr joinLobby();
 // std::condition_variable serverCv;
 
 FuncPtr combat(bool isHost) {
-	std::this_thread::sleep_for(std::chrono::seconds(1));
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 
@@ -119,7 +118,6 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		auto server = &FishEngine::ServerGame::getInstance();
 		server->init("hostLobby.tmj");
 		client->networkClient.init("127.0.0.1", "host player");
-		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	client->init("hostLobby.tmj", false);
