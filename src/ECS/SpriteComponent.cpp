@@ -21,10 +21,6 @@ SpriteComponent::SpriteComponent(std::string id, bool isAnimated) : animated(isA
 	setTexture(id);
 }
 
-// SpriteComponent::~SpriteComponent() {
-// SDL_DestroyTexture(texture);
-// }
-
 void SpriteComponent::setTexture(std::string id) {
 	texture = ClientGame::assets->getTexture(id);
 }
@@ -47,7 +43,6 @@ void SpriteComponent::update() {
 		currentFrame = (SDL_GetTicks() / speed) % frames;
 		srcRect.x = currentFrame * srcRect.w;
 		srcRect.y = animationIndex * transform->getHeight();
-		// spdlog::get("console")->debug("SpriteComponent: {} {} {}", id, currentFrame, srcRect.x);
 	} else {
 		srcRect.x = 0;
 		srcRect.y = 0;

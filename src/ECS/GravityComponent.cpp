@@ -22,7 +22,6 @@ void GravityComponent::update() {
 	// if the entity is not a fish (no move component) or the fish is not in water, apply gravity
 	if (!entity->hasComponent<MoveComponent>() || !(entity->getComponent<MoveComponent>().inWater)) {
 		force = force < MAX_GRAVITY ? force + 0.1 : MAX_GRAVITY;
-		// spdlog::get("console")->debug("GravityComponent - after updating - force: {}", force);
 	} else if (entity->getComponent<MoveComponent>().inWater) {
 		// do not apply force if the fish is in water, but let it sink for a little bit
 		force -= force > 0 ? force * 0.1 : 0;

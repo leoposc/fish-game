@@ -40,8 +40,6 @@ class ClientGame {
 
 	void createHostPlayer();
 
-	void showIP(SDL_Texture *mTexture, int width, int height);
-
 	uint8_t updateMainMenu() const;
 
 	std::string joinInterface();

@@ -34,7 +34,6 @@ void HealthComponent::update() {
 		this->entity->destroy();
 
 		// case when the entity is not alive anymore and the timer has not expired
-
 	} else if (transform->getY() > SCREEN_HEIGHT + 50 || (transform->getX() > SCREEN_WIDTH + 50)
 	           || (transform->getX() < -50)) {
 

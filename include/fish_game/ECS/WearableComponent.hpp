@@ -28,32 +28,6 @@ class WearableComponent : public Component {
 		ar(ammunition);
 	}
 
-	// template <class Archive>
-	// void save(Archive &ar) const {
-	// 	ar(ammunition, needsUpdate);
-	// 	if (needsUpdate) {
-	// 		ar(attached);
-	// 		ar(attachedID);
-	// 	}
-	// }
-
-	// template <class Archive>
-	// void load(Archive &ar) {
-	// 	ar(ammunition, needsUpdate);
-	// 	if (needsUpdate) {
-	// 		needsUpdate = false;
-	// 		ar(attached);
-	// 		ar(attachedID);
-
-	// 		// attach or detach the entity
-	// 		if (attached) {
-	// 			attach(&entity->getManager()->getEntity(attachedID));
-	// 		} else {
-	// 			detach();
-	// 		}
-	// 	}
-	// }
-
 	WearableComponent() = default;
 	~WearableComponent() = default;
 

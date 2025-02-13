@@ -26,6 +26,7 @@ class HealthComponent : public Component {
 	void load(Archive &ar) {
 		ar(alive);
 
+		// needs for further debugging
 		// if (!alive) {
 		// 	startTimer = SDL_GetTicks();
 		// }

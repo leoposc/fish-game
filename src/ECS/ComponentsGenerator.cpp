@@ -22,7 +22,6 @@ void forPlayer(Entity &player, std::pair<std::uint16_t, std::uint16_t> const &po
 void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos, size_t fishSpriteID) {
 	enemy.addComponent<TransformComponent>(pos.first, pos.second, 30, 40, 1.0);
 	enemy.addComponent<SpriteComponent>("fish0" + std::to_string(fishSpriteID), true);
-	// enemy.addComponent<ClientComponent>();
 	enemy.addComponent<ColliderComponent>("enemy", pos.first, pos.second, 30, 40);
 	enemy.addComponent<GravityComponent>();
 	enemy.addComponent<MoveComponent, 0>();

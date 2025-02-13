@@ -32,17 +32,13 @@ ServerGame::~ServerGame() {
 	spdlog::get("console")->info("========== ServerGame deconstruction ==========");
 	delete map;
 	map = nullptr;
-	printEntityMetaData();
 }
 void ServerGame::printManager() {
 	manager.print();
 }
 
+// @author: Leopold Schmid
 void ServerGame::init(fs::path mapPath, bool combat) {
-	// assert(manager.checkEmpty());
-	// assert(map == nullptr);
-	// assert(numPlayers > 0);
-	// assert(players.empty());
 
 	// ================== init map and assets ==================
 	isRunning = true;
@@ -61,16 +57,13 @@ void ServerGame::init(fs::path mapPath, bool combat) {
 		spawnWeapons();
 	}
 
-	spdlog::get("console")->info("ServerGame - init done");
-
-	printEntityMetaData();
-
 	spdlog::get("console")->info("ServerGame - Starting server loop");
 
 	// start the server loop
 	serverThread = std::thread(&ServerGame::serverLoop, this);
 }
 
+// @author: Leopold Schmid
 void ServerGame::update() {
 	// delete dead entities
 	manager.refresh<ServerGame>();
@@ -97,6 +90,7 @@ void ServerGame::update() {
 	}
 }
 
+// @author: Fabian Aster
 void ServerGame::serverLoop() {
 	const int updates_per_second = 60;
 	const int loopDelay = 1000 / updates_per_second;
@@ -121,6 +115,7 @@ void ServerGame::serverLoop() {
 	}
 }
 
+// @author: Fabian Aster
 uint8_t ServerGame::createPlayer() {
 	auto &player(manager.addEntity());
 	players.push_back(Player(player.getID()));
@@ -131,6 +126,7 @@ uint8_t ServerGame::createPlayer() {
 	return player.getID();
 }
 
+// @author: Fabian Aster
 uint8_t ServerGame::createPlayer(int id) {
 	auto &player(manager.addEntity(id));
 
@@ -140,6 +136,7 @@ uint8_t ServerGame::createPlayer(int id) {
 	return player.getID();
 }
 
+// @author: Leopold Schmid
 std::pair<std::uint16_t, std::uint16_t> ServerGame::getPlayerSpawnpoint() {
 	int n_spawnpoints = playerSpawnpoints.size();
 
@@ -150,8 +147,6 @@ std::pair<std::uint16_t, std::uint16_t> ServerGame::getPlayerSpawnpoint() {
 
 	std::pair<std::uint16_t, std::uint16_t> spawnpoint;
 	int randomIndex = rand() % n_spawnpoints;
-	// todo: check why it is always the same spawnpoint
-	spdlog::get("console")->info("Server Game - Random PlayerSpawnpoint index: {}", randomIndex);
 	spawnpoint = playerSpawnpoints.at(randomIndex);
 
 	// erase the spawnpoint from the list
@@ -160,6 +155,7 @@ std::pair<std::uint16_t, std::uint16_t> ServerGame::getPlayerSpawnpoint() {
 	return spawnpoint;
 }
 
+// @author: Fabian Aster
 uint8_t ServerGame::handleJoinRequests() {
 
 	// send playerID to client
@@ -178,6 +174,7 @@ uint8_t ServerGame::handleJoinRequests() {
 	return 0;
 }
 
+// @author: Fabian Aster
 void ServerGame::receivePlayerEvents() {
 	// unpack the event from the frame
 	SDL_Event event;
@@ -207,6 +204,7 @@ void ServerGame::receivePlayerEvents() {
 	}
 }
 
+// @author: Leopold Schmid, Fabian Aster
 void ServerGame::sendGameState() {
 
 	manager.refresh<ServerGame>();
@@ -237,6 +235,7 @@ void ServerGame::sendGameState() {
 	this->networkHost.updateState(serializedString);
 }
 
+// @author: Leopold Schmid
 void ServerGame::spawnWeapons() {
 	// ================== init weapons ==================
 	auto spawnpoints = map->loadWeaponSpawnpoints();
@@ -248,11 +247,11 @@ void ServerGame::spawnWeapons() {
 
 		for (auto &spawnpoint : *spawnpoints) {
 			spawnWeaponsAux(spawnpoint, existingWeapons);
-			spdlog::get("console")->info("Weapon spawned at: {} {}", spawnpoint.first, spawnpoint.second);
 		}
 	}
 }
 
+// @author: Leopold Schmid
 void ServerGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
                                  const std::vector<Entity *> &existingWeapons) {
 
@@ -273,14 +272,17 @@ void ServerGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &
 	ServerGenerator::forWeapon(weapon, spawnpoint);
 }
 
+// @author: Leopold Schmid
 void ServerGame::insertToEntityGroups(uint8_t id, groupLabels label) {
 	entityGroups[id] = label;
 }
 
+// @author: Leopold Schmid
 bool ServerGame::running() const {
 	return isRunning;
 }
 
+// @author: Fabian Aster, Leopold Schmid
 void ServerGame::stop() {
 	spdlog::get("console")->info("=============== stopping ServerGame ===============");
 	{
@@ -298,6 +300,7 @@ void ServerGame::stop() {
 	map = nullptr;
 }
 
+// @author: Leopold Schmid
 bool ServerGame::checkCollisions(Entity *e) {
 	return map->checkCollisions(&e->getComponent<ColliderComponent>().collider);
 }

@@ -29,7 +29,6 @@ void MoveComponent::init() {
 }
 
 void MoveComponent::update() {
-	// spdlog::get("console")->debug("MoveComponent - before updating - velocity Y: {}", transform->velocity.getY());
 	// every entity with a MoveComponent ignores gravity while in water and can jump
 	if (inWater) {
 		canJump = true;

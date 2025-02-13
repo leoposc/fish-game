@@ -88,32 +88,6 @@ bool Manager::checkEmpty() {
 	return entities.empty();
 }
 
-// void Manager::refresh() {
-// 	int tmp_size = entities.size();
-// 	for (auto i(0u); i < maxGroups; i++) {
-// 		auto &v(groupedEntities[i]);
-// 		v.erase(std::remove_if(std::begin(v), std::end(v),
-// 		                       [i](Entity *entity) { return !entity->isActive() || !entity->hasGroup(i); }),
-// 		        std::end(v));
-// 	}
-
-// 	// entities.erase(std::remove_if(std::begin(entities), std::end(entities),
-// 	//                               [](const std::unique_ptr<Entity> &mEntity) { return !mEntity->isActive();
-// 	//                               }),
-// 	//                std::end(entities));
-
-// 	for (auto it = entities.begin(); it != entities.end();) {
-// 		if (!it->second->isActive()) {
-// 			it = entities.erase(it);
-// 		} else {
-// 			++it;
-// 		}
-// 	}
-// 	if (tmp_size != entities.size()) {
-// 		std::cout << "Entities destroyed. size now: " << entities.size() << std::endl;
-// 	}
-// }
-
 // void addToGroup(Entity *entity, Group group) {}
 void Manager::addToGroup(Entity *entity, Group group) {
 	groupedEntities[group].emplace_back(entity);

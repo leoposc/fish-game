@@ -26,6 +26,7 @@ namespace FishEngine {
 
 // ================== helper functions ==================
 
+// @author: Leopold Schmid
 void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
 	// changes.
@@ -43,6 +44,7 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
+// @author: Leopold Schmid
 ClientGame::ClientGame() : title("Fish Game Client") {
 
 	int flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
@@ -73,6 +75,7 @@ ClientGame::ClientGame() : title("Fish Game Client") {
 	assets->addTexture("projectile", "./assets/ProjectileSmall.png");
 	assets->addTexture("present", "./assets/present.png");
 }
+// @author: Leopold Schmid
 
 ClientGame::~ClientGame() {
 	spdlog::get("console")->info(" ============= ClientGame deconstruction ==============");
@@ -82,6 +85,7 @@ ClientGame::~ClientGame() {
 	spdlog::get("console")->info(" ============= ClientGame deconstruction finished ==============");
 }
 
+// @author: Fabian Aster
 void ClientGame::reset() {
 	spdlog::get("console")->info("============ ClientGame - Resetting =============");
 	stop();
@@ -92,6 +96,7 @@ void ClientGame::reset() {
 	connected = false;
 }
 
+// @author: Leopold Schmid
 void ClientGame::init(fs::path mp, bool combat) {
 	size_t progressUpdate = 0;
 	auto future = std::async(std::launch::async, &FishEngine::ClientGame::startLoadingBar, this);
@@ -123,6 +128,7 @@ void ClientGame::init(fs::path mp, bool combat) {
 	SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 }
 
+// @author: Leopold Schmid
 void ClientGame::loadFishSprites() {
 	for (int i = 1; i <= numPlayers; i++) {
 		std::string id = "fish0" + std::to_string(i);
@@ -130,6 +136,7 @@ void ClientGame::loadFishSprites() {
 	}
 }
 
+// @author: Leopold Schmid
 void ClientGame::handleEvents() {
 	SDL_PollEvent(&game_event);
 	// int eventCount = SDL_PeepEvents(nullptr, 0, SDL_PEEKEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT);
@@ -150,12 +157,12 @@ void ClientGame::handleEvents() {
 	}
 }
 
+// @author: Leopold Schmid
 void ClientGame::update() {
 	// delete dead entities
 	manager.refresh<ClientGame>();
 
 	// // update the entities
-	// spdlog::get("console")->debug("Updating entities");
 	manager.update();
 
 	// check for collisions
@@ -170,12 +177,14 @@ void ClientGame::update() {
 	map->updateAnimations();
 
 	// check if game is over TODO: just handle it in the server
+	// if (manager.getGroup(groupLabels::groupPlayers).size() == 1) {
 	if (manager.getGroup(groupLabels::groupPlayers).empty()) {
 		spdlog::get("console")->info("Client Game - Game over");
 		isRunning = false;
 	}
 }
 
+// @author: Leopold Schmid
 void ClientGame::render() const {
 	SDL_RenderClear(renderer);
 
@@ -199,6 +208,7 @@ void ClientGame::render() const {
 	SDL_RenderPresent(renderer);
 }
 
+// @author: Leopold Schmid, Fabian Aster
 void ClientGame::createHostPlayer() {
 	hostPlayer = &manager.addEntity();
 	auto initPos = map->getPlayerSpawnpoints().at(0);
@@ -206,10 +216,12 @@ void ClientGame::createHostPlayer() {
 	hostPlayerID = hostPlayer->getID();
 }
 
+// @author: Leopold Schmid
 Manager *ClientGame::getManager() {
 	return &manager;
 }
 
+// @author: Leopold Schmid
 std::string ClientGame::joinInterface() {
 
 	map = new Map();
@@ -316,10 +328,12 @@ std::string ClientGame::joinInterface() {
 	return inputText;
 }
 
+// @author: Fabian Aster
 void ClientGame::sendJoinRequest(std::string ip, std::string username) {
 	this->networkClient.init(ip, username);
 }
 
+// @author: Leopold Schmid, Fabian Aster
 void ClientGame::receiveGameState() {
 
 	if (!this->networkClient.hasUpdate()) {
@@ -412,14 +426,7 @@ void ClientGame::receiveGameState() {
 	this->connected = true;
 }
 
-void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
-	int x = 0;
-	int y = 0;
-	SDL_Rect renderQuad = {(SCREEN_WIDTH - width) / 2, SCREEN_HEIGHT / 3, width, height};
-
-	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
-}
-
+// @author: Leopold Schmid
 uint8_t ClientGame::updateMainMenu() const {
 	if (this->hostPlayer == nullptr) {
 		spdlog::get("console")->warn("Client Game - No Player from server assigned yet!");
@@ -441,10 +448,12 @@ uint8_t ClientGame::updateMainMenu() const {
 	return -1;
 }
 
+// @author: Leopold Schmid
 bool ClientGame::running() const {
 	return isRunning;
 }
 
+// @author: Fabian Aster, Leopold Schmid
 void ClientGame::stop() {
 	spdlog::get("console")->info("=============== stopping ClientGame ===============");
 	manager.destroyEntities<ClientGame>();
@@ -454,47 +463,7 @@ void ClientGame::stop() {
 	isRunning = false;
 }
 
-// todo: does not work yet - prob pretty wrong
-// void ClientGame::zoomIn() {
-// 	// Get the most outer players
-// 	std::vector<Entity *> &players = manager.getGroup(groupLabels::groupPlayers);
-// 	if (players.empty())
-// 		return;
-
-// 	int minX = players[0]->getComponent<TransformComponent>().position.getX();
-// 	int minY = players[0]->getComponent<TransformComponent>().position.getY();
-// 	int maxX = minX, maxY = minY;
-
-// 	for (auto &player : players) {
-// 		TransformComponent &transform = player->getComponent<TransformComponent>();
-// 		int x = transform.position.getX();
-// 		int y = transform.position.getY();
-// 		minX = std::min(minX, x);
-// 		minY = std::min(minY, y);
-// 		maxX = std::max(maxX, x);
-// 		maxY = std::max(maxY, y);
-// 	}
-
-// 	// int minWidth = std :
-
-// 	minX = std::max(0, minX - 100);
-// 	minY = std::max(0, minY - 100);
-// 	maxX = std::min(SCREEN_WIDTH, maxX + 100);
-// 	maxY = std::min(SCREEN_HEIGHT, maxY + 100);
-
-// 	int width = (maxX - minX);
-// 	int height = (maxY - minY);
-
-// 	// create a minimum size for the camera
-// 	width = std::max(width, SCREEN_WIDTH);
-// 	height = std::max(height, SCREEN_HEIGHT);
-
-// 	camera = {minX, minY, width, height};
-// 	camera = {0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT};
-
-// 	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
-// }
-
+// @author: Leopold Schmid
 void ClientGame::startLoadingBar() {
 	progressUpdate = 0;
 	for (size_t i = 0; i < SCREEN_HEIGHT / 16; ++i) {
@@ -503,6 +472,7 @@ void ClientGame::startLoadingBar() {
 	}
 }
 
+// @author: Leopold Schmid
 void ClientGame::renderLoadingBar() {
 	Map *loadingScreen = new Map();
 	loadingScreen->loadMap(fs::path("./maps/loadingBar.tmj"), false);

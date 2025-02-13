@@ -41,10 +41,6 @@ FuncPtr mainMenu();
 FuncPtr hostLobby(bool isHost, bool needInit = true);
 FuncPtr joinLobby();
 
-// std::thread serverThread;
-// std::mutex serverMutex;
-// std::condition_variable serverCv;
-
 FuncPtr combat(bool isHost) {
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
@@ -93,7 +89,6 @@ FuncPtr combat(bool isHost) {
 	return hostLobby(isHost, false);
 }
 
-// todo: implement joinLobby
 FuncPtr joinLobby() {
 	std::string ip;
 	auto client = &FishEngine::ClientGame::getInstance();

@@ -61,7 +61,6 @@ void Map::drawLayer(tson::Layer &layer) {
 		break;
 	default:
 		break;
-		// spdlog::get("console")->debug( "Layer type not supported!" );
 	}
 }
 
@@ -131,10 +130,6 @@ void Map::drawObjectLayer(tson::Layer &layer) {
 		tson::Rect rect = tileObject.getDrawingRect();
 		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
 		                  rect.width, rect.height};
-
-		// SDL_SetRenderDrawColor(ClientGame::renderer, 0, 255, 0, 255);
-		// SDL_RenderDrawRect(ClientGame::renderer, &block);
-		// SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 }
 
@@ -194,8 +189,6 @@ void Map::loadTilesetTextures() {
 			continue;
 		}
 		tilesetTextures[tilesetPath] = texture;
-
-		// TODO: free the textures in the destructor
 	}
 }
 
