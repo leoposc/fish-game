@@ -55,6 +55,7 @@ void ServerGame::init(fs::path mapPath, bool combat) {
 		this->createPlayer(player.getEntityId());
 	}
 
+	this->combat = combat;
 	// spawn eventually weapons
 	if (combat) {
 		spawnWeapons();

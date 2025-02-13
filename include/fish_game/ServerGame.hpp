@@ -86,7 +86,7 @@ class ServerGame {
 	~ServerGame();
 
   private:
-	ServerGame(){};
+	ServerGame() {};
 	ServerGame(const ServerGame &) = delete;
 	ServerGame &operator=(const ServerGame &other) = delete;
 
@@ -108,6 +108,7 @@ class ServerGame {
 	std::condition_variable serverCv;
 
 	static std::unique_ptr<ServerGame> instance;
+	bool combat = false;
 };
 
 } // namespace FishEngine
