@@ -212,7 +212,7 @@ class Entity {
 };
 
 class Manager {
-	std::unordered_map<const uint8_t, std::unique_ptr<Entity>> entities;
+	std::map<const uint8_t, std::unique_ptr<Entity>> entities;
 	std::array<std::vector<Entity *>, maxGroups> groupedEntities;
 	// std::map<uint8_t, std::unique_ptr<Entity>> entityIDs;
 
