@@ -393,7 +393,6 @@ void ClientGame::receiveGameState() {
 				break;
 			case groupLabels::groupProjectiles:
 				bool faceRight;
-				ar(faceRight);
 				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
 				break;
 			default:

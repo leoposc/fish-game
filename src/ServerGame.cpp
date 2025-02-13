@@ -239,11 +239,6 @@ void ServerGame::sendGameState() {
 		// inform the client about the current entities
 		ar(id, group);
 
-		// if projectile, send the direction
-		if (group == groupLabels::groupProjectiles) {
-			ar(manager.getEntity(id).getComponent<TransformComponent>().faceRight);
-		}
-
 		// serialize components of the entity
 		ar(manager.getEntity(id));
 	}
