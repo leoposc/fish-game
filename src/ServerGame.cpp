@@ -90,7 +90,7 @@ void ServerGame::update() {
 	}
 
 	// check if 30s passed
-	if (SDL_GetTicks() - lastSpawnTime > 30000) {
+	if (SDL_GetTicks() - lastSpawnTime > 30000 && combat) {
 		lastSpawnTime = SDL_GetTicks();
 		spawnWeapons();
 	}

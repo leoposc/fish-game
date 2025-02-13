@@ -27,7 +27,7 @@ class HealthComponent : public Component {
 		ar(alive);
 
 		// if (!alive) {
-		// 	takeDamage();
+		// 	startTimer = SDL_GetTicks();
 		// }
 	}
 
