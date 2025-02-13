@@ -20,6 +20,7 @@
 #include <iostream>
 #include <memory>
 #include <spdlog/spdlog.h>
+#include <unordered_map>
 #include <vector>
 
 namespace FishEngine {
