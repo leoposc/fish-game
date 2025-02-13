@@ -20,6 +20,7 @@
 #include <iostream>
 #include <memory>
 #include <spdlog/spdlog.h>
+#include <unordered_map>
 #include <vector>
 
 namespace FishEngine {
@@ -217,7 +218,7 @@ class Manager {
 	// std::map<uint8_t, std::unique_ptr<Entity>> entityIDs;
 
   public:
-	std::map<const uint8_t, std::unique_ptr<Entity>> &getEntities();
+	std::unordered_map<const uint8_t, std::unique_ptr<Entity>> &getEntities();
 
 	bool entityExists(uint8_t id);
 
