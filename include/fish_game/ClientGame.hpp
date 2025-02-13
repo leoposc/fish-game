@@ -86,7 +86,7 @@ class ClientGame {
 
 	Manager manager;
 	Entity *hostPlayer;
-	std::unordered_map<uint8_t, groupLabels> entityGroups;
+	std::map<uint8_t, groupLabels> entityGroups;
 	int numPlayers = 6;
 	bool isRunning = false;
 	bool connected = false;

@@ -82,7 +82,7 @@ class Map {
   private:
 	SDL_Rect src, dst;
 
-	std::unordered_map<fs::path, SDL_Texture *> tilesetTextures;
+	std::map<fs::path, SDL_Texture *> tilesetTextures;
 
 	SDL_Texture *plattforms;
 	SDL_Texture *water;
@@ -101,7 +101,7 @@ class Map {
 	tson::Vector2i mapScale;
 	tson::Vector2i positionOffset{0, 0};
 
-	std::unordered_map<uint32_t, tson::Animation *> animationUpdateQueue;
+	std::map<uint32_t, tson::Animation *> animationUpdateQueue;
 
 	std::vector<std::pair<std::uint16_t, std::uint16_t>> initialPos;
 

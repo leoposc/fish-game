@@ -33,9 +33,9 @@ class AssetManager {
   private:
 	Manager *manager;
 
-	std::unordered_map<std::string, FontManager *> fonts;
+	std::map<std::string, FontManager *> fonts;
 
-	std::unordered_map<std::string, SDL_Texture *> textures;
+	std::map<std::string, SDL_Texture *> textures;
 };
 
 } // namespace FishEngine
