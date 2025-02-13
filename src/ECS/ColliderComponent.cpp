@@ -36,9 +36,9 @@ void ColliderComponent::update() {
 }
 
 void ColliderComponent::draw() {
-	SDL_SetRenderDrawColor(ClientGame::renderer, 255, 0, 0, 255);
-	SDL_RenderDrawRect(ClientGame::renderer, &collider);
-	SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
+	// SDL_SetRenderDrawColor(ClientGame::renderer, 255, 0, 0, 255);
+	// SDL_RenderDrawRect(ClientGame::renderer, &collider);
+	// SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 }
 
 } // namespace FishEngine

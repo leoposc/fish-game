@@ -132,9 +132,9 @@ void Map::drawObjectLayer(tson::Layer &layer) {
 		SDL_Rect block = {static_cast<int>(tileObject.getPosition().x), static_cast<int>(tileObject.getPosition().y),
 		                  rect.width, rect.height};
 
-		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 255, 0, 255);
-		SDL_RenderDrawRect(ClientGame::renderer, &block);
-		SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
+		// SDL_SetRenderDrawColor(ClientGame::renderer, 0, 255, 0, 255);
+		// SDL_RenderDrawRect(ClientGame::renderer, &block);
+		// SDL_SetRenderDrawColor(ClientGame::renderer, 0, 0, 0, 255);
 	}
 }
 
