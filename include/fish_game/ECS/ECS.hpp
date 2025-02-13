@@ -218,7 +218,7 @@ class Manager {
 	// std::map<uint8_t, std::unique_ptr<Entity>> entityIDs;
 
   public:
-	std::unordered_map<const uint8_t, std::unique_ptr<Entity>> &getEntities();
+	std::map<const uint8_t, std::unique_ptr<Entity>> &getEntities();
 
 	bool entityExists(uint8_t id);
 
