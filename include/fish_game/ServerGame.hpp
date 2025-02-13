@@ -86,7 +86,7 @@ class ServerGame {
 	~ServerGame();
 
   private:
-	ServerGame() {};
+	ServerGame(){};
 	ServerGame(const ServerGame &) = delete;
 	ServerGame &operator=(const ServerGame &other) = delete;
 
@@ -97,6 +97,7 @@ class ServerGame {
 
 	std::map<uint8_t, groupLabels> entityGroups;
 	std::vector<std::pair<uint16_t, uint16_t>> playerSpawnpoints;
+	uint32_t lastSpawnTime = 0; // for weapons
 
 	const unsigned int updateRate_ms = 150;
 	unsigned int nextUpdate = 0;
