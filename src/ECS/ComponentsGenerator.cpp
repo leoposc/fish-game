@@ -43,12 +43,12 @@ void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &po
 	weapon.addGroup(groupLabels::groupColliders);
 }
 
-void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos, bool faceRight) {
-	Vector2D velocity = faceRight ? Vector2D(-10, 0) : Vector2D(10, 0);
-	int projectileOffset = faceRight ? 40 : -50;
-	projectile.addComponent<TransformComponent>(pos.first + projectileOffset, pos.second, 5, 5, 1.0);
+void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos) {
+	// velocity gets synced from server
+	Vector2D velocity = Vector2D(0, 0);
+	projectile.addComponent<TransformComponent>(pos.first, pos.second, 5, 5, 1.0);
 	projectile.addComponent<SpriteComponent>("projectile", false);
-	projectile.addComponent<ColliderComponent>("projectile", pos.first + projectileOffset, pos.second, 5, 5);
+	projectile.addComponent<ColliderComponent>("projectile", pos.first, pos.second, 5, 5);
 	projectile.addComponent<ProjectileComponent>(500, 10, velocity);
 	projectile.addGroup(groupLabels::groupProjectiles);
 	projectile.addGroup(groupLabels::groupColliders);

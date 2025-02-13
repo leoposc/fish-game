@@ -29,7 +29,7 @@ void forEnemy(Entity &enemy, std::pair<std::uint16_t, std::uint16_t> const &pos,
 
 void forWeapon(Entity &weapon, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
-void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos, bool faceRight);
+void forProjectile(Entity &projectile, std::pair<std::uint16_t, std::uint16_t> const &pos);
 
 } // namespace ClientGenerator
 

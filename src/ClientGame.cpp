@@ -392,8 +392,7 @@ void ClientGame::receiveGameState() {
 				ClientGenerator::forWeapon(entity, {0, 0});
 				break;
 			case groupLabels::groupProjectiles:
-				bool faceRight;
-				ClientGenerator::forProjectile(entity, {0, 0}, faceRight);
+				ClientGenerator::forProjectile(entity, {0, 0});
 				break;
 			default:
 				throw std::runtime_error("Server is requesting to create an unknown group type.");
