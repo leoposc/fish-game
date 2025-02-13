@@ -81,6 +81,7 @@ ClientGame::~ClientGame() {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+	spdlog::get("console")->info(" ============= ClientGame deconstruction finished ==============");
 }
 
 // @author: Fabian Aster

@@ -46,7 +46,6 @@ FuncPtr joinLobby();
 // std::condition_variable serverCv;
 
 FuncPtr combat(bool isHost) {
-	std::this_thread::sleep_for(std::chrono::seconds(1));
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
 
@@ -119,7 +118,6 @@ FuncPtr hostLobby(bool isHost, bool needInit) {
 		auto server = &FishEngine::ServerGame::getInstance();
 		server->init("hostLobby.tmj");
 		client->networkClient.init("127.0.0.1", "host player");
-		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	client->init("hostLobby.tmj", false);
@@ -222,12 +220,14 @@ int main(int argc, char *argv[]) {
 	auto network_logger = spdlog::stdout_color_mt("network_logger");
 	auto socket_logger = spdlog::stdout_color_mt("socket_logger");
 	auto current_bug = spdlog::stdout_color_mt("cb");
+	auto font_bug = spdlog::stdout_color_mt("fb");
 
 	socket_logger->set_level(spdlog::level::off);
 	network_logger->set_level(spdlog::level::info);
 	console->set_level(spdlog::level::info);
 	err_logger->set_level(spdlog::level::off);
 	current_bug->set_level(spdlog::level::off);
+	font_bug->set_level(spdlog::level::off);
 
 	auto &player = MusicPlayer::getInstance();
 
