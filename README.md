@@ -4,7 +4,7 @@
 
 #### Combat Mode
 
- Fish Game is a fast-paced 2D action-adventure where players take control of a daring fish jumping on plattforms filled with water, landscapes filled with obstacles. Dive deep into various aquatic environments and outsmart your friends! Swim swiftly through danger, pick your weapons and avoid the bullets from your opponents!
+ Fish Game is a fast-paced 2D action-adventure where players take control of a daring fish jumping on platforms filled with water, landscapes filled with obstacles. Dive deep into various aquatic environments and outsmart your friends! Swim swiftly through danger, pick your weapons and avoid the bullets from your opponents!
 
 ![Join Lobby](./examples/joinLobby.png)
 
@@ -24,7 +24,7 @@
 #### Dependencies
 
 We use conan to install the Dependencies.
-So first install conan then the buildilng commands should work successfully
+So first install conan then the building commands should work successfully
 
 The Dependencies are specified in the conanfile.txt file
 
@@ -49,7 +49,7 @@ conan install . --build=missing
 conan install . --build=missing -s build_type=Debug
 ```
 
-#### Building fish_game using presets requirering cmake>=3.23
+#### Building fish_game using presets requiring cmake>=3.23
 
 ```
 cmake --preset conan-debug
@@ -60,8 +60,14 @@ cmake --build --preset conan-debug
 
 cmake --preset conan-release
 cmake -B build/Release --preset conan-release
-cmake --build --preset conan-debug
+cmake --build --preset conan-release
 ./build/Release/fish_game
+```
+
+Note: We had sometimes the issue that sdl2 ttf wasnt correctly installed, in that case install it with:
+
+```sh
+sudo apt-get install libsdl2-ttf-2.0-0 libsdl2-ttf-dev
 ```
 
 ## Specification (12 Points total)
