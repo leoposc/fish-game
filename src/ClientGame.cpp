@@ -25,7 +25,7 @@
 namespace FishEngine {
 
 // ================== helper functions ==================
-
+// @author: Leopold Schmid
 void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// Grab the mouse so that we don't end up with unexpected movement when the dimensions/position of the window
 	// changes.
@@ -43,6 +43,7 @@ void toggleWindowMode(SDL_Window *win, bool *windowed) {
 	// recalculateResolution(); // This function sets appropriate font sizes/UI positions
 }
 
+// @author: Leopold Schmid
 ClientGame::ClientGame() : title("Fish Game Client") {
 
 	int flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
@@ -74,6 +75,7 @@ ClientGame::ClientGame() : title("Fish Game Client") {
 	assets->addTexture("present", "./assets/present.png");
 }
 
+// @author: Leopold Schmid
 ClientGame::~ClientGame() {
 	spdlog::get("console")->info(" ============= ClientGame deconstruction ==============");
 	SDL_DestroyRenderer(renderer);
@@ -81,6 +83,7 @@ ClientGame::~ClientGame() {
 	SDL_Quit();
 }
 
+// @author: Fabian Aster
 void ClientGame::reset() {
 	spdlog::get("console")->info("============ ClientGame - Resetting =============");
 	stop();
@@ -91,6 +94,7 @@ void ClientGame::reset() {
 	connected = false;
 }
 
+// @author: Leopold Schmid
 void ClientGame::init(fs::path mp, bool combat) {
 	size_t progressUpdate = 0;
 	auto future = std::async(std::launch::async, &FishEngine::ClientGame::startLoadingBar, this);
@@ -122,6 +126,7 @@ void ClientGame::init(fs::path mp, bool combat) {
 	SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 }
 
+// @author: Leopold Schmid
 void ClientGame::loadFishSprites() {
 	for (int i = 1; i <= numPlayers; i++) {
 		std::string id = "fish0" + std::to_string(i);
@@ -129,6 +134,7 @@ void ClientGame::loadFishSprites() {
 	}
 }
 
+// @author: Leopold Schmid
 void ClientGame::handleEvents() {
 	SDL_PollEvent(&game_event);
 	// int eventCount = SDL_PeepEvents(nullptr, 0, SDL_PEEKEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT);
@@ -149,6 +155,7 @@ void ClientGame::handleEvents() {
 	}
 }
 
+// @author: Leopold Schmid
 void ClientGame::update() {
 	// delete dead entities
 	manager.refresh<ClientGame>();
@@ -175,11 +182,11 @@ void ClientGame::update() {
 	}
 }
 
+// @author: Leopold Schmid
 void ClientGame::render() const {
 	SDL_RenderClear(renderer);
 
 	map->drawMap();
-	// manager.draw();
 
 	for (auto &t : manager.getGroup_c(groupLabels::groupPlayers)) {
 		t->draw();
@@ -198,6 +205,7 @@ void ClientGame::render() const {
 	SDL_RenderPresent(renderer);
 }
 
+// @author: Leopold Schmid
 void ClientGame::createHostPlayer() {
 	hostPlayer = &manager.addEntity();
 	auto initPos = map->getPlayerSpawnpoints().at(0);
@@ -205,10 +213,12 @@ void ClientGame::createHostPlayer() {
 	hostPlayerID = hostPlayer->getID();
 }
 
+// @author: Leopold Schmid
 Manager *ClientGame::getManager() {
 	return &manager;
 }
 
+// @author: Leopold Schmid
 std::string ClientGame::joinInterface() {
 
 	map = new Map();
@@ -315,10 +325,12 @@ std::string ClientGame::joinInterface() {
 	return inputText;
 }
 
+// @author: Fabian Aster
 void ClientGame::sendJoinRequest(std::string ip, std::string username) {
 	this->networkClient.init(ip, username);
 }
 
+// @author: Leopold Schmid, Fabian Aster
 void ClientGame::receiveGameState() {
 
 	if (!this->networkClient.hasUpdate()) {
@@ -331,7 +343,7 @@ void ClientGame::receiveGameState() {
 	cereal::BinaryInputArchive ar(is);
 
 	// fetch the number of the entities
-	std::map<uint8_t, groupLabels> new_entityGroups;
+	std::unordered_map<uint8_t, groupLabels> new_entityGroups;
 	size_t numEntities;
 	ar(numEntities);
 
@@ -421,6 +433,7 @@ void ClientGame::showIP(SDL_Texture *mTexture, int width, int height) {
 	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
 }
 
+// @author: Leopold Schmid
 uint8_t ClientGame::updateMainMenu() const {
 	if (this->hostPlayer == nullptr) {
 		spdlog::get("console")->warn("Client Game - No Player from server assigned yet!");
@@ -442,10 +455,12 @@ uint8_t ClientGame::updateMainMenu() const {
 	return -1;
 }
 
+// @author: Leopold Schmid
 bool ClientGame::running() const {
 	return isRunning;
 }
 
+// @author: Leopold Schmid, Fabian Aster
 void ClientGame::stop() {
 	spdlog::get("console")->info("=============== stopping ClientGame ===============");
 	manager.destroyEntities<ClientGame>();
@@ -496,6 +511,7 @@ void ClientGame::stop() {
 // 	spdlog::get("console")->debug("Camera: {} {} {} {}", camera.x, camera.y, camera.w, camera.h);
 // }
 
+// @author: Leopold Schmid
 void ClientGame::startLoadingBar() {
 	progressUpdate = 0;
 	for (size_t i = 0; i < SCREEN_HEIGHT / 16; ++i) {
@@ -504,6 +520,7 @@ void ClientGame::startLoadingBar() {
 	}
 }
 
+// @author: Leopold Schmid
 void ClientGame::renderLoadingBar() {
 	Map *loadingScreen = new Map();
 	loadingScreen->loadMap(fs::path("./maps/loadingBar.tmj"), false);

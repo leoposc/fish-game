@@ -86,7 +86,7 @@ class ServerGame {
 	~ServerGame();
 
   private:
-	ServerGame(){};
+	ServerGame() {};
 	ServerGame(const ServerGame &) = delete;
 	ServerGame &operator=(const ServerGame &other) = delete;
 
@@ -95,7 +95,7 @@ class ServerGame {
 
 	std::vector<Player> players;
 
-	std::map<uint8_t, groupLabels> entityGroups;
+	std::unordered_map<uint8_t, groupLabels> entityGroups;
 	std::vector<std::pair<uint16_t, uint16_t>> playerSpawnpoints;
 	uint32_t lastSpawnTime = 0; // for weapons
 
@@ -108,6 +108,7 @@ class ServerGame {
 	std::condition_variable serverCv;
 
 	static std::unique_ptr<ServerGame> instance;
+	bool combat = false;
 };
 
 } // namespace FishEngine

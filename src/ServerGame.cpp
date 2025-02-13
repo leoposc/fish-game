@@ -28,6 +28,7 @@ namespace FishEngine {
 
 std::unique_ptr<ServerGame> ServerGame::instance = nullptr;
 
+// @author: Fabian Aster
 ServerGame::~ServerGame() {
 	spdlog::get("console")->info("========== ServerGame deconstruction ==========");
 	delete map;
@@ -38,6 +39,7 @@ void ServerGame::printManager() {
 	manager.print();
 }
 
+// @author: Leopold Schmid
 void ServerGame::init(fs::path mapPath, bool combat) {
 	// assert(manager.checkEmpty());
 	// assert(map == nullptr);
@@ -56,9 +58,7 @@ void ServerGame::init(fs::path mapPath, bool combat) {
 	}
 
 	// spawn eventually weapons
-	if (combat) {
-		spawnWeapons();
-	}
+	this->combat = combat;
 
 	spdlog::get("console")->info("ServerGame - init done");
 
@@ -70,6 +70,7 @@ void ServerGame::init(fs::path mapPath, bool combat) {
 	serverThread = std::thread(&ServerGame::serverLoop, this);
 }
 
+// @author: Leopold Schmid
 void ServerGame::update() {
 	// delete dead entities
 	manager.refresh<ServerGame>();
@@ -90,12 +91,13 @@ void ServerGame::update() {
 	}
 
 	// check if 30s passed
-	if (SDL_GetTicks() - lastSpawnTime > 30000) {
+	if (SDL_GetTicks() - lastSpawnTime > 30000 && combat) {
 		lastSpawnTime = SDL_GetTicks();
 		spawnWeapons();
 	}
 }
 
+// @author: Fabian Aster
 void ServerGame::serverLoop() {
 	const int updates_per_second = 60;
 	const int loopDelay = 1000 / updates_per_second;
@@ -120,6 +122,7 @@ void ServerGame::serverLoop() {
 	}
 }
 
+// @author: Fabian Aster
 uint8_t ServerGame::createPlayer() {
 	auto &player(manager.addEntity());
 	players.push_back(Player(player.getID()));
@@ -130,6 +133,7 @@ uint8_t ServerGame::createPlayer() {
 	return player.getID();
 }
 
+// @author: Fabian Aster
 uint8_t ServerGame::createPlayer(int id) {
 	auto &player(manager.addEntity(id));
 
@@ -139,6 +143,7 @@ uint8_t ServerGame::createPlayer(int id) {
 	return player.getID();
 }
 
+// @author: Leopold Schmid
 std::pair<std::uint16_t, std::uint16_t> ServerGame::getPlayerSpawnpoint() {
 	int n_spawnpoints = playerSpawnpoints.size();
 
@@ -159,6 +164,7 @@ std::pair<std::uint16_t, std::uint16_t> ServerGame::getPlayerSpawnpoint() {
 	return spawnpoint;
 }
 
+// @author: Fabian Aster
 uint8_t ServerGame::handleJoinRequests() {
 
 	// send playerID to client
@@ -177,6 +183,7 @@ uint8_t ServerGame::handleJoinRequests() {
 	return 0;
 }
 
+// @author: Fabian Aster
 void ServerGame::receivePlayerEvents() {
 	// unpack the event from the frame
 	SDL_Event event;
@@ -206,6 +213,7 @@ void ServerGame::receivePlayerEvents() {
 	}
 }
 
+// @author: Leopold Schmid, Fabian Aster
 void ServerGame::sendGameState() {
 
 	manager.refresh<ServerGame>();
@@ -241,6 +249,7 @@ void ServerGame::sendGameState() {
 	this->networkHost.updateState(serializedString);
 }
 
+// @author: Leopold Schmid
 void ServerGame::spawnWeapons() {
 	// ================== init weapons ==================
 	auto spawnpoints = map->loadWeaponSpawnpoints();
@@ -257,6 +266,7 @@ void ServerGame::spawnWeapons() {
 	}
 }
 
+// @author: Leopold Schmid
 void ServerGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &spawnpoint,
                                  const std::vector<Entity *> &existingWeapons) {
 
@@ -277,14 +287,17 @@ void ServerGame::spawnWeaponsAux(const std::pair<std::uint16_t, std::uint16_t> &
 	ServerGenerator::forWeapon(weapon, spawnpoint);
 }
 
+// @author: Leopold Schmid
 void ServerGame::insertToEntityGroups(uint8_t id, groupLabels label) {
 	entityGroups[id] = label;
 }
 
+// @author: Leopold Schmid
 bool ServerGame::running() const {
 	return isRunning;
 }
 
+// @author: Fabian Aster, Leopold Schmid
 void ServerGame::stop() {
 	spdlog::get("console")->info("=============== stopping ServerGame ===============");
 	{
@@ -302,6 +315,7 @@ void ServerGame::stop() {
 	map = nullptr;
 }
 
+// @author: Leopold Schmid
 bool ServerGame::checkCollisions(Entity *e) {
 	return map->checkCollisions(&e->getComponent<ColliderComponent>().collider);
 }

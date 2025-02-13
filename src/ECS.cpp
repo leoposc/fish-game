@@ -51,7 +51,7 @@ void Entity::delGroup(Group group) {
 
 // ------------------------ Manager -----------------------
 
-std::map<const uint8_t, std::unique_ptr<Entity>> &Manager::getEntities() {
+std::unordered_map<const uint8_t, std::unique_ptr<Entity>> &Manager::getEntities() {
 	return entities;
 }
 
