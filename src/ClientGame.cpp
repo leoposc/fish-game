@@ -250,17 +250,20 @@ std::string ClientGame::joinInterface() {
 	map = new Map();
 	map->loadMap(fs::path("./maps/joinLobby.tmj"));
 
+	FontManager gInputTextTexture(renderer, "./assets/zd-bold.ttf");
+	FontManager gPromptTextTexture(renderer, "./assets/zd-bold.ttf", 26);
+
 	SDL_Color textColor = {0, 0, 0, 255};
 	SDL_Event event;
 
 	// remove all SDL_Events which occured during loading from the queue
 	SDL_PumpEvents();
 	SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
-	/* SDL_StartTextInput(); */
+	SDL_StartTextInput();
 
 	std::string inputText = "xxx.xxx.xxx.xxx";
-	/* gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor); */
-	/* gPromptTextTexture.loadFromRenderedText("Enter IP Address", textColor); */
+	gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
+	gPromptTextTexture.loadFromRenderedText("Enter IP Address", textColor);
 
 	bool modified = false;
 	bool running = true;
@@ -293,7 +296,7 @@ std::string ClientGame::joinInterface() {
 						modified = false;
 						renderText = true;
 						inputText = "Invalid IP Address";
-						/* gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor); */
+						gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
 					}
 					break;
 				// handle copy
@@ -330,11 +333,14 @@ std::string ClientGame::joinInterface() {
 				inputText = " ";
 			}
 			renderText = false;
-			/* gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor); */
+			gInputTextTexture.loadFromRenderedText(inputText.c_str(), textColor);
 			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderer);
 
 			map->drawMap();
+			gPromptTextTexture.render((SCREEN_WIDTH - gPromptTextTexture.getWidth()) / 2, SCREEN_HEIGHT / 3 + 55);
+			gInputTextTexture.render((SCREEN_WIDTH - gInputTextTexture.getWidth()) / 2,
+			                         SCREEN_HEIGHT / 3 + 65 + gPromptTextTexture.getHeight());
 
 			SDL_RenderPresent(renderer);
 		}

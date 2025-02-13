@@ -220,12 +220,14 @@ int main(int argc, char *argv[]) {
 	auto network_logger = spdlog::stdout_color_mt("network_logger");
 	auto socket_logger = spdlog::stdout_color_mt("socket_logger");
 	auto current_bug = spdlog::stdout_color_mt("cb");
+	auto font_bug = spdlog::stdout_color_mt("fb");
 
 	socket_logger->set_level(spdlog::level::off);
 	network_logger->set_level(spdlog::level::info);
 	console->set_level(spdlog::level::info);
 	err_logger->set_level(spdlog::level::off);
 	current_bug->set_level(spdlog::level::off);
+	font_bug->set_level(spdlog::level::off);
 
 	auto &player = MusicPlayer::getInstance();
 

@@ -56,15 +56,16 @@ bool FontManager::loadFromRenderedText(std::string textureText, SDL_Color textCo
 void FontManager::render(int x, int y, SDL_Rect *clip, double angle, SDL_Point *center, SDL_RendererFlip flip) {
 
 	SDL_Rect renderQuad = {x, y, mWidth, mHeight};
+	spdlog::get("fb")->debug("Rendering font, x: {}, y:{}", x, y);
 
 	// Set clip rendering dimensions
 	if (clip != NULL) {
 		renderQuad.w = clip->w;
 		renderQuad.h = clip->h;
 	}
+	spdlog::get("fb")->debug("Rendering font, x: {}, y:{}", x, y);
 
 	SDL_RenderCopyEx(renderer, mTexture, clip, &renderQuad, angle, center, flip);
-	SDL_RenderPresent(renderer);
 }
 
 } // namespace FishEngine
