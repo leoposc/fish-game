@@ -59,6 +59,9 @@ void ServerGame::init(fs::path mapPath, bool combat) {
 
 	// spawn eventually weapons
 	this->combat = combat;
+	if (combat) {
+		spawnWeapons();
+	}
 
 	spdlog::get("console")->info("ServerGame - init done");
 
